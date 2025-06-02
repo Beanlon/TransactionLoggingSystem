@@ -93,7 +93,7 @@ public class Login extends JFrame implements ActionListener {
 
             if (username.equals(validusername) && password.equals(validpassword)) {
                 JOptionPane.showMessageDialog(this, "Login successful!");
-                new MAINENTRY(); // Open main page
+                new Menu(); // Open main page
                 this.dispose(); // Close login window
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid username or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
