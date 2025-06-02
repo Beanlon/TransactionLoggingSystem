@@ -2,20 +2,23 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class MAINENTRY extends JFrame {
+public class MAINENTRY extends JFrame implements ActionListener {
     JLabel lblName, lblPrice, lblItem, lblQuantity, lblTitle;
     JTextField txtName, txtPrice, txtItem, txtQuantity;
     JPanel panelInfo, panelTitle,panelInputmain,panelbtn,panelsearch, panelTable;
-    JButton btnadd, btnremove, btnedit, btnexport;
+    JButton btnadd, btnremove, btnedit, btnsave, btnclear;
     JTextField txtSearch;
     JTable table;
+    DefaultTableModel model;
 
 
     MAINENTRY() {
         // Frame setup
         setTitle("Transaction Logging System");
-        setSize(600, 663);
+        setSize(700, 663);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -23,7 +26,7 @@ public class MAINENTRY extends JFrame {
 
         // ====== Title Panel (Top) ======
         panelTitle = new JPanel(new FlowLayout());
-        panelTitle.setBounds(10, 10, 565, 60);
+        panelTitle.setBounds(10, 10, 665, 60);
         lblTitle = new JLabel("Transaction Logging System", SwingConstants.CENTER);
 
         lblTitle = new JLabel("Transaction Logging System", SwingConstants.CENTER);
@@ -38,7 +41,7 @@ public class MAINENTRY extends JFrame {
         //PanelINFO
         panelInfo = new JPanel(new GridBagLayout());
         panelInfo.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        panelInfo.setBounds(10, 80, 565, 200);  // <== Set proper bounds (Y=80)
+        panelInfo.setBounds(10, 80, 665, 200);  // <== Set proper bounds (Y=80)
         add(panelInfo);
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -85,19 +88,28 @@ public class MAINENTRY extends JFrame {
         // ====== Button + Search Panel ======
         panelInputmain = new JPanel(new BorderLayout());
         panelInputmain.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        panelInputmain.setBounds(10, 290, 565, 35);  // <== Set below panelInfo
+        panelInputmain.setBounds(10, 290, 665, 35);  // <== Set below panelInfo
         add(panelInputmain);
 
         panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT,6,2));
         btnadd = new JButton("ADD");
         btnedit = new JButton("EDIT");
+        btnclear = new JButton("CLEAR");
         btnremove = new JButton("REMOVE");
-        btnexport = new JButton("EXPORT");
+        btnsave = new JButton("SAVE");
+
+
+        btnadd.addActionListener(this);
+        btnedit.addActionListener(this);
+        btnsave.addActionListener(this);
+        btnremove.addActionListener(this);
+        btnclear.addActionListener(this);
 
         panelbtn.add(btnadd);
         panelbtn.add(btnremove);
         panelbtn.add(btnedit);
-        panelbtn.add(btnexport);
+        panelbtn.add(btnclear);
+        panelbtn.add(btnsave);
 
         panelsearch = new JPanel(new FlowLayout(FlowLayout.RIGHT,4,5));
         txtSearch = new JTextField(15);
@@ -128,14 +140,14 @@ public class MAINENTRY extends JFrame {
         panelInputmain.add(panelsearch, BorderLayout.EAST);
 
         String[] columnNames = { "Name", "Item", "Price", "Quantity" };
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0); // No data
+        model = new DefaultTableModel(columnNames, 0); // ✅ Corrected line
         table = new JTable(model);
 
         JScrollPane scrollPane = new JScrollPane(table);
 
         panelTable = new JPanel(new BorderLayout());
         panelTable.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        panelTable.setBounds(10, 335, 565, 280);
+        panelTable.setBounds(10, 335, 665, 280);
         panelTable.add(scrollPane, BorderLayout.CENTER);
         add(panelTable);
 
@@ -145,7 +157,35 @@ public class MAINENTRY extends JFrame {
         add(panelInputmain);
         add(panelTable);
         setVisible(true);
+
+
+
+
     }
 
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == btnadd) {
+            String name = txtName.getText().trim();
+            String item = txtItem.getText().trim();
+            String price = txtPrice.getText().trim();
+            String quantity = txtQuantity.getText().trim();
+
+            if (name.isEmpty() || item.isEmpty() || price.isEmpty() || quantity.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Missing Input", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Add row to table
+            model.addRow(new Object[]{name, item, price, quantity});
+
+            // Optionally clear fields
+            txtName.setText("");
+            txtItem.setText("");
+            txtPrice.setText("");
+            txtQuantity.setText("");
+        }
+    }
 
 }
