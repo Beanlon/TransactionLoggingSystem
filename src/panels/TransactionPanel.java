@@ -19,7 +19,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
         // ===== Title Panel =====
         JPanel panelTitle = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 15));
-        panelTitle.setBounds(10, 10, 665, 60);
+        panelTitle.setBounds(10, 10, 565, 60);
         panelTitle.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         panelTitle.setBackground(Color.white);
         JLabel lblTitle = new JLabel("TRANSACTION LOGGING SYSTEM", SwingConstants.LEFT);
@@ -30,7 +30,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
         // ===== Info Panel =====
         JPanel panelInfo = new JPanel(new GridBagLayout());
-        panelInfo.setBounds(10, 80, 665, 200);
+        panelInfo.setBounds(10, 80, 565, 200);
         panelInfo.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         add(panelInfo);
 
@@ -79,7 +79,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
         // ===== Button + Search Panel =====
         JPanel panelInputmain = new JPanel(new BorderLayout());
-        panelInputmain.setBounds(10, 290, 665, 35);
+        panelInputmain.setBounds(10, 290, 565, 35);
         panelInputmain.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         add(panelInputmain);
 
@@ -139,7 +139,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JScrollPane scrollPane = new JScrollPane(table);
 
         JPanel panelTable = new JPanel(new BorderLayout());
-        panelTable.setBounds(10, 335, 665, 280);
+        panelTable.setBounds(10, 335, 565, 280);
         panelTable.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         panelTable.add(scrollPane, BorderLayout.CENTER);
         add(panelTable);
