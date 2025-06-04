@@ -21,7 +21,7 @@ public class Menu extends JFrame implements ActionListener {
         Title = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         Title.setBounds(10, 10, 365, 365);
         lblTitle = new JLabel("WELCOME");
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 30));
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 36));
         Title.add(lblTitle);
 
         // Panel for buttons with FlowLayout
@@ -43,7 +43,7 @@ public class Menu extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == createnew) {
-            new inputdata(); // Ensure this class exists
+            new createLog();
             this.dispose();
         }
     }

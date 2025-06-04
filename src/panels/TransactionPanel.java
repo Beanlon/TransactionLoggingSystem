@@ -16,6 +16,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
     public TransactionPanel() {
         setLayout(null);
+        setBackground(new Color(189, 189, 189));
 
         // ===== Title Panel =====
         JPanel panelTitle = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 15));
@@ -28,62 +29,83 @@ public class TransactionPanel extends JPanel implements ActionListener {
         panelTitle.add(lblTitle);
         add(panelTitle);
 
-        // ===== Info Panel =====
-        JPanel panelInfo = new JPanel(new GridBagLayout());
-        panelInfo.setBounds(10, 80, 565, 200);
-        panelInfo.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        // ===== Outer Split Panel =====
+        JPanel panelInfo = new JPanel(new GridLayout(1, 2)); // Split into two equal halves
+        panelInfo.setBounds(10, 80, 565, 200); // Full width
         add(panelInfo);
 
+// ===== Left Panel =====
+        JPanel leftPanel = new JPanel(); // Use any layout you like
+        leftPanel.setBackground(Color.WHITE);
+        leftPanel.add(new JLabel("LEFT SIDE PANEL"));
+        leftPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+        panelInfo.add(leftPanel); // Add to left half
+
+// ===== Right Panel (Form) =====
+        JPanel rightPanel = new JPanel(new GridBagLayout());
+        rightPanel.setBackground(new Color(120, 26, 26)); // Optional styling
+        rightPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        panelInfo.add(rightPanel); // Add to right half
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 15, 5, 15);
+        gbc.insets = new Insets(5, 10, 5, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
 
-        JLabel lblName = new JLabel("ENTER NAME:");
+        JLabel lblName = new JLabel("NAME:");
         lblName.setFont(new Font("Arial", Font.BOLD, 13));
+        lblName.setForeground(Color.WHITE);
         txtName = new JTextField(15);
-        txtName.setPreferredSize(new Dimension(200,30));
-
-        JLabel lblItem = new JLabel("ENTER ITEM:");
-        lblItem.setFont(new Font("Arial", Font.BOLD, 13));
-        txtItem = new JTextField(15);
-        txtItem.setPreferredSize(new Dimension(200,30));
-
-        JLabel lblPrice = new JLabel("ENTER PRICE:");
-        lblPrice.setFont(new Font("Arial", Font.BOLD, 13));
-        txtPrice = new JTextField(15);
-        txtPrice.setPreferredSize(new Dimension(200,30));
-
-        JLabel lblQuantity = new JLabel("ENTER QUANTITY:");
-        lblQuantity.setFont(new Font("Arial", Font.BOLD, 13));
-        txtQuantity = new JTextField(7);
-        txtQuantity.setPreferredSize(new Dimension(200,30));
+        txtName.setPreferredSize(new Dimension(140,30));
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
-        panelInfo.add(lblName, gbc);
+        rightPanel.add(lblName, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        panelInfo.add(txtName, gbc);
+        rightPanel.add(txtName, gbc);
+
+        JLabel lblItem = new JLabel("ITEM:");
+        lblItem.setFont(new Font("Arial", Font.BOLD, 13));
+        lblItem.setForeground(Color.WHITE);
+        txtItem = new JTextField();
+        txtItem.setPreferredSize(new Dimension(140,30));
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
-        panelInfo.add(lblItem, gbc);
+        rightPanel.add(lblItem, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        panelInfo.add(txtItem, gbc);
+        rightPanel.add(txtItem, gbc);
+
+        JLabel lblPrice = new JLabel("PRICE:");
+        lblPrice.setFont(new Font("Arial", Font.BOLD, 13));
+        lblPrice.setForeground(Color.WHITE);
+        txtPrice = new JTextField();
+        txtPrice.setPreferredSize(new Dimension(140,30));
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
-        panelInfo.add(lblPrice, gbc);
+        rightPanel.add(lblPrice, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        panelInfo.add(txtPrice, gbc);
+        rightPanel.add(txtPrice, gbc);
+
+        JLabel lblQuantity = new JLabel("QUANTITY:");
+        lblQuantity.setFont(new Font("Arial", Font.BOLD, 13));
+        lblQuantity.setForeground(Color.WHITE);
+        txtQuantity = new JTextField();
+        txtQuantity.setPreferredSize(new Dimension(140,30));
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
-        panelInfo.add(lblQuantity, gbc);
+        rightPanel.add(lblQuantity, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
-        panelInfo.add(txtQuantity, gbc);
+        rightPanel.add(txtQuantity, gbc);
 
         // ===== Button + Search Panel =====
         JPanel panelInputmain = new JPanel(new BorderLayout());
         panelInputmain.setBounds(10, 290, 565, 35);
         panelInputmain.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        panelInputmain.setBackground(new Color(120, 26, 26));
         add(panelInputmain);
 
         JPanel panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+        panelbtn.setBackground(new Color(120, 26, 26));
         btnadd = new JButton("ADD");
         btnremove = new JButton("REMOVE");
         btnedit = new JButton("EDIT");
@@ -107,8 +129,8 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
 
         JPanel panelsearch = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 5));
+        panelsearch.setBackground(new Color(120, 26, 26));
         txtSearch = new JTextField(15);
-        txtSearch.setForeground(Color.GRAY);
         txtSearch.setText("Search..");
 
         txtSearch.addFocusListener(new FocusAdapter() {

@@ -17,6 +17,7 @@ public class inputdata extends JFrame implements ActionListener {
         setTitle("Transaction Logging System");
         setSize(800, 663);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
         setLocationRelativeTo(null);
         setResizable(false);
         setLayout(new BorderLayout());
@@ -26,7 +27,7 @@ public class inputdata extends JFrame implements ActionListener {
         panelLeft.setLayout(new BoxLayout(panelLeft, BoxLayout.Y_AXIS));
         panelLeft.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         panelLeft.setPreferredSize(new Dimension(200, 0)); // Width is 200, height adapts
-        panelLeft.setBackground(Color.LIGHT_GRAY);
+        panelLeft.setBackground(new Color(120, 26, 26));
         add(panelLeft, BorderLayout.WEST);
 
         // --- FIX START ---
@@ -62,12 +63,12 @@ public class inputdata extends JFrame implements ActionListener {
         // so they don't fill the entire width of the parent panel.
         // Your current maximumSize and preferredSize help with this for Transaction/Summary.
 
-        btnTransaction = new JButton("Transaction");
+        btnTransaction = new JButton("TRANSACTION");
         btnTransaction.setAlignmentX(Component.CENTER_ALIGNMENT); // Keep centered
         btnTransaction.setMaximumSize(new Dimension(160, 40));
         btnTransaction.setPreferredSize(new Dimension(160, 40));
 
-        btnSummary = new JButton("Summary");
+        btnSummary = new JButton("SUMMARY");
         btnSummary.setAlignmentX(Component.CENTER_ALIGNMENT); // Keep centered
         btnSummary.setMaximumSize(new Dimension(160, 40));
         btnSummary.setPreferredSize(new Dimension(160, 40));
