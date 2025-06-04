@@ -57,9 +57,9 @@ public class createLog extends JFrame implements ActionListener {
                 "07", "08", "09", "10", "11", "12"
         };
 
-        String[] years = new String[76];
-        int startYear = 1950;
-        for (int i = 0; i < 76; i++)
+        String[] years = new String[11];
+        int startYear = 2025;
+        for (int i = 0; i < 11; i++)
             years[i] = Integer.toString(startYear + i);
 
         dayCombo = new JComboBox<>(days);
@@ -103,8 +103,10 @@ public class createLog extends JFrame implements ActionListener {
 
             String date = year + "-" + month + "-" + day;
             JOptionPane.showMessageDialog(this, "Log created for " + name + " on " + date);
+
+            // Open inputdata and pass name/date
+            new inputdata(name, date);
+            this.dispose();
         }
     }
-
-
 }

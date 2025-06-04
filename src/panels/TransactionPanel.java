@@ -1,4 +1,5 @@
 package panels;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
@@ -9,10 +10,11 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
 public class TransactionPanel extends JPanel implements ActionListener {
-    public JTextField txtName, txtItem, txtPrice, txtQuantity, txtSearch;
-    public JButton btnadd, btnedit, btnremove, btnclear, btnsave;
-    public JTable table;
+    private JTextField txtName, txtItem, txtPrice, txtQuantity, txtSearch;
+    private JLabel lblNameValue, lblDateValue;
+    private JTable table;
     public DefaultTableModel model;
+    public JButton btnadd, btnedit, btnremove, btnclear, btnsave;
 
     public TransactionPanel() {
         setLayout(null);
@@ -23,25 +25,38 @@ public class TransactionPanel extends JPanel implements ActionListener {
         panelTitle.setBounds(10, 10, 565, 60);
         panelTitle.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         panelTitle.setBackground(Color.white);
+
         JLabel lblTitle = new JLabel("TRANSACTION LOGGING SYSTEM", SwingConstants.LEFT);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 26));
         lblTitle.setVerticalAlignment(SwingConstants.CENTER);
         panelTitle.add(lblTitle);
         add(panelTitle);
 
-        // ===== Outer Split Panel =====
-        JPanel panelInfo = new JPanel(new GridLayout(1, 2)); // Split into two equal halves
-        panelInfo.setBounds(10, 80, 565, 200); // Full width
+        // ===== Info Panel Split into Left and Right =====
+        JPanel panelInfo = new JPanel(new GridLayout(1, 2));
+        panelInfo.setBounds(10, 80, 565, 200);
         add(panelInfo);
 
-// ===== Left Panel =====
-        JPanel leftPanel = new JPanel(); // Use any layout you like
+        // ===== Left Panel (Displays name and date) =====
+        JPanel leftPanel = new JPanel();
         leftPanel.setBackground(Color.WHITE);
-        leftPanel.add(new JLabel("LEFT SIDE PANEL"));
-        leftPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        panelInfo.add(leftPanel); // Add to left half
+        leftPanel.setLayout(new GridLayout(4, 1, 10, 10));
+        leftPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-// ===== Right Panel (Form) =====
+        JLabel lblName = new JLabel("NAME:");
+        lblNameValue = new JLabel("");
+
+        JLabel lblDate = new JLabel("DATE:");
+        lblDateValue = new JLabel("");
+
+        leftPanel.add(lblName);
+        leftPanel.add(lblNameValue);
+        leftPanel.add(lblDate);
+        leftPanel.add(lblDateValue);
+
+        panelInfo.add(leftPanel);
+
+        // ===== Right Panel (Form) =====
         JPanel rightPanel = new JPanel(new GridBagLayout());
         rightPanel.setBackground(new Color(120, 26, 26)); // Optional styling
         rightPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
@@ -53,7 +68,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
-        JLabel lblName = new JLabel("NAME:");
+        lblName = new JLabel("NAME:");
         lblName.setFont(new Font("Arial", Font.BOLD, 13));
         lblName.setForeground(Color.WHITE);
         txtName = new JTextField(15);
@@ -167,6 +182,11 @@ public class TransactionPanel extends JPanel implements ActionListener {
         add(panelTable);
     }
 
+    public void setNameAndDate(String name, String date) {
+        lblNameValue.setText(name);
+        lblDateValue.setText(date);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
@@ -229,4 +249,3 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
 
 }
-
