@@ -102,8 +102,4 @@ public class loadlog extends JFrame implements ActionListener {
 
     }
 
-    // For testing this class independently
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new loadlog());
-    }
 }

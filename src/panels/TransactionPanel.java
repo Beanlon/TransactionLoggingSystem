@@ -198,6 +198,8 @@ public class TransactionPanel extends JPanel implements ActionListener {
         lblDateValue.setText(date);
     }
 
+    private boolean saved = true;
+
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
@@ -216,6 +218,8 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
             model.addRow(new Object[]{name, item, price, quantity});
             clearInputs();
+            saved = false;
+
 
         } else if (source == btnedit) {
             // Edit selected row
@@ -229,12 +233,14 @@ public class TransactionPanel extends JPanel implements ActionListener {
             model.setValueAt(txtPrice.getText(), selectedRow, 2);
             model.setValueAt(txtQuantity.getText(), selectedRow, 3);
             clearInputs();
+            saved = false;
 
         } else if (source == btnremove) {
             // Remove selected row
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
                 JOptionPane.showMessageDialog(this, "Please select a row to remove.");
+                saved = false;
                 return;
             }
             model.removeRow(selectedRow);
@@ -247,6 +253,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         } else if (source == btnsave) {
             try {
                 saveToFile();
+                saved = true;
                 JOptionPane.showMessageDialog(this, "File saved successfully!");
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
@@ -271,6 +278,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         File file = new File(filename);
 
         TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), model);
+        saved = true;
     }
 
     public void loadFromFile(String filename) {
@@ -294,5 +302,8 @@ public class TransactionPanel extends JPanel implements ActionListener {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage());
         }
+    }
+    public boolean isSaved() {
+        return saved;  // fixed method here
     }
 }

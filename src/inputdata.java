@@ -6,6 +6,8 @@ import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+
 
 public class inputdata extends JFrame implements ActionListener {
     CardLayout cardLayout;
@@ -83,11 +85,39 @@ public class inputdata extends JFrame implements ActionListener {
         setVisible(true);
     }
 
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnBack) {
-            new Menu();
-            this.dispose();
+            if (transactionPanel != null && transactionPanel.isSaved()) {
+                new Menu();
+                this.dispose();
+            } else {
+                int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE
+                );
+
+                if (choice == JOptionPane.YES_OPTION) {
+                    try {
+                        transactionPanel.saveToFile(); // ✅ Save
+                        new Menu();
+                        this.dispose();
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Error saving file: " + ex.getMessage(),
+                                "Save Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                    new Menu();
+                    this.dispose();
+                } else if (choice == JOptionPane.NO_OPTION) {
+                    new Menu();
+                    this.dispose();
+                } else if (choice == JOptionPane.CANCEL_OPTION) {
+
+                }
+            }
         }
     }
 }
