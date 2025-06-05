@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.*;
+import utils.TransactionFileManager;
+import utils.TransactionFileManager.TransactionData;
 
 public class TransactionPanel extends JPanel implements ActionListener {
     private JTextField txtName, txtItem, txtPrice, txtQuantity, txtSearch;
@@ -262,62 +264,33 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
     // Updated save method: no filename input, builds filename from name + date
     public void saveToFile() throws IOException {
-        // Create logs directory if it doesn't exist
         File dir = new File("logs");
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
+        if (!dir.exists()) dir.mkdir();
 
-        // Use name and date as filename, e.g., "John_2025-06-05.csv"
         String filename = "logs/" + lblNameValue.getText() + "_" + lblDateValue.getText() + ".csv";
+        File file = new File(filename);
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
-            // Write name and date on first line
-            bw.write(lblNameValue.getText() + "," + lblDateValue.getText());
-            bw.newLine();
-
-            // Write CSV header
-            for (int c = 0; c < model.getColumnCount(); c++) {
-                bw.write(model.getColumnName(c));
-                if (c < model.getColumnCount() - 1) bw.write(",");
-            }
-            bw.newLine();
-
-            // Write table rows
-            for (int r = 0; r < model.getRowCount(); r++) {
-                for (int c = 0; c < model.getColumnCount(); c++) {
-                    bw.write(model.getValueAt(r, c).toString());
-                    if (c < model.getColumnCount() - 1) bw.write(",");
-                }
-                bw.newLine();
-            }
-        }
+        TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), model);
     }
 
     public void loadFromFile(String filename) {
-        File file = new File(filename);
-        if (!file.exists()) {
-            JOptionPane.showMessageDialog(this, "File not found: " + filename);
-            return;
-        }
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line = br.readLine();  // first line: name,date
-            if (line != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 2) {
-                    setNameAndDate(parts[0], parts[1]);
+        try {
+            File file = new File(filename);
+            if (!file.exists()) {
+                JOptionPane.showMessageDialog(this, "File not found: " + filename);
+                return;
+            }
+
+            TransactionData data = TransactionFileManager.loadFromFile(file);
+            setNameAndDate(data.name, data.date);
+
+            model.setRowCount(0); // Clear table
+            for (String[] row : data.rows) {
+                if (row.length == model.getColumnCount()) {
+                    model.addRow(row);
                 }
             }
-            br.readLine(); // skip header
 
-            model.setRowCount(0); // clear table
-
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length == model.getColumnCount()) {
-                    model.addRow(data);
-                }
-            }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage());
         }

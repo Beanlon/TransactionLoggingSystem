@@ -34,7 +34,7 @@ public class createLog extends JFrame implements ActionListener {
         add(lblTitle);
 
         // ===== Name Field =====
-        JLabel lblName = new JLabel("ENTER NAME:", SwingConstants.CENTER);
+        JLabel lblName = new JLabel("ENTER LOG:", SwingConstants.CENTER);
         lblName.setFont(new Font("Arial", Font.BOLD, 14));
         lblName.setBounds(50, 140, 120, 25);
         add(lblName);
@@ -45,7 +45,7 @@ public class createLog extends JFrame implements ActionListener {
 
         // ===== Date Dropdowns =====
         JLabel lblDate = new JLabel("DATE:", SwingConstants.CENTER);
-        lblDate.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblDate.setFont(new Font("Arial", Font.BOLD, 14));
         lblDate.setBounds(50, 190, 120, 25);
         add(lblDate);
 
