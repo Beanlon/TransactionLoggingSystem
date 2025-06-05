@@ -21,7 +21,7 @@ public class createLog extends JFrame implements ActionListener {
         topPanel.setBounds(10, 10, 665, 50);
 
         btnBack = new JButton("← BACK");
-        btnBack.setBounds(10, 10, 80, 30);  // Top-left corner
+        btnBack.setBounds(10, 10, 100, 30);  // Top-left corner
         btnBack.addActionListener(this);
         topPanel.add(btnBack);
 

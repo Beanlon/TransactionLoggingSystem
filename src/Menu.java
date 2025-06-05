@@ -19,24 +19,55 @@ public class Menu extends JFrame implements ActionListener {
 
         // Title panel
         Title = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        Title.setBounds(10, 10, 365, 365);
+        Title.setBounds(10, 10, 365, 60);  // Adjusted height for title
         lblTitle = new JLabel("WELCOME");
         lblTitle.setFont(new Font("Arial", Font.BOLD, 36));
         Title.add(lblTitle);
 
-        // Panel for buttons with FlowLayout
-        pnlbtn = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        pnlbtn.setBounds(0, 60, 400, 200);
-        this.add(pnlbtn);
+        // Button panel with vertical BoxLayout
+        pnlbtn = new JPanel();
+        pnlbtn.setLayout(new BoxLayout(pnlbtn, BoxLayout.Y_AXIS));
+        pnlbtn.setBounds(95, 100, 200, 230);  // Wider & taller to fit bigger buttons
+        pnlbtn.setBackground(Color.white);
 
-        // Button
         createnew = new JButton("CREATE NEW");
-        createnew.setPreferredSize(new Dimension(130, 40));
-        createnew.addActionListener(this);
+        load = new JButton("LOAD");
+        exit = new JButton("EXIT");
+
+        createnew.setAlignmentX(Component.CENTER_ALIGNMENT);
+        load.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exit.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Make buttons bigger - set preferred and max size
+        Dimension btnSize = new Dimension(180, 60);
+        createnew.setPreferredSize(btnSize);
+        createnew.setMaximumSize(btnSize);
+
+        load.setPreferredSize(btnSize);
+        load.setMaximumSize(btnSize);
+
+        exit.setPreferredSize(btnSize);
+        exit.setMaximumSize(btnSize);
+
+        // Add buttons with spacing
+        pnlbtn.add(Box.createVerticalStrut(20));
         pnlbtn.add(createnew);
+        createnew.addActionListener(this);
+
+        pnlbtn.add(Box.createVerticalStrut(20));
+        pnlbtn.add(load);
+        load.addActionListener(this);
+
+        pnlbtn.add(Box.createVerticalStrut(20));
+        pnlbtn.add(exit);
+        exit.addActionListener(this);
+
+        pnlbtn.add(Box.createVerticalGlue());
 
         // Add panels to frame
         this.add(Title);
+        this.add(pnlbtn);
+
         setVisible(true);
     }
 
@@ -45,7 +76,14 @@ public class Menu extends JFrame implements ActionListener {
         if (e.getSource() == createnew) {
             new createLog();
             this.dispose();
+        } else if (e.getSource() == load) {
+            // Your load action here
+        } else if (e.getSource() == exit) {
+            System.exit(0);
         }
     }
 
+    public static void main(String[] args) {
+        new Menu();
+    }
 }
