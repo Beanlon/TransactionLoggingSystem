@@ -77,7 +77,8 @@ public class Menu extends JFrame implements ActionListener {
             new createLog();
             this.dispose();
         } else if (e.getSource() == load) {
-            // Your load action here
+            new loadlog();
+            this.dispose();
         } else if (e.getSource() == exit) {
             System.exit(0);
         }

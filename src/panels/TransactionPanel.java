@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.io.*;
 
 public class TransactionPanel extends JPanel implements ActionListener {
     private JTextField txtName, txtItem, txtPrice, txtQuantity, txtSearch;
@@ -72,44 +73,56 @@ public class TransactionPanel extends JPanel implements ActionListener {
         lblName.setFont(new Font("Arial", Font.BOLD, 13));
         lblName.setForeground(Color.WHITE);
         txtName = new JTextField(15);
-        txtName.setPreferredSize(new Dimension(140,30));
+        txtName.setPreferredSize(new Dimension(140, 30));
 
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
         rightPanel.add(lblName, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         rightPanel.add(txtName, gbc);
 
         JLabel lblItem = new JLabel("ITEM:");
         lblItem.setFont(new Font("Arial", Font.BOLD, 13));
         lblItem.setForeground(Color.WHITE);
         txtItem = new JTextField();
-        txtItem.setPreferredSize(new Dimension(140,30));
+        txtItem.setPreferredSize(new Dimension(140, 30));
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         rightPanel.add(lblItem, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         rightPanel.add(txtItem, gbc);
 
         JLabel lblPrice = new JLabel("PRICE:");
         lblPrice.setFont(new Font("Arial", Font.BOLD, 13));
         lblPrice.setForeground(Color.WHITE);
         txtPrice = new JTextField();
-        txtPrice.setPreferredSize(new Dimension(140,30));
+        txtPrice.setPreferredSize(new Dimension(140, 30));
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
         rightPanel.add(lblPrice, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         rightPanel.add(txtPrice, gbc);
 
         JLabel lblQuantity = new JLabel("QUANTITY:");
         lblQuantity.setFont(new Font("Arial", Font.BOLD, 13));
         lblQuantity.setForeground(Color.WHITE);
         txtQuantity = new JTextField();
-        txtQuantity.setPreferredSize(new Dimension(140,30));
+        txtQuantity.setPreferredSize(new Dimension(140, 30));
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         rightPanel.add(lblQuantity, gbc);
-        gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         rightPanel.add(txtQuantity, gbc);
 
         // ===== Button + Search Panel =====
@@ -132,16 +145,12 @@ public class TransactionPanel extends JPanel implements ActionListener {
         btnsave.addActionListener(this);
         btnremove.addActionListener(this);
         btnclear.addActionListener(this);
-        btnsave.addActionListener(this);
-
 
         panelbtn.add(btnadd);
         panelbtn.add(btnremove);
         panelbtn.add(btnedit);
         panelbtn.add(btnclear);
         panelbtn.add(btnsave);
-
-
 
         JPanel panelsearch = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 5));
         panelsearch.setBackground(new Color(120, 26, 26));
@@ -234,8 +243,12 @@ public class TransactionPanel extends JPanel implements ActionListener {
             clearInputs();
 
         } else if (source == btnsave) {
-            // For now, just show a message - implement your save logic here
-            JOptionPane.showMessageDialog(this, "Save function not implemented yet.");
+            try {
+                saveToFile();
+                JOptionPane.showMessageDialog(this, "File saved successfully!");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
+            }
         }
     }
 
@@ -247,5 +260,66 @@ public class TransactionPanel extends JPanel implements ActionListener {
         txtQuantity.setText("");
     }
 
+    // Updated save method: no filename input, builds filename from name + date
+    public void saveToFile() throws IOException {
+        // Create logs directory if it doesn't exist
+        File dir = new File("logs");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
 
+        // Use name and date as filename, e.g., "John_2025-06-05.csv"
+        String filename = "logs/" + lblNameValue.getText() + "_" + lblDateValue.getText() + ".csv";
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            // Write name and date on first line
+            bw.write(lblNameValue.getText() + "," + lblDateValue.getText());
+            bw.newLine();
+
+            // Write CSV header
+            for (int c = 0; c < model.getColumnCount(); c++) {
+                bw.write(model.getColumnName(c));
+                if (c < model.getColumnCount() - 1) bw.write(",");
+            }
+            bw.newLine();
+
+            // Write table rows
+            for (int r = 0; r < model.getRowCount(); r++) {
+                for (int c = 0; c < model.getColumnCount(); c++) {
+                    bw.write(model.getValueAt(r, c).toString());
+                    if (c < model.getColumnCount() - 1) bw.write(",");
+                }
+                bw.newLine();
+            }
+        }
+    }
+
+    public void loadFromFile(String filename) {
+        File file = new File(filename);
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(this, "File not found: " + filename);
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line = br.readLine();  // first line: name,date
+            if (line != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    setNameAndDate(parts[0], parts[1]);
+                }
+            }
+            br.readLine(); // skip header
+
+            model.setRowCount(0); // clear table
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == model.getColumnCount()) {
+                    model.addRow(data);
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage());
+        }
+    }
 }

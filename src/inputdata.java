@@ -3,7 +3,6 @@ import panels.TransactionPanel;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,22 +11,23 @@ public class inputdata extends JFrame implements ActionListener {
     CardLayout cardLayout;
     JPanel rightPanel;
     JButton btnBack, btnTransaction, btnSummary;
-    TransactionPanel transactionPanel;  // Keep reference
+    TransactionPanel transactionPanel;
 
-    // New constructor with parameters
     public inputdata(String name, String date) {
-        this();  // Call default constructor to setup UI
-
-        // After UI is set up, pass data to transactionPanel
+        this();
         transactionPanel.setNameAndDate(name, date);
     }
 
-    // Default constructor (unchanged except make public)
+    // New constructor to load from saved file
+    public inputdata(String filename) {
+        this();
+        transactionPanel.loadFromFile(filename);
+    }
+
     public inputdata() {
         setTitle("Transaction Logging System");
         setSize(800, 663);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
         setLocationRelativeTo(null);
         setResizable(false);
         setLayout(new BorderLayout());
