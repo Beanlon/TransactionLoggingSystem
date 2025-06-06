@@ -3,12 +3,16 @@ package panels;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.*;
+
+import utils.Inputvalidator;
 import utils.TransactionFileManager;
 import utils.TransactionFileManager.TransactionData;
 
@@ -118,6 +122,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         lblQuantity.setForeground(Color.WHITE);
         txtQuantity = new JTextField();
         txtQuantity.setPreferredSize(new Dimension(140, 30));
+        Inputvalidator.makeNumericOnly(txtQuantity);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
