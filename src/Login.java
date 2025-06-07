@@ -59,16 +59,31 @@ public class Login extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.WEST;
         Loginpage.add(txtpassword, gbc);
 
-        loginbtn = new JButton("Log in");
-        loginbtn.setPreferredSize(new Dimension(130, 30));
+        Dimension btnsize = new Dimension(150,40);
+
+        loginbtn = new JButton("LOG IN");
+        loginbtn.setBackground(new Color(120, 26, 26));
+        loginbtn.setPreferredSize(new Dimension(170,40));
+        loginbtn.setFont(new Font("Arial", Font.BOLD,16));
+        loginbtn.setForeground(Color.white);
         loginbtn.addActionListener(this);
 
         Regbtn = new JButton("REGISTER");
-        Regbtn.setPreferredSize(new Dimension(130, 30));
+        Regbtn.setPreferredSize(btnsize);
+        Regbtn.setContentAreaFilled(false);
+        Regbtn.setFocusPainted(false);
+        Regbtn.setOpaque(false);
+        Regbtn.setBorderPainted(false);
+        Regbtn.setForeground(Color.blue);
         Regbtn.addActionListener(this);
 
-        btnpanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        btnpanel.setBounds(10, 250, 365, 35);
+        btnpanel = new JPanel();
+        btnpanel.setLayout(new GridLayout(2,0));
+        btnpanel.setBounds(65, 236, 265, 90); // Adjust position and size to center and fit buttons
+
+        loginbtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Regbtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         btnpanel.add(loginbtn);
         btnpanel.add(Regbtn);
 
