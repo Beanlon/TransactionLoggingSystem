@@ -1,3 +1,5 @@
+import utils.UserAuth;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,9 +9,12 @@ public class Register extends JFrame implements ActionListener {
 
     JPanel Title, Register, btnPanel;
     JLabel lbltitle, username, createpassword, enterpassword;
-    JTextField txtpassword1, txtusername;
+    JTextField txtusername, txtpassword1;
     JPasswordField txtpassword2;
     JButton btnreg, back;
+
+    // Declare UserAuth instance
+    UserAuth auth;
 
     Register() {
         this.setTitle("Transaction Logging System");
@@ -18,6 +23,9 @@ public class Register extends JFrame implements ActionListener {
         this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setLayout(null);
+
+        // Initialize UserAuth with filename
+        auth = new UserAuth("users.txt");
 
         Title = new JPanel(new FlowLayout());
         Title.setBounds(10, 34, 365, 80);
@@ -43,7 +51,6 @@ public class Register extends JFrame implements ActionListener {
         txtpassword2 = new JPasswordField();
         txtpassword2.setPreferredSize(new Dimension(210, 30));
 
-        // ✅ Initialize buttons before adding to layout
         btnreg = new JButton("REGISTER");
         btnreg.setPreferredSize(new Dimension(130, 30));
         btnreg.addActionListener(this);
@@ -52,7 +59,6 @@ public class Register extends JFrame implements ActionListener {
         back.setPreferredSize(new Dimension(130, 30));
         back.addActionListener(this);
 
-        // Add components to Register panel
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.CENTER;
         Register.add(username, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
@@ -68,7 +74,6 @@ public class Register extends JFrame implements ActionListener {
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.WEST;
         Register.add(txtpassword2, gbc);
 
-        // These buttons were being added before being initialized — now fixed:
         gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.WEST;
         Register.add(back, gbc);
         gbc.gridx = 1; gbc.anchor = GridBagConstraints.EAST;
@@ -91,6 +96,29 @@ public class Register extends JFrame implements ActionListener {
             new Login();
             this.dispose();
         }
-    }
 
+        if (e.getSource() == btnreg) {
+            String user = txtusername.getText().trim();
+            String pass1 = txtpassword1.getText().trim();
+            String pass2 = new String(txtpassword2.getPassword()).trim();
+
+            if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!pass1.equals(pass2)) {
+                JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (auth.register(user, pass1)) {
+                JOptionPane.showMessageDialog(this, "Registration successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                new Login();
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Username already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }

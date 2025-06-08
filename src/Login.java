@@ -1,3 +1,5 @@
+import utils.UserAuth;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
@@ -96,8 +98,6 @@ public class Login extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String validusername = "Jeric";
-        String validpassword = "0408";
         if (e.getSource() == Regbtn) {
             // Open your main entry page here
             new Register();
@@ -106,7 +106,13 @@ public class Login extends JFrame implements ActionListener {
             String username = txtusername.getText();
             String password = txtpassword.getText();
 
-            if (username.equals(validusername) && password.equals(validpassword)) {
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            UserAuth auth = new UserAuth("users.txt");
+
+            if (auth.login(username, password)) {
                 JOptionPane.showMessageDialog(this, "Login successful!");
                 new Menu(); // Open main page
                 this.dispose(); // Close login window
