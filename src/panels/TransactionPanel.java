@@ -108,6 +108,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         lblPrice.setForeground(Color.WHITE);
         txtPrice = new JTextField();
         txtPrice.setPreferredSize(new Dimension(140, 30));
+        Inputvalidator.makeNumericOnly(txtPrice);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -186,7 +187,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         panelInputmain.add(panelsearch, BorderLayout.EAST);
 
         // ===== Table Panel =====
-        String[] columnNames = {"Name", "Item", "Price", "Quantity"};
+        String[] columnNames = {"NAME", "ITEM", "PRICE", "QUANTITY", "SUBTOTAL"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -216,12 +217,18 @@ public class TransactionPanel extends JPanel implements ActionListener {
             String price = txtPrice.getText().trim();
             String quantity = txtQuantity.getText().trim();
 
+            double pricedouble = Double.parseDouble(price);
+            int quantityInt = Integer.parseInt(quantity);
+
+            double subtotal = pricedouble * quantityInt;
+
+
             if (name.isEmpty() || item.isEmpty() || price.isEmpty() || quantity.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
                 return;
             }
 
-            model.addRow(new Object[]{name, item, price, quantity});
+            model.addRow(new Object[]{name, item, pricedouble, quantity, subtotal});
             clearInputs();
             saved = false;
 
