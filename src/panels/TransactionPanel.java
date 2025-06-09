@@ -217,17 +217,15 @@ public class TransactionPanel extends JPanel implements ActionListener {
             String price = txtPrice.getText().trim();
             String quantity = txtQuantity.getText().trim();
 
-            double pricedouble = Double.parseDouble(price);
-            int quantityInt = Integer.parseInt(quantity);
-
-            double subtotal = pricedouble * quantityInt;
-
 
             if (name.isEmpty() || item.isEmpty() || price.isEmpty() || quantity.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
                 return;
             }
 
+            double pricedouble = Double.parseDouble(price);
+            int quantityInt = Integer.parseInt(quantity);
+            double subtotal = pricedouble * quantityInt;
             model.addRow(new Object[]{name, item, pricedouble, quantity, subtotal});
             clearInputs();
             saved = false;

@@ -11,39 +11,60 @@ public class Login extends JFrame implements ActionListener {
     JLabel lblusername, lblpassword, lblTitle;
     JTextField txtusername ;
     JPasswordField txtpassword;
-    JPanel Loginpage, Title, btnpanel;
+    JPanel leftpanel, rightpanel, Loginpage, Title, btnpanel;
     JButton loginbtn, Regbtn;
+    JCheckBox showpass;
 
     Login() {
         // Use 'this' JFrame methods:
         this.setTitle("Transaction Logging System");
-        this.setSize(400, 400);
+        this.setSize(700, 420);
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
         this.setLayout(null);
 
-        Title = new JPanel(new BorderLayout());
-        Title.setBounds(10, 28, 365, 80);
-        lblTitle = new JLabel("Login", SwingConstants.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 70));
+        rightpanel = new JPanel();
+        rightpanel.setBounds(400, 0, 300, 420);
 
-        Title.add(lblTitle, BorderLayout.CENTER);
+
+        leftpanel = new JPanel();
+        leftpanel.setLayout(null);
+        leftpanel.setBounds(0,0,400,420);
+        leftpanel.setBackground(Color.WHITE);
+        this.add(leftpanel);
+
+        JPanel Title = new JPanel(new GridLayout(2, 1)); // 2 rows, 1 column
+        Title.setBounds(10, 28, 365, 97); // x, y, width, height
+        Title.setBackground(Color.WHITE);
+
+        JLabel line1 = new JLabel("Login to your", SwingConstants.CENTER);
+        JLabel line2 = new JLabel("account", SwingConstants.CENTER);
+        line1.setFont(new Font("Arial", Font.BOLD, 40));
+        line2.setFont(new Font("Arial", Font.BOLD, 40));
+
+        Title.add(line1);
+        Title.add(line2);
+
+        leftpanel.add(Title);
 
         Loginpage = new JPanel(new GridBagLayout());
-        Loginpage.setBounds(10, 120, 365, 120);
-        this.add(Loginpage);
+        Loginpage.setBounds(10, 135, 365, 120);
+        Loginpage.setBackground(Color.WHITE);
+        leftpanel.add(Loginpage);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 15, 3, 15);
+        gbc.insets = new Insets(6, 15, 6, 15);
 
-        lblusername = new JLabel("Username: ");
+        lblusername = new JLabel("USERNAME: ");
         txtusername = new JTextField();
         txtusername.setPreferredSize(new Dimension(210, 30));
+        txtusername.setBackground(new Color(231, 231, 231));
 
-        lblpassword = new JLabel("Password: ");
+        lblpassword = new JLabel("PASSWORD: ");
         txtpassword = new JPasswordField();
         txtpassword.setPreferredSize(new Dimension(210, 30));
+        txtpassword.setBackground(new Color(231, 231, 231));
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -61,12 +82,39 @@ public class Login extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.WEST;
         Loginpage.add(txtpassword, gbc);
 
+        showpass = new JCheckBox("SHOW PASSWORD");
+        showpass.setBackground(Color.white);
+        showpass.setPreferredSize(new Dimension(170,15));
+        showpass.setFocusPainted(false);
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        Loginpage.add(showpass, gbc);
+
+        char defaultEchoChar = txtpassword.getEchoChar();
+
+        showpass.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (showpass.isSelected()) {
+                    txtpassword.setEchoChar((char) 0);
+                } else {
+                    txtpassword.setEchoChar(defaultEchoChar);
+                }
+            }
+        });
+
+
+
         Dimension btnsize = new Dimension(150,40);
 
         loginbtn = new JButton("LOG IN");
         loginbtn.setBackground(new Color(120, 26, 26));
         loginbtn.setPreferredSize(new Dimension(170,40));
         loginbtn.setFont(new Font("Arial", Font.BOLD,16));
+        loginbtn.setFocusPainted(false);
+        loginbtn.setFocusPainted(false);
         loginbtn.setForeground(Color.white);
         loginbtn.addActionListener(this);
 
@@ -81,16 +129,18 @@ public class Login extends JFrame implements ActionListener {
 
         btnpanel = new JPanel();
         btnpanel.setLayout(new GridLayout(2,0));
-        btnpanel.setBounds(65, 236, 265, 90); // Adjust position and size to center and fit buttons
+        btnpanel.setBounds(65, 265, 265, 90); // Adjust position and size to center and fit buttons
+        btnpanel.setBackground(Color.WHITE);
 
         loginbtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         Regbtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         btnpanel.add(loginbtn);
         btnpanel.add(Regbtn);
+        leftpanel.add(btnpanel);
 
-        this.add(Title);
-        this.add(btnpanel);
+        this.add(leftpanel);
+        this.add(rightpanel);
 
         this.setVisible(true);
     }
@@ -98,6 +148,7 @@ public class Login extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         if (e.getSource() == Regbtn) {
             // Open your main entry page here
             new Register();
