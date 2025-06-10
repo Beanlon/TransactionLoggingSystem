@@ -58,7 +58,7 @@ public class Login extends JFrame implements ActionListener {
         leftpanel.add(Title);
 
         Loginpage = new JPanel(new GridBagLayout());
-        Loginpage.setBounds(10, 135, 365, 120);
+        Loginpage.setBounds(17, 135, 365, 120);
         Loginpage.setBackground(new Color(201, 42, 42));
         leftpanel.add(Loginpage);
 
@@ -122,7 +122,7 @@ public class Login extends JFrame implements ActionListener {
 
         btnpanel = new JPanel();
         btnpanel.setLayout(new GridLayout(0,2,10,5));
-        btnpanel.setBounds(17, 265, 365, 40); // Adjust position and size to center and fit buttons
+        btnpanel.setBounds(33, 267, 326, 40); // Adjust position and size to center and fit buttons
         btnpanel.setBackground(new Color(201, 42, 42));
 
         loginbtn = new JButton("LOG IN");
