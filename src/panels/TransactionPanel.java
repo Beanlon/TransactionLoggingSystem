@@ -126,11 +126,12 @@ public class TransactionPanel extends JPanel implements ActionListener {
         // ===== Button + Search Panel =====
         JPanel panelInputmain = new JPanel(new BorderLayout());
         panelInputmain.setBounds(10, 240, 565, 35);
-        panelInputmain.setBackground(new Color(201, 42, 42));
+        panelInputmain.setBorder(BorderFactory.createEtchedBorder());
+        panelInputmain.setBackground(new Color(255, 255, 255));
         add(panelInputmain);
 
-        JPanel panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 5));
-        panelbtn.setBackground(new Color(201, 42, 42));
+        JPanel panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+        panelbtn.setBackground(new Color(255, 255, 255));
         btnadd = new JButton("ADD");
         btnremove = new JButton("REMOVE");
         btnedit = new JButton("EDIT");
@@ -149,15 +150,21 @@ public class TransactionPanel extends JPanel implements ActionListener {
         panelbtn.add(btnclear);
         panelbtn.add(btnsave);
 
-        JPanel panelsearch = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 8));
-        panelsearch.setBackground(new Color(201, 42, 42));
-        txtSearch = new JTextField(15);
+        JPanel panelsearch = new JPanel();
+        panelsearch.setLayout(new BoxLayout(panelsearch, BoxLayout.X_AXIS));
+        panelsearch.setBackground(new Color(255, 255, 255));
+        panelsearch.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4    )); // optional
+
+        txtSearch = new JTextField();
+        txtSearch.setPreferredSize(new Dimension(150, 30));
+        txtSearch.setMaximumSize(new Dimension(150, 30)); // enforce max size
+        txtSearch.setBackground(new Color(238, 235, 235));
         txtSearch.setText("Search..");
         txtSearch.setForeground(Color.GRAY);
 
         txtSearch.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (txtSearch.getText().equals("Search..")) {
+                if (txtSearch.getText().equals("Search")) {
                     txtSearch.setText("");
                     txtSearch.setForeground(Color.BLACK);
                 }
@@ -171,6 +178,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
             }
         });
 
+        panelsearch.add(Box.createHorizontalGlue()); // push search field to the right
         panelsearch.add(txtSearch);
         panelInputmain.add(panelbtn, BorderLayout.WEST);
         panelInputmain.add(panelsearch, BorderLayout.EAST);
