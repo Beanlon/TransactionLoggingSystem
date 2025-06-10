@@ -65,7 +65,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
         // ===== Right Panel (Form) =====
         JPanel rightPanel = new JPanel(new GridBagLayout());
-        rightPanel.setBackground(new Color(120, 26, 26)); // Optional styling
+        rightPanel.setBackground(new Color(201, 42, 42)); // Optional styling
         rightPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         panelInfo.add(rightPanel); // Add to right half
 
@@ -137,7 +137,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JPanel panelInputmain = new JPanel(new BorderLayout());
         panelInputmain.setBounds(10, 290, 565, 35);
         panelInputmain.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-        panelInputmain.setBackground(new Color(120, 26, 26));
+        panelInputmain.setBackground(new Color(201, 42, 42));
         add(panelInputmain);
 
         JPanel panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
@@ -161,7 +161,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         panelbtn.add(btnsave);
 
         JPanel panelsearch = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 5));
-        panelsearch.setBackground(new Color(120, 26, 26));
+        panelsearch.setBackground(new Color(201, 42, 42));
         txtSearch = new JTextField(15);
         txtSearch.setText("Search..");
 

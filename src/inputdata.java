@@ -38,7 +38,7 @@ public class inputdata extends JFrame implements ActionListener {
         panelLeft.setLayout(new BoxLayout(panelLeft, BoxLayout.Y_AXIS));
         panelLeft.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         panelLeft.setPreferredSize(new Dimension(200, 0));
-        panelLeft.setBackground(new Color(120, 26, 26));
+        panelLeft.setBackground(new Color(201, 42, 42));
         add(panelLeft, BorderLayout.WEST);
 
         JPanel backButtonPanel = new JPanel();

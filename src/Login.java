@@ -1,17 +1,17 @@
 import utils.UserAuth;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class Login extends JFrame implements ActionListener {
 
     JLabel lblusername, lblpassword, lblTitle;
     JTextField txtusername ;
     JPasswordField txtpassword;
-    JPanel leftpanel, rightpanel, Loginpage, Title, btnpanel;
+    JPanel leftpanel, Loginpage, Title, btnpanel;
     JButton loginbtn, Regbtn;
     JCheckBox showpass;
 
@@ -22,26 +22,35 @@ public class Login extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
-        this.setLayout(null);
 
-        rightpanel = new JPanel();
-        rightpanel.setBounds(400, 0, 300, 420);
+        ImageIcon logo = new ImageIcon("Images/Logo.png");
+        Image image = logo.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
+        JLabel imagelabel = new JLabel(new ImageIcon(image));
+        imagelabel.setBounds(394,37, 300, 300);
+        add(imagelabel);
+
+
+
+        JPanel rightPanel = new JPanel();
+        rightPanel.setBounds(400, 0, 300, 420);
 
 
         leftpanel = new JPanel();
         leftpanel.setLayout(null);
         leftpanel.setBounds(0,0,400,420);
-        leftpanel.setBackground(Color.WHITE);
+        leftpanel.setBackground(new Color(201, 42, 42));
         this.add(leftpanel);
 
         JPanel Title = new JPanel(new GridLayout(2, 1)); // 2 rows, 1 column
         Title.setBounds(10, 28, 365, 97); // x, y, width, height
-        Title.setBackground(Color.WHITE);
+        Title.setBackground(new Color(201, 42, 42));
 
         JLabel line1 = new JLabel("Login to your", SwingConstants.CENTER);
-        JLabel line2 = new JLabel("account", SwingConstants.CENTER);
+        JLabel line2 = new JLabel("Account", SwingConstants.CENTER);
         line1.setFont(new Font("Arial", Font.BOLD, 40));
         line2.setFont(new Font("Arial", Font.BOLD, 40));
+        line1.setForeground(Color.white);
+        line2.setForeground(Color.white);
 
         Title.add(line1);
         Title.add(line2);
@@ -50,21 +59,23 @@ public class Login extends JFrame implements ActionListener {
 
         Loginpage = new JPanel(new GridBagLayout());
         Loginpage.setBounds(10, 135, 365, 120);
-        Loginpage.setBackground(Color.WHITE);
+        Loginpage.setBackground(new Color(201, 42, 42));
         leftpanel.add(Loginpage);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 15, 6, 15);
 
         lblusername = new JLabel("USERNAME: ");
+        lblusername.setForeground(Color.white);
         txtusername = new JTextField();
         txtusername.setPreferredSize(new Dimension(210, 30));
-        txtusername.setBackground(new Color(231, 231, 231));
+        txtusername.setBackground(Color.white);
 
         lblpassword = new JLabel("PASSWORD: ");
+        lblpassword.setForeground(Color.white);
         txtpassword = new JPasswordField();
         txtpassword.setPreferredSize(new Dimension(210, 30));
-        txtpassword.setBackground(new Color(231, 231, 231));
+        txtpassword.setBackground(Color.white);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -83,7 +94,8 @@ public class Login extends JFrame implements ActionListener {
         Loginpage.add(txtpassword, gbc);
 
         showpass = new JCheckBox("SHOW PASSWORD");
-        showpass.setBackground(Color.white);
+        showpass.setForeground(Color.white);
+        showpass.setBackground(new Color(201, 42, 42));
         showpass.setPreferredSize(new Dimension(170,15));
         showpass.setFocusPainted(false);
 
@@ -110,22 +122,19 @@ public class Login extends JFrame implements ActionListener {
         Dimension btnsize = new Dimension(150,40);
 
         loginbtn = new JButton("LOG IN");
-        loginbtn.setBackground(new Color(120, 26, 26));
+        loginbtn.setBackground(Color.white);
         loginbtn.setPreferredSize(new Dimension(170,40));
         loginbtn.setFont(new Font("Arial", Font.BOLD,16));
         loginbtn.setFocusPainted(false);
         loginbtn.setFocusPainted(false);
-        loginbtn.setForeground(Color.white);
+        loginbtn.setForeground(new Color(201, 42, 42));
         loginbtn.addActionListener(this);
 
         Regbtn = new JButton("REGISTER");
         Regbtn.setPreferredSize(btnsize);
-        Regbtn.setContentAreaFilled(false);
-        Regbtn.setFocusPainted(false);
-        Regbtn.setOpaque(false);
-        Regbtn.setBorderPainted(false);
-        Regbtn.setForeground(Color.blue);
-        Regbtn.addActionListener(this);
+        Regbtn.setBackground(new Color(201, 42, 42));
+        Regbtn.setForeground(Color.BLUE);
+        Regbtn.setFont(new Font("Arial", Font.BOLD, 14)); // Optional styling
 
         btnpanel = new JPanel();
         btnpanel.setLayout(new GridLayout(2,0));
@@ -140,7 +149,7 @@ public class Login extends JFrame implements ActionListener {
         leftpanel.add(btnpanel);
 
         this.add(leftpanel);
-        this.add(rightpanel);
+        this.add(rightPanel);
 
         this.setVisible(true);
     }
