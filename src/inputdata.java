@@ -15,18 +15,25 @@ public class inputdata extends JFrame implements ActionListener {
     JButton btnBack, btnTransaction, btnSummary;
     TransactionPanel transactionPanel;
 
+    // Constructor with name and date
     public inputdata(String name, String date) {
-        this();
+        initUI();
         transactionPanel.setNameAndDate(name, date);
     }
 
-    // New constructor to load from saved file
+    // Constructor for loading from file
     public inputdata(String filename) {
-        this();
+        initUI();
         transactionPanel.loadFromFile(filename);
     }
 
+    // Default constructor
     public inputdata() {
+        initUI();
+    }
+
+    // Shared UI setup method
+    private void initUI() {
         setTitle("Transaction Logging System");
         setSize(800, 663);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -69,7 +76,7 @@ public class inputdata extends JFrame implements ActionListener {
         rightPanel = new JPanel(cardLayout);
         add(rightPanel, BorderLayout.CENTER);
 
-        transactionPanel = new TransactionPanel();
+        transactionPanel = new TransactionPanel(); // <-- MUST be initialized before usage
         SummaryPanel summaryPanel = new SummaryPanel();
 
         rightPanel.add(transactionPanel, "TRANSACTION");
@@ -84,7 +91,6 @@ public class inputdata extends JFrame implements ActionListener {
         setVisible(true);
     }
 
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnBack) {
@@ -92,8 +98,7 @@ public class inputdata extends JFrame implements ActionListener {
                 new Menu();
                 this.dispose();
             } else {
-                int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE
-                );
+                int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 
                 if (choice == JOptionPane.YES_OPTION) {
                     try {
@@ -108,14 +113,10 @@ public class inputdata extends JFrame implements ActionListener {
                                 JOptionPane.ERROR_MESSAGE
                         );
                     }
-                    new Menu();
-                    this.dispose();
                 } else if (choice == JOptionPane.NO_OPTION) {
                     new Menu();
                     this.dispose();
-                } else if (choice == JOptionPane.CANCEL_OPTION) {
-
-                }
+                } // Do nothing on CANCEL_OPTION
             }
         }
     }

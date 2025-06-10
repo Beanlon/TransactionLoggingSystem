@@ -8,64 +8,62 @@ import java.util.List;
 public class TransactionFileManager {
 
     // Save method (used from TransactionPanel)
-    public static void saveToFile(File file, String name, String date, DefaultTableModel model) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-            bw.write(name + "," + date);
-            bw.newLine();
-
-            // Write headers
-            for (int c = 0; c < model.getColumnCount(); c++) {
-                bw.write(model.getColumnName(c));
-                if (c < model.getColumnCount() - 1) bw.write(",");
-            }
-            bw.newLine();
-
-            // Write rows
-            for (int r = 0; r < model.getRowCount(); r++) {
-                for (int c = 0; c < model.getColumnCount(); c++) {
-                    bw.write(model.getValueAt(r, c).toString());
-                    if (c < model.getColumnCount() - 1) bw.write(",");
+    public static void saveToFile(File file, String name, String date, String transactionNumber, DefaultTableModel model) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write("LOG NAME," + name);
+            writer.newLine();
+            writer.write("DATE," + date);
+            writer.newLine();
+            writer.write("TRANSACTION NUMBER," + transactionNumber);
+            writer.newLine();
+            for (int i = 0; i < model.getRowCount(); i++) {
+                for (int j = 0; j < model.getColumnCount(); j++) {
+                    writer.write(model.getValueAt(i, j).toString());
+                    if (j < model.getColumnCount() - 1) writer.write(",");
                 }
-                bw.newLine();
+                writer.newLine();
             }
         }
     }
 
     // Load method returns name, date, and rows
     public static TransactionData loadFromFile(File file) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String name = "", date = "";
-            List<String[]> rows = new ArrayList<>();
+        TransactionData data = new TransactionData();
+        data.rows = new ArrayList<>();
 
-            String line = br.readLine();  // First line: name,date
-            if (line != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 2) {
-                    name = parts[0];
-                    date = parts[1];
-                }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+
+            // Read header info (name, date, transaction number)
+            data.name = reader.readLine().split(",", 2)[1];
+            data.date = reader.readLine().split(",", 2)[1];
+            data.transactionNumber = reader.readLine().split(",", 2)[1];
+
+            // Read table data
+            while ((line = reader.readLine()) != null) {
+                String[] row = line.split(",");
+                data.rows.add(row);
             }
-
-            br.readLine(); // Skip header row
-
-            while ((line = br.readLine()) != null) {
-                rows.add(line.split(","));
-            }
-
-            return new TransactionData(name, date, rows);
         }
+        return data;
     }
+
 
     // Helper class to return combined data
     public static class TransactionData {
         public String name;
         public String date;
+        public String transactionNumber;
         public List<String[]> rows;
 
         public TransactionData(String name, String date, List<String[]> rows) {
             this.name = name;
             this.date = date;
             this.rows = rows;
+        }
+
+        public TransactionData() {
+
         }
     }
 }

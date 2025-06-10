@@ -14,9 +14,11 @@ import utils.TransactionFileManager;
 import utils.TransactionFileManager.TransactionData;
 
 public class TransactionPanel extends JPanel implements ActionListener {
+
+    private String transactionNumber;
     private JTextField txtQuantity, txtSearch;
     private JComboBox<Item> comboItem;
-    private JLabel lblNameValue, lblDateValue;
+    private JLabel lblNameValue, lblDateValue, line2;
     private JTable table;
     public DefaultTableModel model;
     public JButton btnadd, btnedit, btnremove, btnclear, btnsave;
@@ -66,9 +68,10 @@ public class TransactionPanel extends JPanel implements ActionListener {
         leftPanel.setLayout(null);
 
         JLabel line1 = new JLabel("TRANSACTION NO:");
-        JLabel line2 = new JLabel(generateRandomTransactionNumber());
+        line2 = new JLabel(generateRandomTransactionNumber());
+        transactionNumber = line2.getText();
         line1.setBounds(17, 7, 300, 100);
-        line2.setBounds(30, 30, 300, 100);
+        line2.setBounds(100, 50, 300, 100);
         line1.setFont(new Font("Arial", Font.BOLD, 26));
         line2.setFont(new Font("Arial", Font.BOLD, 35));
 
@@ -297,7 +300,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
         String filename = "logs/" + lblNameValue.getText() + "_" + lblDateValue.getText() + ".csv";
         File file = new File(filename);
-        TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), model);
+        TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), transactionNumber, model);
     }
 
     public void loadFromFile(String filename) {
@@ -310,6 +313,8 @@ public class TransactionPanel extends JPanel implements ActionListener {
 
             TransactionData data = TransactionFileManager.loadFromFile(file);
             setNameAndDate(data.name, data.date);
+            transactionNumber = data.transactionNumber;
+            line2.setText(transactionNumber);
 
             model.setRowCount(0);
             for (String[] row : data.rows) {
