@@ -118,12 +118,9 @@ public class Login extends JFrame implements ActionListener {
         });
 
 
-
-        Dimension btnsize = new Dimension(150,40);
-
         loginbtn = new JButton("LOG IN");
         loginbtn.setBackground(Color.white);
-        loginbtn.setPreferredSize(new Dimension(170,40));
+        loginbtn.setPreferredSize(new Dimension(70,40));
         loginbtn.setFont(new Font("Arial", Font.BOLD,16));
         loginbtn.setFocusPainted(false);
         loginbtn.setFocusPainted(false);
@@ -131,18 +128,19 @@ public class Login extends JFrame implements ActionListener {
         loginbtn.addActionListener(this);
 
         Regbtn = new JButton("REGISTER");
-        Regbtn.setPreferredSize(btnsize);
-        Regbtn.setBackground(new Color(201, 42, 42));
-        Regbtn.setForeground(Color.BLUE);
-        Regbtn.setFont(new Font("Arial", Font.BOLD, 14)); // Optional styling
+        Regbtn.setBackground(Color.white);
+        Regbtn.setPreferredSize(new Dimension(70,40));
+        Regbtn.setFont(new Font("Arial", Font.BOLD,16));
+        Regbtn.setFocusPainted(false);
+        Regbtn.setFocusPainted(false);
+        Regbtn.setForeground(new Color(201, 42, 42));
+        Regbtn.addActionListener(this);
 
         btnpanel = new JPanel();
-        btnpanel.setLayout(new GridLayout(2,0));
-        btnpanel.setBounds(65, 265, 265, 90); // Adjust position and size to center and fit buttons
-        btnpanel.setBackground(Color.WHITE);
+        btnpanel.setLayout(new GridLayout(0,2,10,5));
+        btnpanel.setBounds(17, 265, 365, 40); // Adjust position and size to center and fit buttons
+        btnpanel.setBackground(new Color(201, 42, 42));
 
-        loginbtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        Regbtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         btnpanel.add(loginbtn);
         btnpanel.add(Regbtn);

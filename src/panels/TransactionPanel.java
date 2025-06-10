@@ -141,7 +141,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         add(panelInputmain);
 
         JPanel panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        panelbtn.setBackground(new Color(120, 26, 26));
+        panelbtn.setBackground(new Color(201, 42, 42));
         btnadd = new JButton("ADD");
         btnremove = new JButton("REMOVE");
         btnedit = new JButton("EDIT");
