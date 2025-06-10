@@ -34,13 +34,13 @@ public class createLog extends JFrame implements ActionListener {
         add(lblTitle);
 
         // ===== Name Field =====
-        JLabel lblName = new JLabel("ENTER LOG:", SwingConstants.CENTER);
+        JLabel lblName = new JLabel("LOG NAME:", SwingConstants.CENTER);
         lblName.setFont(new Font("Arial", Font.BOLD, 14));
         lblName.setBounds(50, 140, 120, 25);
         add(lblName);
 
         txtName = new JTextField();
-        txtName.setBounds(180, 140, 250, 30);
+        txtName.setBounds(180, 140, 250, 26);
         add(txtName);
 
         // ===== Date Dropdowns =====
@@ -108,5 +108,9 @@ public class createLog extends JFrame implements ActionListener {
             new inputdata(name, date);
             this.dispose();
         }
+    }
+
+    public static void main(String[] args) {
+        new createLog();
     }
 }
