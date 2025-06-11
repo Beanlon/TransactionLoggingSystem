@@ -1,86 +1,59 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class Menu extends JFrame implements ActionListener {
+public class Menu extends JFrame {
 
-    JButton createnew, load, exit;
-    JPanel Title, pnlbtn;
-    JLabel lblTitle;
+    CardLayout cardLayout;
+    JPanel rightpanel;
 
-    Menu() {
-        this.setTitle("Transaction Logging System");
-        this.setSize(400, 400);
-        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        this.setLocationRelativeTo(null);
-        this.setResizable(false);
-        this.setLayout(null);
+    public Menu() {
+        setTitle("Transaction Logging System");
+        setSize(1000, 600);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setLayout(new BorderLayout());
 
-        // Title panel
-        Title = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        Title.setBounds(10, 10, 365, 60);  // Adjusted height for title
-        lblTitle = new JLabel("WELCOME");
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 36));
-        Title.add(lblTitle);
+        // Left red sidebar (dashboard)
+        JPanel dashboard = new JPanel();
+        dashboard.setLayout(new BoxLayout(dashboard, BoxLayout.Y_AXIS));
+        dashboard.setBackground(new Color(201, 42, 42));
+        dashboard.setPreferredSize(new Dimension(200, 0));
+        add(dashboard, BorderLayout.WEST);
 
-        // Button panel with vertical BoxLayout
-        pnlbtn = new JPanel();
-        pnlbtn.setLayout(new BoxLayout(pnlbtn, BoxLayout.Y_AXIS));
-        pnlbtn.setBounds(95, 100, 200, 230);  // Wider & taller to fit bigger buttons
-        pnlbtn.setBackground(Color.white);
+        JButton btnmain = new JButton("MAIN");
+        btnmain.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnmain.setMaximumSize(new Dimension(160, 40));
 
-        createnew = new JButton("CREATE NEW");
-        load = new JButton("LOAD");
-        exit = new JButton("EXIT");
+        JButton btnInventory = new JButton("INVENTORY");
+        btnInventory.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnInventory.setMaximumSize(new Dimension(160, 40));
 
-        createnew.setAlignmentX(Component.CENTER_ALIGNMENT);
-        load.setAlignmentX(Component.CENTER_ALIGNMENT);
-        exit.setAlignmentX(Component.CENTER_ALIGNMENT);
+        dashboard.add(Box.createVerticalStrut(100));
+        dashboard.add(btnmain);
+        dashboard.add(Box.createVerticalStrut(10));
+        dashboard.add(btnInventory);
 
-        // Make buttons bigger - set preferred and max size
-        Dimension btnSize = new Dimension(180, 60);
-        createnew.setPreferredSize(btnSize);
-        createnew.setMaximumSize(btnSize);
+        // Right side with CardLayout
+        cardLayout = new CardLayout();
+        rightpanel = new JPanel(cardLayout);
+        add(rightpanel, BorderLayout.CENTER);
 
-        load.setPreferredSize(btnSize);
-        load.setMaximumSize(btnSize);
+        // Add panels to rightpanel
+        JPanel mainPanel = new MainPanel();
+        JPanel inventoryPanel = new InventorySystem();  // Make sure this class exists
+        rightpanel.add(mainPanel, "MAIN");
+        rightpanel.add(inventoryPanel, "INVENTORY");
+        cardLayout.show(rightpanel, "MAIN");  // Show initial panel
 
-        exit.setPreferredSize(btnSize);
-        exit.setMaximumSize(btnSize);
-
-        // Add buttons with spacing
-        pnlbtn.add(Box.createVerticalStrut(20));
-        pnlbtn.add(createnew);
-        createnew.addActionListener(this);
-
-        pnlbtn.add(Box.createVerticalStrut(20));
-        pnlbtn.add(load);
-        load.addActionListener(this);
-
-        pnlbtn.add(Box.createVerticalStrut(20));
-        pnlbtn.add(exit);
-        exit.addActionListener(this);
-
-        pnlbtn.add(Box.createVerticalGlue());
-
-        // Add panels to frame
-        this.add(Title);
-        this.add(pnlbtn);
+        // Button actions
+        btnmain.addActionListener(e -> cardLayout.show(rightpanel, "MAIN"));
+        btnInventory.addActionListener(e -> cardLayout.show(rightpanel, "INVENTORY"));
 
         setVisible(true);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == createnew) {
-            new createLog();
-            this.dispose();
-        } else if (e.getSource() == load) {
-            new loadlog();
-            this.dispose();
-        } else if (e.getSource() == exit) {
-            System.exit(0);
-        }
+    public static void main(String[] args) {
+        new Menu();
     }
 }

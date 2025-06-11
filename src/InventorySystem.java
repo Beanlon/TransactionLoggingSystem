@@ -1,25 +1,17 @@
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-public class InventorySystem extends JFrame {
+public class InventorySystem extends JPanel {
     private JTextField txtItem, txtQuantity, txtPrice;
     private JTable table;
     private DefaultTableModel model;
     private JButton btnAdd, btnRemove, btnSave;
 
     public InventorySystem() {
-        setTitle("Inventory System");
-        setSize(600, 500);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setResizable(false);
         setLayout(new BorderLayout());
 
         // Panel for input fields

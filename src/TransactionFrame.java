@@ -1,5 +1,3 @@
-package panels;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -13,8 +11,7 @@ import utils.Item;
 import utils.TransactionFileManager;
 import utils.TransactionFileManager.TransactionData;
 
-public class TransactionPanel extends JPanel implements ActionListener {
-
+public class TransactionFrame extends JFrame implements ActionListener {
     private String transactionNumber;
     private JTextField txtQuantity, txtSearch;
     private JComboBox<Item> comboItem;
@@ -24,11 +21,48 @@ public class TransactionPanel extends JPanel implements ActionListener {
     public JButton btnadd, btnedit, btnremove, btnclear, btnsave;
     private boolean saved = true;
 
-    public TransactionPanel() {
-        setLayout(null);
-        setBackground(new Color(255, 255, 255));
+    // Constructor for new log
+    public TransactionFrame(String name, String date) {
+        this(null);  // Call main constructor
+        setNameAndDate(name, date);
+    }
 
-        // ===== Title Panel =====
+    // Constructor for existing log file
+    public TransactionFrame(String filepath) {
+        setTitle("Transaction Panel");
+        setSize(700, 680);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
+
+        JPanel mainWrapper = new JPanel(new BorderLayout());
+        setContentPane(mainWrapper);
+
+        JPanel sidebar = new JPanel();
+        sidebar.setBackground(new Color(220, 53, 69));
+        sidebar.setPreferredSize(new Dimension(100, getHeight()));
+        sidebar.setLayout(new GridBagLayout());
+
+        JButton btnBack = new JButton("Back");
+        btnBack.setPreferredSize(new Dimension(80, 30));
+        btnBack.setFocusPainted(false);
+        btnBack.setBackground(Color.WHITE);
+        btnBack.setForeground(Color.BLACK);
+        btnBack.addActionListener(e -> {
+            if (!saved) {
+                int choice = JOptionPane.showConfirmDialog(this, "You have unsaved changes. Are you sure you want to go back?", "Unsaved Changes", JOptionPane.YES_NO_OPTION);
+                if (choice != JOptionPane.YES_OPTION) return;
+            }
+            dispose();
+        });
+        sidebar.add(btnBack);
+        mainWrapper.add(sidebar, BorderLayout.WEST);
+
+        JPanel content = new JPanel();
+        content.setLayout(null);
+        content.setBackground(new Color(255, 255, 255));
+        mainWrapper.add(content, BorderLayout.CENTER);
+
         JPanel logdetails = new JPanel();
         logdetails.setLayout(null);
         logdetails.setBounds(10, 10, 565, 60);
@@ -38,7 +72,6 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JLabel lblName = new JLabel("LOG NAME:");
         lblName.setBounds(30, 2, 150, 60);
         lblName.setFont(new Font("Arial", Font.BOLD, 20));
-
         lblNameValue = new JLabel("");
         lblNameValue.setBounds(150, 2, 150, 60);
         lblNameValue.setFont(new Font("Arial", Font.BOLD, 20));
@@ -46,7 +79,6 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JLabel lblDate = new JLabel("DATE:");
         lblDate.setBounds(310, 2, 150, 60);
         lblDate.setFont(new Font("Arial", Font.BOLD, 20));
-
         lblDateValue = new JLabel("");
         lblDateValue.setBounds(380, 2, 150, 60);
         lblDateValue.setFont(new Font("Arial", Font.BOLD, 20));
@@ -55,14 +87,12 @@ public class TransactionPanel extends JPanel implements ActionListener {
         logdetails.add(lblNameValue);
         logdetails.add(lblDate);
         logdetails.add(lblDateValue);
-        add(logdetails);
+        content.add(logdetails);
 
-        // ===== Info Panel Split into Left and Right =====
         JPanel panelInfo = new JPanel(new GridLayout(1, 2));
         panelInfo.setBounds(10, 80, 565, 150);
-        add(panelInfo);
+        content.add(panelInfo);
 
-        // ===== Left Panel =====
         JPanel leftPanel = new JPanel();
         leftPanel.setBackground(new Color(246, 241, 241));
         leftPanel.setLayout(null);
@@ -70,6 +100,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JLabel line1 = new JLabel("TRANSACTION NO:");
         line2 = new JLabel(generateRandomTransactionNumber());
         transactionNumber = line2.getText();
+
         line1.setBounds(17, 7, 300, 100);
         line2.setBounds(100, 50, 300, 100);
         line1.setFont(new Font("Arial", Font.BOLD, 26));
@@ -79,7 +110,6 @@ public class TransactionPanel extends JPanel implements ActionListener {
         leftPanel.add(line2);
         panelInfo.add(leftPanel);
 
-        // ===== Right Panel (Form) =====
         JPanel rightPanel = new JPanel(new GridBagLayout());
         rightPanel.setBackground(new Color(201, 42, 42));
         panelInfo.add(rightPanel);
@@ -93,10 +123,9 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JLabel lblItem = new JLabel("ITEM:");
         lblItem.setFont(new Font("Arial", Font.BOLD, 13));
         lblItem.setForeground(Color.WHITE);
+
         comboItem = new JComboBox<>();
-        for (Item item : loadInventoryItems()) {
-            comboItem.addItem(item);
-        }
+        for (Item item : loadInventoryItems()) comboItem.addItem(item);
         if (comboItem.getItemCount() > 0) comboItem.setSelectedIndex(0);
         comboItem.setPreferredSize(new Dimension(140, 30));
 
@@ -104,6 +133,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.EAST;
         rightPanel.add(lblItem, gbc);
+
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
         rightPanel.add(comboItem, gbc);
@@ -111,6 +141,7 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JLabel lblQuantity = new JLabel("QUANTITY:");
         lblQuantity.setFont(new Font("Arial", Font.BOLD, 13));
         lblQuantity.setForeground(Color.WHITE);
+
         txtQuantity = new JTextField();
         txtQuantity.setPreferredSize(new Dimension(140, 30));
         Inputvalidator.makeNumericOnly(txtQuantity);
@@ -119,19 +150,20 @@ public class TransactionPanel extends JPanel implements ActionListener {
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.EAST;
         rightPanel.add(lblQuantity, gbc);
+
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
         rightPanel.add(txtQuantity, gbc);
 
-        // ===== Button + Search Panel =====
         JPanel panelInputmain = new JPanel(new BorderLayout());
         panelInputmain.setBounds(10, 240, 565, 35);
         panelInputmain.setBorder(BorderFactory.createEtchedBorder());
         panelInputmain.setBackground(new Color(255, 255, 255));
-        add(panelInputmain);
+        content.add(panelInputmain);
 
         JPanel panelbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
         panelbtn.setBackground(new Color(255, 255, 255));
+
         btnadd = new JButton("ADD");
         btnremove = new JButton("REMOVE");
         btnedit = new JButton("EDIT");
@@ -153,18 +185,18 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JPanel panelsearch = new JPanel();
         panelsearch.setLayout(new BoxLayout(panelsearch, BoxLayout.X_AXIS));
         panelsearch.setBackground(new Color(255, 255, 255));
-        panelsearch.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4    )); // optional
+        panelsearch.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
         txtSearch = new JTextField();
         txtSearch.setPreferredSize(new Dimension(150, 30));
-        txtSearch.setMaximumSize(new Dimension(150, 30)); // enforce max size
+        txtSearch.setMaximumSize(new Dimension(150, 30));
         txtSearch.setBackground(new Color(238, 235, 235));
         txtSearch.setText("Search..");
         txtSearch.setForeground(Color.GRAY);
 
         txtSearch.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (txtSearch.getText().equals("Search")) {
+                if (txtSearch.getText().equals("Search") || txtSearch.getText().equals("Search..")) {
                     txtSearch.setText("");
                     txtSearch.setForeground(Color.BLACK);
                 }
@@ -178,12 +210,12 @@ public class TransactionPanel extends JPanel implements ActionListener {
             }
         });
 
-        panelsearch.add(Box.createHorizontalGlue()); // push search field to the right
+        panelsearch.add(Box.createHorizontalGlue());
         panelsearch.add(txtSearch);
+
         panelInputmain.add(panelbtn, BorderLayout.WEST);
         panelInputmain.add(panelsearch, BorderLayout.EAST);
 
-        // ===== Table Panel =====
         String[] columnNames = {"ITEM", "PRICE", "QUANTITY", "SUBTOTAL"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
@@ -192,14 +224,18 @@ public class TransactionPanel extends JPanel implements ActionListener {
         JPanel panelTable = new JPanel(new BorderLayout());
         panelTable.setBounds(10, 285, 565, 330);
         panelTable.add(scrollPane, BorderLayout.CENTER);
-        add(panelTable);
+        content.add(panelTable);
+
+        // Load from file if provided
+        if (filepath != null && !filepath.isEmpty()) {
+            loadFromFile(filepath);
+        }
     }
 
     private List<Item> loadInventoryItems() {
         List<Item> items = new ArrayList<>();
         File file = new File("INVENTORY.txt");
         if (!file.exists()) return items;
-
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -224,26 +260,16 @@ public class TransactionPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
-
         if (source == btnadd) {
             Item selectedItem = (Item) comboItem.getSelectedItem();
             String quantity = txtQuantity.getText().trim();
-
             if (selectedItem == null || quantity.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
                 return;
             }
-
             int quantityInt = Integer.parseInt(quantity);
             double subtotal = selectedItem.getPrice() * quantityInt;
-
-            model.addRow(new Object[]{
-                    selectedItem.getName(),
-                    selectedItem.getPrice(),
-                    quantityInt,
-                    subtotal
-            });
-
+            model.addRow(new Object[]{selectedItem.getName(), selectedItem.getPrice(), quantityInt, subtotal});
             clearInputs();
             saved = false;
 
@@ -253,26 +279,20 @@ public class TransactionPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please select a row to edit.");
                 return;
             }
-
             Item selectedItem = (Item) comboItem.getSelectedItem();
             String quantity = txtQuantity.getText().trim();
-
             if (selectedItem == null || quantity.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields before editing.");
                 return;
             }
-
             int quantityInt = Integer.parseInt(quantity);
             double subtotal = selectedItem.getPrice() * quantityInt;
-
             model.setValueAt(selectedItem.getName(), selectedRow, 0);
             model.setValueAt(selectedItem.getPrice(), selectedRow, 1);
             model.setValueAt(quantityInt, selectedRow, 2);
             model.setValueAt(subtotal, selectedRow, 3);
-
             clearInputs();
             saved = false;
-
         } else if (source == btnremove) {
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
@@ -282,10 +302,8 @@ public class TransactionPanel extends JPanel implements ActionListener {
             model.removeRow(selectedRow);
             clearInputs();
             saved = false;
-
         } else if (source == btnclear) {
             clearInputs();
-
         } else if (source == btnsave) {
             try {
                 saveToFile();
@@ -305,7 +323,6 @@ public class TransactionPanel extends JPanel implements ActionListener {
     public void saveToFile() throws IOException {
         File dir = new File("logs");
         if (!dir.exists()) dir.mkdir();
-
         String filename = "logs/" + lblNameValue.getText() + "_" + lblDateValue.getText() + ".csv";
         File file = new File(filename);
         TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), transactionNumber, model);
@@ -318,19 +335,16 @@ public class TransactionPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "File not found: " + filename);
                 return;
             }
-
             TransactionData data = TransactionFileManager.loadFromFile(file);
             setNameAndDate(data.name, data.date);
             transactionNumber = data.transactionNumber;
             line2.setText(transactionNumber);
-
             model.setRowCount(0);
             for (String[] row : data.rows) {
                 if (row.length == model.getColumnCount()) {
                     model.addRow(row);
                 }
             }
-
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage());
         }
@@ -344,5 +358,13 @@ public class TransactionPanel extends JPanel implements ActionListener {
         Random random = new Random();
         int number = 1000 + random.nextInt(9000);
         return String.valueOf(number);
+    }
+
+    public static void main(String[] args) {
+        String filepath = (args.length > 0) ? args[0] : null;
+        SwingUtilities.invokeLater(() -> {
+            TransactionFrame frame = new TransactionFrame(filepath);
+            frame.setVisible(true);
+        });
     }
 }
