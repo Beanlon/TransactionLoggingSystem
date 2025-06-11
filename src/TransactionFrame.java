@@ -18,17 +18,17 @@ public class TransactionFrame extends JFrame implements ActionListener {
     private JLabel lblNameValue, lblDateValue, line2;
     private JTable table;
     public DefaultTableModel model;
-    public JButton btnadd, btnedit, btnremove, btnclear, btnsave;
+    public JButton btnadd, btnedit, btnremove, btnclear, btnsave, btnBack;
     private boolean saved = true;
 
     // Constructor for new log
     public TransactionFrame(String name, String date) {
-        this(null);  // Call main constructor
+        this(name, date, null);  // ✅ pass the correct variables
         setNameAndDate(name, date);
     }
 
     // Constructor for existing log file
-    public TransactionFrame(String filepath) {
+    public TransactionFrame(String logname, String date, String filepath) {
         setTitle("Transaction Panel");
         setSize(700, 680);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,18 +43,12 @@ public class TransactionFrame extends JFrame implements ActionListener {
         sidebar.setPreferredSize(new Dimension(100, getHeight()));
         sidebar.setLayout(new GridBagLayout());
 
-        JButton btnBack = new JButton("Back");
+        btnBack = new JButton("Back");
         btnBack.setPreferredSize(new Dimension(80, 30));
         btnBack.setFocusPainted(false);
         btnBack.setBackground(Color.WHITE);
         btnBack.setForeground(Color.BLACK);
-        btnBack.addActionListener(e -> {
-            if (!saved) {
-                int choice = JOptionPane.showConfirmDialog(this, "You have unsaved changes. Are you sure you want to go back?", "Unsaved Changes", JOptionPane.YES_NO_OPTION);
-                if (choice != JOptionPane.YES_OPTION) return;
-            }
-            dispose();
-        });
+        btnBack.addActionListener(this);
         sidebar.add(btnBack);
         mainWrapper.add(sidebar, BorderLayout.WEST);
 
@@ -312,6 +306,33 @@ public class TransactionFrame extends JFrame implements ActionListener {
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
             }
+        } else if (source == btnBack) {
+            if (this.saved) {
+                new Menu();
+                dispose();
+            } else {
+                int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (choice == JOptionPane.YES_OPTION) {
+                    try {
+                        this.saveToFile(); // ✅ Save
+                        new Menu();
+                        this.dispose();
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Error saving file: " + ex.getMessage(),
+                                "Save Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                } else if (choice == JOptionPane.NO_OPTION) {
+                    new Menu();
+                    this.dispose();
+                } else {
+
+                }
+            }
+
         }
     }
 
@@ -361,9 +382,11 @@ public class TransactionFrame extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        String filepath = (args.length > 0) ? args[0] : null;
         SwingUtilities.invokeLater(() -> {
-            TransactionFrame frame = new TransactionFrame(filepath);
+            String logname = "SampleLog";
+            String date = "2025-06-11";
+            String filepath = (args.length > 0) ? args[0] : null;
+            TransactionFrame frame = new TransactionFrame(logname, date, filepath);
             frame.setVisible(true);
         });
     }

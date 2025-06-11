@@ -2,10 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 
 public class createLog extends JFrame implements ActionListener {
     private JTextField txtName;
-    private JComboBox<String> dayCombo, monthCombo, yearCombo;
+    private JTextField txtDate;
     private JButton btnBack, btnCreate;
 
     public createLog() {
@@ -32,7 +33,7 @@ public class createLog extends JFrame implements ActionListener {
 
         // Input panel
         JPanel inputlog = new JPanel(new GridBagLayout());
-        inputlog.setBounds(20, 130, 400, 100);
+        inputlog.setBounds(20, 130, 400, 120);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
@@ -45,12 +46,13 @@ public class createLog extends JFrame implements ActionListener {
         inputlog.add(lblName, gbc);
 
         txtName = new JTextField();
+        txtName.setBackground(Color.white);
         txtName.setPreferredSize(new Dimension(200, 30));
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         inputlog.add(txtName, gbc);
 
-        // Date input (day, month, year combo boxes)
+        // Auto-filled current date in a disabled text field
         JLabel lblDate = new JLabel("DATE:");
         lblDate.setFont(new Font("Arial", Font.BOLD, 14));
         gbc.gridx = 0;
@@ -58,27 +60,13 @@ public class createLog extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.EAST;
         inputlog.add(lblDate, gbc);
 
-        JPanel dropdate = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        String[] days = new String[31];
-        for (int i = 1; i <= 31; i++) days[i - 1] = String.format("%02d", i);
-
-        String[] months = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"};
-
-        String[] years = new String[11];
-        int startYear = 2025;
-        for (int i = 0; i < 11; i++)
-            years[i] = Integer.toString(startYear + i);
-
-        dayCombo = new JComboBox<>(days);
-        monthCombo = new JComboBox<>(months);
-        yearCombo = new JComboBox<>(years);
-        dropdate.add(dayCombo);
-        dropdate.add(monthCombo);
-        dropdate.add(yearCombo);
-
+        txtDate = new JTextField(LocalDate.now().toString());
+        txtDate.setPreferredSize(new Dimension(200, 30));
+        txtDate.setBackground(Color.white);
+        txtDate.setEditable(false);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        inputlog.add(dropdate, gbc);
+        inputlog.add(txtDate, gbc);
 
         add(inputlog);
 
@@ -88,7 +76,7 @@ public class createLog extends JFrame implements ActionListener {
         btnCreate.setFont(new Font("Arial", Font.BOLD, 17));
         btnCreate.setBorderPainted(false);
         btnCreate.setForeground(Color.white);
-        btnCreate.setBounds(117, 240, 220, 40);
+        btnCreate.setBounds(117, 270, 220, 40);
         btnCreate.addActionListener(this);
         add(btnCreate);
 
@@ -103,21 +91,17 @@ public class createLog extends JFrame implements ActionListener {
                 this.dispose();
             } else if (e.getSource() == btnCreate) {
                 String name = txtName.getText().trim();
-                String day = (String) dayCombo.getSelectedItem();
-                String month = (String) monthCombo.getSelectedItem();
-                String year = (String) yearCombo.getSelectedItem();
+                String date = txtDate.getText().trim();
 
                 if (name.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Please enter a name.");
                     return;
                 }
 
-                String date = year + "-" + month + "-" + day;
-
                 // Show message
                 JOptionPane.showMessageDialog(this, "Log created for " + name + " on " + date);
 
-                // ✅ Corrected: Use TransactionFrame, not inputdata
+                // Open transaction frame
                 TransactionFrame transactionFrame = new TransactionFrame(name, date);
                 transactionFrame.setVisible(true);
 
