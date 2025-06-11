@@ -273,6 +273,26 @@
                     }
                 }
 
+            } else if (e.getSource() == exit) {
+                int selectedrow = logTable.getSelectedRow();
+
+                if (selectedrow != -1) {
+                    String filename = (String) tableModel.getValueAt(selectedrow,0);
+                    int confrim = JOptionPane.showConfirmDialog(this,
+                            "Are you sure you want to delete " + filename + " ?",
+                            "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                    if (confrim == JOptionPane.YES_OPTION) {
+                        File filetodelete = new File("logs/" + filename);
+                        if (filetodelete.exists() && filetodelete.delete()) {
+                            tableModel.removeRow(selectedrow);
+                            JOptionPane.showMessageDialog(this, "Log deleted successfully");
+                        } else {
+                            JOptionPane.showMessageDialog(this,"Failed to delete log file.");
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please select log file to delete");
+                }
             }
 
         }
