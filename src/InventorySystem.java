@@ -10,7 +10,7 @@ public class InventorySystem extends JPanel {
     private JTextField txtItem, txtQuantity, txtPrice;
     private JTable table;
     private DefaultTableModel model;
-    private JButton btnAdd, btnRemove, btnSave;
+    private JButton btnAdd, btnRemove, btnSave, btnEdit;
 
     public InventorySystem() {
         setLayout(new BorderLayout());
@@ -33,16 +33,19 @@ public class InventorySystem extends JPanel {
 
         // Panel for buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        btnAdd = new JButton("Add");
-        btnRemove = new JButton("Remove");
-        btnSave = new JButton("Save");
+        btnAdd = new JButton("ADD");
+        btnRemove = new JButton("REMOVE");
+        btnEdit = new JButton("EDIT");
+        btnSave = new JButton("SAVE");
 
         btnAdd.addActionListener(e -> addRow());
         btnRemove.addActionListener(e -> removeRow());
+        btnEdit.addActionListener(e -> editItem());
         btnSave.addActionListener(e -> saveToFile());
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnRemove);
+        buttonPanel.add(btnEdit);
         buttonPanel.add(btnSave);
 
         // Table setup
@@ -56,6 +59,15 @@ public class InventorySystem extends JPanel {
         table = new JTable(model);
         table.setPreferredScrollableViewportSize(new Dimension(400, 400));
         JScrollPane scrollPane = new JScrollPane(table);
+
+        table.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow != -1) {
+                txtItem.setText(model.getValueAt(selectedRow, 0).toString());
+                txtQuantity.setText(model.getValueAt(selectedRow, 1).toString());
+                txtPrice.setText(model.getValueAt(selectedRow, 2).toString());
+            }
+        });
 
         // Combine all into main panel
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -100,6 +112,40 @@ public class InventorySystem extends JPanel {
         txtItem.setText("");
         txtQuantity.setText("");
         txtPrice.setText("");
+    }
+
+    private void editItem() {
+        int selectedRow = table.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a row to edit.");
+            return;
+        }
+
+        String item = txtItem.getText().trim();
+        String quantityText = txtQuantity.getText().trim();
+        String priceText = txtPrice.getText().trim();
+
+        if (item.isEmpty() || quantityText.isEmpty() || priceText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all fields to edit the item.");
+            return;
+        }
+
+        try {
+            int quantity = Integer.parseInt(quantityText);
+            double price = Double.parseDouble(priceText.replace(",", ""));
+
+            model.setValueAt(item, selectedRow, 0);
+            model.setValueAt(quantity, selectedRow, 1);
+            model.setValueAt(String.format("%.2f", price), selectedRow, 2);
+
+            clearInputs();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Quantity must be and integer and price must be a valid number.");
+
+
+        }
+
     }
 
     private void saveToFile() {

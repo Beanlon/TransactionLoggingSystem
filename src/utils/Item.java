@@ -30,6 +30,6 @@ public class Item {
 
     @Override
     public String toString() {
-        return name + " (" + quantity + " in stock)";
+        return name + " | ₱" + price + " | " + quantity + " in stock";
     }
 }

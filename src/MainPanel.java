@@ -7,6 +7,7 @@
     import java.nio.file.attribute.BasicFileAttributes;
     import java.nio.file.attribute.FileTime;
     import java.text.SimpleDateFormat;
+    import javax.swing.table.DefaultTableCellRenderer;
     import javax.swing.table.DefaultTableModel;
 
     public class MainPanel extends JPanel implements ActionListener {
@@ -188,10 +189,22 @@
 
             // ==== Table for saved logs ====
             String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified" };
-            tableModel = new DefaultTableModel(columns, 0);
+            tableModel = new DefaultTableModel(columns, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+
             logTable = new JTable(tableModel);
             logTable.setRowHeight(25);
             logTable.setPreferredScrollableViewportSize(new Dimension(760, 400));
+
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+            for (int i = 0; i < tableModel.getColumnCount(); i++) {
+                logTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+            }
 
             JScrollPane scrollPane = new JScrollPane(logTable);
             scrollPane.setPreferredSize(new Dimension(780, 300));
