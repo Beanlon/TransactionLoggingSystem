@@ -1,9 +1,10 @@
+import utils.InventoryManager;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class InventorySystem extends JPanel {
     private JTextField txtItem, txtQuantity, txtPrice;
@@ -36,39 +37,27 @@ public class InventorySystem extends JPanel {
         btnRemove = new JButton("Remove");
         btnSave = new JButton("Save");
 
-        btnAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addRow();
-            }
-        });
-
-        btnRemove.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeRow();
-            }
-        });
-
-        btnSave.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveToFile();
-            }
-        });
+        btnAdd.addActionListener(e -> addRow());
+        btnRemove.addActionListener(e -> removeRow());
+        btnSave.addActionListener(e -> saveToFile());
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnRemove);
         buttonPanel.add(btnSave);
 
-        // Table for displaying inventory
+        // Table setup
         String[] columnNames = {"Item", "Quantity", "Price"};
-        model = new DefaultTableModel(columnNames, 0);
+        model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make table non-editable
+            }
+        };
         table = new JTable(model);
         table.setPreferredScrollableViewportSize(new Dimension(400, 400));
         JScrollPane scrollPane = new JScrollPane(table);
 
-        // Main panel
+        // Combine all into main panel
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(inputPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
@@ -80,21 +69,21 @@ public class InventorySystem extends JPanel {
 
     private void addRow() {
         String item = txtItem.getText().trim();
-        String quantity = txtQuantity.getText().trim();
-        String price = txtPrice.getText().trim();
+        String quantityText = txtQuantity.getText().trim();
+        String priceText = txtPrice.getText().trim();
 
-        if (item.isEmpty() || quantity.isEmpty() || price.isEmpty()) {
+        if (item.isEmpty() || quantityText.isEmpty() || priceText.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
             return;
         }
 
         try {
-            int quantityInt = Integer.parseInt(quantity);
-            double priceDouble = Double.parseDouble(price);
-            model.addRow(new Object[]{item, quantityInt, priceDouble});
+            int quantity = Integer.parseInt(quantityText);
+            double price = Double.parseDouble(priceText);
+            model.addRow(new Object[]{item, quantity, String.format("%.2f", price)});
             clearInputs();
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Quantity must be an integer and price must be a number.");
+            JOptionPane.showMessageDialog(this, "Quantity must be an integer and price must be a valid number.");
         }
     }
 
@@ -102,9 +91,9 @@ public class InventorySystem extends JPanel {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Please select a row to remove.");
-            return;
+        } else {
+            model.removeRow(selectedRow);
         }
-        model.removeRow(selectedRow);
     }
 
     private void clearInputs() {
@@ -114,41 +103,45 @@ public class InventorySystem extends JPanel {
     }
 
     private void saveToFile() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("inventory.txt"))) {
-            for (int i = 0; i < model.getRowCount(); i++) {
-                writer.println(model.getValueAt(i, 0) + "," + model.getValueAt(i, 1) + "," + model.getValueAt(i, 2));
+        Map<String, InventoryManager> inventory = new LinkedHashMap<>();
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            try {
+                String name = model.getValueAt(i, 0).toString();
+                int quantity = Integer.parseInt(model.getValueAt(i, 1).toString());
+                double price = Double.parseDouble(model.getValueAt(i, 2).toString());
+                inventory.put(name, new InventoryManager(name, quantity, price));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Error parsing data in row " + (i + 1));
+                return;
             }
-            JOptionPane.showMessageDialog(this, "Inventory saved successfully!");
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error saving inventory: " + e.getMessage());
         }
+
+        InventoryManager.saveInventory(inventory);
+        JOptionPane.showMessageDialog(this, "Inventory saved successfully!");
     }
 
     private void loadFromFile() {
-        File file = new File("inventory.txt");
-        if (!file.exists()) {
-            return;
-        }
+        Map<String, InventoryManager> inventory = InventoryManager.loadInventory();
+        model.setRowCount(0); // Clear existing table rows
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3) {
-                    model.addRow(parts);
-                }
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading inventory: " + e.getMessage());
+        for (InventoryManager item : inventory.values()) {
+            model.addRow(new Object[]{
+                    item.getName(),
+                    item.getQuantity(),
+                    String.format("%.2f", item.getPrice())
+            });
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new InventorySystem().setVisible(true);
-            }
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Inventory System");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setContentPane(new InventorySystem());
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         });
     }
 }

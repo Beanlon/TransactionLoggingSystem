@@ -18,85 +18,110 @@
         public MainPanel() {
             setLayout(null);
 
-    // ==== Top Horizontal Panels with Equal Sizes (3 Panels) ====
+            // ==== Top Horizontal Panels with Equal Sizes (3 Panels) ====
             JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0)); // 3 columns with 5px horizontal gap
             paneloverview.setBounds(10, 10, 765, 125); // Keep existing size
 
-            Color panelColor = new Color(243, 243, 243); // Panel background color
+            Color panelColor = new Color(255, 255, 255); // Panel background color
             Font titleFont = new Font("SansSerif", Font.BOLD, 23);
             Font valueFont = new Font("SansSerif", Font.PLAIN, 20);
             Color textColor = new Color(201, 42, 42);
 
-    // Panel 1 - Total Sales
-            JPanel pnlsales = new JPanel();
+            // ==== Panel 1 - Total Sales ====
+            JPanel pnlsales = new JPanel(new BorderLayout());
             pnlsales.setBackground(panelColor);
-            pnlsales.setLayout(new BoxLayout(pnlsales, BoxLayout.Y_AXIS));
-            pnlsales.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+
+            JPanel pnlline1 = new JPanel();
+            pnlline1.setPreferredSize(new Dimension(5, 125));
+            pnlline1.setBackground(textColor);
+            pnlsales.add(pnlline1, BorderLayout.WEST);
+
+            JPanel pnlSalesContent = new JPanel();
+            pnlSalesContent.setLayout(new BoxLayout(pnlSalesContent, BoxLayout.Y_AXIS));
+            pnlSalesContent.setBackground(panelColor);
+            pnlSalesContent.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
 
             JLabel lblSalesTitle = new JLabel("Total Sales");
             lblSalesTitle.setFont(titleFont);
             lblSalesTitle.setForeground(textColor);
             lblSalesTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-            lblSalesTitle.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-            JLabel lblSalesValue = new JLabel("₱12,000.00"); // Placeholder value
+            JLabel lblSalesValue = new JLabel("₱12,000.00");
             lblSalesValue.setFont(valueFont);
             lblSalesValue.setForeground(textColor);
             lblSalesValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-            lblSalesValue.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-            pnlsales.add(lblSalesTitle);
-            pnlsales.add(Box.createVerticalStrut(10));
-            pnlsales.add(lblSalesValue);
+            pnlSalesContent.add(lblSalesTitle);
+            pnlSalesContent.add(Box.createVerticalStrut(10));
+            pnlSalesContent.add(lblSalesValue);
 
-    // Panel 2 - Total Transactions
-            JPanel totaltrans = new JPanel();
+            pnlsales.add(pnlSalesContent, BorderLayout.CENTER);
+
+            // ==== Panel 2 - Total Transactions ====
+            JPanel totaltrans = new JPanel(new BorderLayout());
             totaltrans.setBackground(panelColor);
-            totaltrans.setLayout(new BoxLayout(totaltrans, BoxLayout.Y_AXIS));
-            totaltrans.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+
+            JPanel pnlline2 = new JPanel();
+            pnlline2.setPreferredSize(new Dimension(5, 125));
+            pnlline2.setBackground(textColor);
+            totaltrans.add(pnlline2, BorderLayout.WEST);
+
+            JPanel pnlTransContent = new JPanel();
+            pnlTransContent.setLayout(new BoxLayout(pnlTransContent, BoxLayout.Y_AXIS));
+            pnlTransContent.setBackground(panelColor);
+            pnlTransContent.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
 
             JLabel lblTransTitle = new JLabel("Total Transactions");
             lblTransTitle.setFont(titleFont);
             lblTransTitle.setForeground(textColor);
             lblTransTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-            lblTransTitle.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-            JLabel lblTransValue = new JLabel("28"); // Placeholder value
+            JLabel lblTransValue = new JLabel("28");
             lblTransValue.setFont(valueFont);
             lblTransValue.setForeground(textColor);
             lblTransValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-            lblTransValue.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-            totaltrans.add(lblTransTitle);
-            totaltrans.add(Box.createVerticalStrut(10));
-            totaltrans.add(lblTransValue);
+            pnlTransContent.add(lblTransTitle);
+            pnlTransContent.add(Box.createVerticalStrut(10));
+            pnlTransContent.add(lblTransValue);
 
-    // Panel 3 - Most Bought Item
-            JPanel itemssold = new JPanel();
+            totaltrans.add(pnlTransContent, BorderLayout.CENTER);
+
+            // ==== Panel 3 - Most Bought Item ====
+            JPanel itemssold = new JPanel(new BorderLayout());
             itemssold.setBackground(panelColor);
-            itemssold.setLayout(new BoxLayout(itemssold, BoxLayout.Y_AXIS));
-            itemssold.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+
+            JPanel pnlline3 = new JPanel();
+            pnlline3.setPreferredSize(new Dimension(5, 125));
+            pnlline3.setBackground(textColor);
+            itemssold.add(pnlline3, BorderLayout.WEST);
+
+            JPanel pnlItemContent = new JPanel();
+            pnlItemContent.setLayout(new BoxLayout(pnlItemContent, BoxLayout.Y_AXIS));
+            pnlItemContent.setBackground(panelColor);
+            pnlItemContent.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
 
             JLabel lblMostBoughtTitle = new JLabel("Most Bought Item");
             lblMostBoughtTitle.setFont(titleFont);
             lblMostBoughtTitle.setForeground(textColor);
             lblMostBoughtTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-            lblMostBoughtTitle.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-            JLabel lblMostBoughtValue = new JLabel("Coffee"); // Placeholder value
+            JLabel lblMostBoughtValue = new JLabel("Coffee");
             lblMostBoughtValue.setFont(valueFont);
             lblMostBoughtValue.setForeground(textColor);
             lblMostBoughtValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-            lblMostBoughtTitle.setAlignmentY(Component.CENTER_ALIGNMENT);
 
-            itemssold.add(lblMostBoughtTitle);
-            itemssold.add(Box.createVerticalStrut(10));
-            itemssold.add(lblMostBoughtValue);
+            pnlItemContent.add(lblMostBoughtTitle);
+            pnlItemContent.add(Box.createVerticalStrut(10));
+            pnlItemContent.add(lblMostBoughtValue);
 
-    // Add all panels to the container
+            itemssold.add(pnlItemContent, BorderLayout.CENTER);
+
+            // ==== Add overview panels ====
             paneloverview.add(pnlsales);
             paneloverview.add(totaltrans);
             paneloverview.add(itemssold);
+
 
             // ==== Button Panel ====
             pnlbtn = new JPanel();
@@ -162,7 +187,7 @@
             Searchfilter.add(txtSearch);
 
             // ==== Table for saved logs ====
-            String[] columns = { "Log Name", "Transaction No.", "Date", "Last Modified" };
+            String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified" };
             tableModel = new DefaultTableModel(columns, 0);
             logTable = new JTable(tableModel);
             logTable.setRowHeight(25);

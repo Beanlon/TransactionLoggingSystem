@@ -1,3 +1,3 @@
-Joy Dishwashing Soap,30,12.0
-Tang Orange,20,10.0
-Royal,40,20.0
+Joy Dishwashing Soap,18,12.00
+Tang Orange,20,10.00
+Royal,39,20.00

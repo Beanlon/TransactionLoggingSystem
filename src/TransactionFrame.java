@@ -5,13 +5,16 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 import utils.Inputvalidator;
+import utils.InventoryManager;
 import utils.Item;
 import utils.TransactionFileManager;
 import utils.TransactionFileManager.TransactionData;
 
 public class TransactionFrame extends JFrame implements ActionListener {
+
     private String transactionNumber;
     private JTextField txtQuantity, txtSearch;
     private JComboBox<Item> comboItem;
@@ -20,10 +23,11 @@ public class TransactionFrame extends JFrame implements ActionListener {
     public DefaultTableModel model;
     public JButton btnadd, btnedit, btnremove, btnclear, btnsave, btnBack;
     private boolean saved = true;
+    private Map<String, InventoryManager> inventoryMap;
 
     // Constructor for new log
     public TransactionFrame(String name, String date) {
-        this(name, date, null);  // ✅ pass the correct variables
+        this(name, date, null);
         setNameAndDate(name, date);
     }
 
@@ -160,19 +164,16 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
         btnadd = new JButton("ADD");
         btnremove = new JButton("REMOVE");
-        btnedit = new JButton("EDIT");
         btnclear = new JButton("CLEAR");
         btnsave = new JButton("SAVE");
 
         btnadd.addActionListener(this);
-        btnedit.addActionListener(this);
         btnsave.addActionListener(this);
         btnremove.addActionListener(this);
         btnclear.addActionListener(this);
 
         panelbtn.add(btnadd);
         panelbtn.add(btnremove);
-        panelbtn.add(btnedit);
         panelbtn.add(btnclear);
         panelbtn.add(btnsave);
 
@@ -220,7 +221,6 @@ public class TransactionFrame extends JFrame implements ActionListener {
         panelTable.add(scrollPane, BorderLayout.CENTER);
         content.add(panelTable);
 
-        // Load from file if provided
         if (filepath != null && !filepath.isEmpty()) {
             loadFromFile(filepath);
         }
@@ -228,21 +228,12 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     private List<Item> loadInventoryItems() {
         List<Item> items = new ArrayList<>();
-        File file = new File("INVENTORY.txt");
-        if (!file.exists()) return items;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 2) {
-                    String itemName = parts[0].trim();
-                    double itemPrice = Double.parseDouble(parts[1].trim());
-                    items.add(new Item(itemName, itemPrice));
-                }
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading inventory: " + e.getMessage());
+        inventoryMap = InventoryManager.loadInventory();  // load and store for updating later
+
+        for (InventoryManager inv : inventoryMap.values()) {
+            items.add(new Item(inv.getName(), inv.getPrice(), inv.getQuantity()));
         }
+
         return items;
     }
 
@@ -257,34 +248,32 @@ public class TransactionFrame extends JFrame implements ActionListener {
         if (source == btnadd) {
             Item selectedItem = (Item) comboItem.getSelectedItem();
             String quantity = txtQuantity.getText().trim();
+
             if (selectedItem == null || quantity.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
                 return;
             }
+
             int quantityInt = Integer.parseInt(quantity);
+            if (quantityInt > selectedItem.getQuantity()) {
+                JOptionPane.showMessageDialog(this, "Not enough stock. Available: " + selectedItem.getQuantity());
+                return;
+            }
+
             double subtotal = selectedItem.getPrice() * quantityInt;
             model.addRow(new Object[]{selectedItem.getName(), selectedItem.getPrice(), quantityInt, subtotal});
-            clearInputs();
-            saved = false;
 
-        } else if (source == btnedit) {
-            int selectedRow = table.getSelectedRow();
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(this, "Please select a row to edit.");
-                return;
+            selectedItem.reduceQuantity(quantityInt);
+            InventoryManager inv = inventoryMap.get(selectedItem.getName());
+            if (inv != null) {
+                inv.reduceQuantity(quantityInt);
             }
-            Item selectedItem = (Item) comboItem.getSelectedItem();
-            String quantity = txtQuantity.getText().trim();
-            if (selectedItem == null || quantity.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields before editing.");
-                return;
-            }
-            int quantityInt = Integer.parseInt(quantity);
-            double subtotal = selectedItem.getPrice() * quantityInt;
-            model.setValueAt(selectedItem.getName(), selectedRow, 0);
-            model.setValueAt(selectedItem.getPrice(), selectedRow, 1);
-            model.setValueAt(quantityInt, selectedRow, 2);
-            model.setValueAt(subtotal, selectedRow, 3);
+
+            int selectedIndex = comboItem.getSelectedIndex();
+            ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(selectedIndex);
+            ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(selectedItem, selectedIndex);
+            comboItem.setSelectedIndex(selectedIndex);
+
             clearInputs();
             saved = false;
         } else if (source == btnremove) {
@@ -314,25 +303,17 @@ public class TransactionFrame extends JFrame implements ActionListener {
                 int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if (choice == JOptionPane.YES_OPTION) {
                     try {
-                        this.saveToFile(); // ✅ Save
+                        this.saveToFile();
                         new Menu();
                         this.dispose();
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(
-                                this,
-                                "Error saving file: " + ex.getMessage(),
-                                "Save Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
+                        JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } else if (choice == JOptionPane.NO_OPTION) {
                     new Menu();
                     this.dispose();
-                } else {
-
                 }
             }
-
         }
     }
 
@@ -344,9 +325,11 @@ public class TransactionFrame extends JFrame implements ActionListener {
     public void saveToFile() throws IOException {
         File dir = new File("logs");
         if (!dir.exists()) dir.mkdir();
-        String filename = "logs/" + lblNameValue.getText() + "_" + lblDateValue.getText() + ".csv";
+        String filename = "logs/" + lblNameValue.getText() + ".csv";
         File file = new File(filename);
+
         TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), transactionNumber, model);
+        InventoryManager.saveInventory(inventoryMap);
     }
 
     public void loadFromFile(String filename) {
