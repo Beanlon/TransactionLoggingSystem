@@ -1,362 +1,240 @@
-    import javax.swing.*;
-    import java.awt.*;
-    import java.awt.event.*;
-    import java.io.*;
-    import java.nio.file.Files;
-    import java.nio.file.Path;
-    import java.nio.file.attribute.BasicFileAttributes;
-    import java.nio.file.attribute.FileTime;
-    import java.text.SimpleDateFormat;
-    import javax.swing.table.DefaultTableCellRenderer;
-    import javax.swing.table.DefaultTableModel;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.text.SimpleDateFormat;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
-    public class MainPanel extends JPanel implements ActionListener {
-        JPanel pnlbtn;
-        JButton createnew, load, exit;
-        JTable logTable;
-        DefaultTableModel tableModel;
+public class MainPanel extends JPanel implements ActionListener {
+    JPanel pnlbtn;
+    JButton createnew, load, delete;
+    JTable logTable;
+    DefaultTableModel tableModel;
 
-        public MainPanel() {
-            setLayout(null);
+    public MainPanel() {
+        setLayout(null);
 
-            // ==== Top Horizontal Panels with Equal Sizes (3 Panels) ====
-            JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0)); // 3 columns with 5px horizontal gap
-            paneloverview.setBounds(10, 10, 765, 125); // Keep existing size
+        // Overview panels
+        JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0));
+        paneloverview.setBounds(10, 10, 765, 125);
+        add(paneloverview);
 
-            Color panelColor = new Color(255, 255, 255); // Panel background color
-            Font titleFont = new Font("SansSerif", Font.BOLD, 23);
-            Font valueFont = new Font("SansSerif", Font.PLAIN, 20);
-            Color textColor = new Color(201, 42, 42);
+        paneloverview.add(createInfoPanel("Total Sales", "₱12,000.00"));
+        paneloverview.add(createInfoPanel("Total Transactions", "28"));
+        paneloverview.add(createInfoPanel("Most Bought Item", "Coffee"));
 
-            // ==== Panel 1 - Total Sales ====
-            JPanel pnlsales = new JPanel(new BorderLayout());
-            pnlsales.setBackground(panelColor);
+        // Button panel
+        pnlbtn = new JPanel();
+        pnlbtn.setBounds(10, 140, 480, 26);
+        pnlbtn.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        pnlbtn.setOpaque(false);
 
-            JPanel pnlline1 = new JPanel();
-            pnlline1.setPreferredSize(new Dimension(5, 125));
-            pnlline1.setBackground(textColor);
-            pnlsales.add(pnlline1, BorderLayout.WEST);
+        createnew = new JButton("ADD");
+        createnew.setPreferredSize(new Dimension(90, 26));
+        createnew.addActionListener(this);
 
-            JPanel pnlSalesContent = new JPanel();
-            pnlSalesContent.setLayout(new BoxLayout(pnlSalesContent, BoxLayout.Y_AXIS));
-            pnlSalesContent.setBackground(panelColor);
-            pnlSalesContent.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        load = new JButton("LOAD");
+        load.setPreferredSize(new Dimension(90, 26));
+        load.addActionListener(this);
 
-            JLabel lblSalesTitle = new JLabel("Total Sales");
-            lblSalesTitle.setFont(titleFont);
-            lblSalesTitle.setForeground(textColor);
-            lblSalesTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        delete = new JButton("DELETE");
+        delete.setPreferredSize(new Dimension(90, 26));
+        delete.addActionListener(this);
 
-            JLabel lblSalesValue = new JLabel("₱12,000.00");
-            lblSalesValue.setFont(valueFont);
-            lblSalesValue.setForeground(textColor);
-            lblSalesValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+        pnlbtn.add(createnew);
+        pnlbtn.add(Box.createRigidArea(new Dimension(10, 0)));
+        pnlbtn.add(load);
+        pnlbtn.add(Box.createRigidArea(new Dimension(10, 0)));
+        pnlbtn.add(delete);
+        add(pnlbtn);
 
-            pnlSalesContent.add(lblSalesTitle);
-            pnlSalesContent.add(Box.createVerticalStrut(10));
-            pnlSalesContent.add(lblSalesValue);
+        // Search panel
+        JPanel Searchfilter = new JPanel();
+        Searchfilter.setBounds(495, 140, 280, 26);
+        Searchfilter.setLayout(new GridLayout(1, 2, 5, 0));
+        Searchfilter.setOpaque(false);
 
-            pnlsales.add(pnlSalesContent, BorderLayout.CENTER);
+        JComboBox<String> month = new JComboBox<>();
+        Searchfilter.add(month);
 
-            // ==== Panel 2 - Total Transactions ====
-            JPanel totaltrans = new JPanel(new BorderLayout());
-            totaltrans.setBackground(panelColor);
-
-            JPanel pnlline2 = new JPanel();
-            pnlline2.setPreferredSize(new Dimension(5, 125));
-            pnlline2.setBackground(textColor);
-            totaltrans.add(pnlline2, BorderLayout.WEST);
-
-            JPanel pnlTransContent = new JPanel();
-            pnlTransContent.setLayout(new BoxLayout(pnlTransContent, BoxLayout.Y_AXIS));
-            pnlTransContent.setBackground(panelColor);
-            pnlTransContent.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-
-            JLabel lblTransTitle = new JLabel("Total Transactions");
-            lblTransTitle.setFont(titleFont);
-            lblTransTitle.setForeground(textColor);
-            lblTransTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-            JLabel lblTransValue = new JLabel("28");
-            lblTransValue.setFont(valueFont);
-            lblTransValue.setForeground(textColor);
-            lblTransValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-            pnlTransContent.add(lblTransTitle);
-            pnlTransContent.add(Box.createVerticalStrut(10));
-            pnlTransContent.add(lblTransValue);
-
-            totaltrans.add(pnlTransContent, BorderLayout.CENTER);
-
-            // ==== Panel 3 - Most Bought Item ====
-            JPanel itemssold = new JPanel(new BorderLayout());
-            itemssold.setBackground(panelColor);
-
-            JPanel pnlline3 = new JPanel();
-            pnlline3.setPreferredSize(new Dimension(5, 125));
-            pnlline3.setBackground(textColor);
-            itemssold.add(pnlline3, BorderLayout.WEST);
-
-            JPanel pnlItemContent = new JPanel();
-            pnlItemContent.setLayout(new BoxLayout(pnlItemContent, BoxLayout.Y_AXIS));
-            pnlItemContent.setBackground(panelColor);
-            pnlItemContent.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
-
-            JLabel lblMostBoughtTitle = new JLabel("Most Bought Item");
-            lblMostBoughtTitle.setFont(titleFont);
-            lblMostBoughtTitle.setForeground(textColor);
-            lblMostBoughtTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-            JLabel lblMostBoughtValue = new JLabel("Coffee");
-            lblMostBoughtValue.setFont(valueFont);
-            lblMostBoughtValue.setForeground(textColor);
-            lblMostBoughtValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-            pnlItemContent.add(lblMostBoughtTitle);
-            pnlItemContent.add(Box.createVerticalStrut(10));
-            pnlItemContent.add(lblMostBoughtValue);
-
-            itemssold.add(pnlItemContent, BorderLayout.CENTER);
-
-            // ==== Add overview panels ====
-            paneloverview.add(pnlsales);
-            paneloverview.add(totaltrans);
-            paneloverview.add(itemssold);
-
-
-            // ==== Button Panel ====
-            pnlbtn = new JPanel();
-            pnlbtn.setBounds(10, 140, 480, 26);
-            pnlbtn.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-            pnlbtn.setOpaque(false);
-
-            Dimension btnSize = new Dimension(90, 26);
-
-            createnew = new JButton("ADD");
-            createnew.setPreferredSize(btnSize);
-            createnew.addActionListener(this);
-
-            load = new JButton("LOAD");
-            load.setPreferredSize(btnSize);
-            load.addActionListener(this);
-
-            exit = new JButton("DELETE");
-            exit.setPreferredSize(btnSize);
-            exit.addActionListener(this);
-
-            pnlbtn.add(createnew);
-            pnlbtn.add(Box.createRigidArea(new Dimension(10, 0)));
-            pnlbtn.add(load);
-            pnlbtn.add(Box.createRigidArea(new Dimension(10, 0)));
-            pnlbtn.add(exit);
-
-            // ==== Search and Filter Panel ====
-            JPanel Searchfilter = new JPanel();
-            Searchfilter.setBounds(495, 140, 280, 26);
-            Searchfilter.setLayout(new GridLayout(1, 2, 5, 0));
-            Searchfilter.setOpaque(false);
-
-            JComboBox<String> month = new JComboBox<>();
-            month.setPreferredSize(new Dimension(150, 30));
-            month.setMaximumSize(new Dimension(150, 30));
-            month.setBackground(new Color(238, 235, 235));
-            Searchfilter.add(month);
-
-            JTextField txtSearch = new JTextField();
-            txtSearch.setPreferredSize(new Dimension(150, 30));
-            txtSearch.setMaximumSize(new Dimension(150, 30));
-            txtSearch.setBackground(new Color(238, 235, 235));
-            txtSearch.setText("Search..");
-            txtSearch.setForeground(Color.GRAY);
-
-            txtSearch.addFocusListener(new FocusAdapter() {
-                public void focusGained(FocusEvent e) {
-                    if (txtSearch.getText().equals("Search")) {
-                        txtSearch.setText("");
-                        txtSearch.setForeground(Color.BLACK);
-                    }
+        JTextField txtSearch = new JTextField("Search..");
+        txtSearch.setForeground(Color.GRAY);
+        txtSearch.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                if (txtSearch.getText().equals("Search..")) {
+                    txtSearch.setText("");
+                    txtSearch.setForeground(Color.BLACK);
                 }
-
-                public void focusLost(FocusEvent e) {
-                    if (txtSearch.getText().isEmpty()) {
-                        txtSearch.setForeground(Color.GRAY);
-                        txtSearch.setText("Search..");
-                    }
-                }
-            });
-
-            Searchfilter.add(txtSearch);
-
-            // ==== Table for saved logs ====
-            String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified" };
-            tableModel = new DefaultTableModel(columns, 0) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-
-            logTable = new JTable(tableModel);
-            logTable.setRowHeight(25);
-            logTable.setPreferredScrollableViewportSize(new Dimension(760, 400));
-
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-            for (int i = 0; i < tableModel.getColumnCount(); i++) {
-                logTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
             }
 
-            JScrollPane scrollPane = new JScrollPane(logTable);
-            scrollPane.setPreferredSize(new Dimension(780, 300));
-
-            JPanel paneltable = new JPanel(new BorderLayout());
-            paneltable.setBounds(10, 175, 765, 375);
-            paneltable.add(scrollPane, BorderLayout.CENTER);
-
-            loadSavedLogs();
-
-            // ==== Add components to MainPanel ====
-            add(paneloverview);
-            add(pnlbtn);
-            add(Searchfilter);
-            add(paneltable);
-        }
-
-        private void loadSavedLogs() {
-            File dir = new File("logs");
-            if (!dir.exists()) {
-                dir.mkdirs();
-                return;
+            public void focusLost(FocusEvent e) {
+                if (txtSearch.getText().isEmpty()) {
+                    txtSearch.setText("Search..");
+                    txtSearch.setForeground(Color.GRAY);
+                }
             }
+        });
+        Searchfilter.add(txtSearch);
+        add(Searchfilter);
 
-            File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
-            if (files != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                for (File file : files) {
-                    String filename = file.getName();
-                    String filepath = file.getPath();
-                    String modified = sdf.format(file.lastModified());
+        // Table
+        String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified", "Full Filename" };
+        tableModel = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
-                    String transactionNo = "";
-                    String creationDate = "";
+        logTable = new JTable(tableModel);
+        logTable.setRowHeight(25);
+        logTable.removeColumn(logTable.getColumnModel().getColumn(4)); // hide full filename
 
-                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                        // Read the first three lines
-                        String logNameLine = reader.readLine(); // LOG NAME,test1
-                        String dateLine = reader.readLine();    // DATE,2025-01-01
-                        String transLine = reader.readLine();   // TRANSACTION NUMBER,7460
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+        center.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < 4; i++) logTable.getColumnModel().getColumn(i).setCellRenderer(center);
 
-                        if (dateLine != null && dateLine.contains(",")) {
-                            String[] parts = dateLine.split(",");
-                            if (parts.length > 1) {
-                                creationDate = parts[1].trim();
-                            }
-                        }
+        JScrollPane scrollPane = new JScrollPane(logTable);
+        JPanel paneltable = new JPanel(new BorderLayout());
+        paneltable.setBounds(10, 175, 765, 375);
+        paneltable.add(scrollPane);
+        add(paneltable);
 
-                        if (transLine != null && transLine.contains(",")) {
-                            String[] parts = transLine.split(",");
-                            if (parts.length > 1) {
-                                transactionNo = parts[1].trim();
-                            }
-                        }
+        loadSavedLogs();
+    }
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
+    private JPanel createInfoPanel(String title, String value) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        JPanel line = new JPanel();
+        line.setPreferredSize(new Dimension(5, 125));
+        line.setBackground(new Color(201, 42, 42));
+        panel.add(line, BorderLayout.WEST);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(Color.WHITE);
+        content.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 23));
+        lblTitle.setForeground(new Color(201, 42, 42));
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel lblValue = new JLabel(value);
+        lblValue.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        lblValue.setForeground(new Color(201, 42, 42));
+        lblValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        content.add(lblTitle);
+        content.add(Box.createVerticalStrut(10));
+        content.add(lblValue);
+
+        panel.add(content, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void loadSavedLogs() {
+        File dir = new File("logs");
+        if (!dir.exists()) dir.mkdirs();
+
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
+        if (files != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            for (File file : files) {
+                String filename = file.getName();
+                String filepath = file.getPath();
+                String modified = sdf.format(file.lastModified());
+                String transactionNo = "", creationDate = "";
+
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    reader.readLine();
+                    String dateLine = reader.readLine();
+                    String transLine = reader.readLine();
+
+                    if (dateLine != null && dateLine.contains(",")) {
+                        String[] parts = dateLine.split(",");
+                        if (parts.length > 1) creationDate = parts[1].trim();
                     }
 
-                    // If file creation time is available, use it for creationDate (optional)
-                    try {
-                        Path path = file.toPath();
-                        BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+                    if (transLine != null && transLine.contains(",")) {
+                        String[] parts = transLine.split(",");
+                        if (parts.length > 1) transactionNo = parts[1].trim();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    Path path = file.toPath();
+                    BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+                    if (creationDate.isEmpty()) {
                         FileTime creationTime = attr.creationTime();
-                        if (creationDate.isEmpty()) {
-                            creationDate = sdf.format(creationTime.toMillis());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        creationDate = sdf.format(creationTime.toMillis());
                     }
-
-                    // Add row to the table
-                    String displayName = filename.replace(".csv", "").replaceAll("\\(\\d+\\)$", "");
-                    tableModel.addRow(new Object[]{displayName, transactionNo, creationDate, modified});
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+
+                tableModel.addRow(new Object[]{filename, transactionNo, creationDate, modified, filepath});
             }
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Window parentWindow = SwingUtilities.getWindowAncestor(this);
-
-            if (e.getSource() == createnew) {
-                new createLog();  // Open new log creation window
-                if (parentWindow != null) {
-                    parentWindow.dispose();
-                }
-
-            } else if (e.getSource() == load) {
-                int selectedrow = logTable.getSelectedRow();
-
-                if (selectedrow != -1) {
-                    String filename = (String) tableModel.getValueAt(selectedrow, 0);
-                    String logname = filename.replace(".csv","");
-                    String filepath = "logs/" + filename;
-
-                    String date = extractDateFromCSV(filepath);
-
-                    new TransactionFrame(logname, date, filepath).setVisible(true);
-                    if (parentWindow != null) {
-                        parentWindow.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Please select a log file to load.");
-
-                    }
-                }
-
-            } else if (e.getSource() == exit) {
-                int selectedRow = logTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    String displayName = (String) tableModel.getValueAt(selectedRow, 0);
-                    File logsFolder = new File("logs");
-
-                    File[] matches = logsFolder.listFiles((dir, name) ->
-                            name.startsWith(displayName) && name.endsWith(".csv"));
-
-                    if (matches != null && matches.length > 0) {
-                        File fileToDelete = matches[0]; // use the actual matching file
-                        if (fileToDelete.delete()) {
-                            tableModel.removeRow(selectedRow);
-                            JOptionPane.showMessageDialog(this, "Log file deleted successfully.");
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Failed to delete log file.");
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Log file not found.");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this, "Please select a log to delete.");
-                }
-            }
-
-        }
-
-        private String extractDateFromCSV(String filepath) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
-                String headerLine = reader.readLine(); // read the header
-                String dataLine = reader.readLine();   // read the first data row
-
-                if (dataLine != null) {
-                    String[] values = dataLine.split(",");
-                    if (values.length >= 2) {
-                        return values[1].trim(); // assuming the 2nd column is the date
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return ""; // return empty string if date couldn't be extracted
         }
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
 
+        if (e.getSource() == createnew) {
+            new createLog();
+            if (parentWindow != null) parentWindow.dispose();
 
+        } else if (e.getSource() == load) {
+            int selectedrow = logTable.getSelectedRow();
+            if (selectedrow != -1) {
+                int modelRow = logTable.convertRowIndexToModel(selectedrow);
+                String logname = ((String) tableModel.getValueAt(modelRow, 0)).replace(".csv", "");
+                String filepath = (String) tableModel.getValueAt(modelRow, 4);
+                String date = extractDateFromCSV(filepath); // ✅ Get the date from CSV
+
+                new TransactionFrame(logname, date, filepath).setVisible(true); // ✅ Fixed
+                if (parentWindow != null) parentWindow.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a log file to load.");
+            }
+
+        } else if (e.getSource() == delete) {
+            int selectedRow = logTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                String filepath = (String) tableModel.getValueAt(selectedRow, 4);
+                File fileToDelete = new File(filepath);
+                if (fileToDelete.exists() && fileToDelete.delete()) {
+                    tableModel.removeRow(selectedRow);
+                    JOptionPane.showMessageDialog(this, "Log file deleted successfully.");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to delete log file.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a log to delete.");
+            }
+        }
+    }
+
+    private String extractDateFromCSV(String filepath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
+            reader.readLine();
+            String dataLine = reader.readLine();
+            if (dataLine != null) {
+                String[] values = dataLine.split(",");
+                if (values.length >= 2) return values[1].trim();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+}
