@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.time.LocalDate;
 
 public class createLog extends JFrame implements ActionListener {
@@ -98,15 +99,32 @@ public class createLog extends JFrame implements ActionListener {
                     return;
                 }
 
-                // Show message
+                // Ensure logs folder exists
+                File logDir = new File("logs");
+                if (!logDir.exists()) {
+                    logDir.mkdirs();
+                }
+
+                // Prepare unique file name
+                String fileName = name;
+                File file = new File(logDir, fileName + ".csv");
+                int counter = 1;
+                while (file.exists()) {
+                    fileName = name + "(" + counter + ")";
+                    file = new File(logDir, fileName + ".csv");
+                    counter++;
+                }
+
+                // Show message using original name
                 JOptionPane.showMessageDialog(this, "Log created for " + name + " on " + date);
 
-                // Open transaction frame
-                TransactionFrame transactionFrame = new TransactionFrame(name, date);
+                // Open transaction frame using actual unique file name
+                TransactionFrame transactionFrame = new TransactionFrame(fileName, date);
                 transactionFrame.setVisible(true);
 
                 this.dispose();
             }
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage());
             ex.printStackTrace();

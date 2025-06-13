@@ -277,7 +277,8 @@
                     }
 
                     // Add row to the table
-                    tableModel.addRow(new Object[]{filename, transactionNo, creationDate, modified});
+                    String displayName = filename.replace(".csv", "").replaceAll("\\(\\d+\\)$", "");
+                    tableModel.addRow(new Object[]{displayName, transactionNo, creationDate, modified});
                 }
             }
         }
@@ -312,24 +313,27 @@
                 }
 
             } else if (e.getSource() == exit) {
-                int selectedrow = logTable.getSelectedRow();
+                int selectedRow = logTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    String displayName = (String) tableModel.getValueAt(selectedRow, 0);
+                    File logsFolder = new File("logs");
 
-                if (selectedrow != -1) {
-                    String filename = (String) tableModel.getValueAt(selectedrow,0);
-                    int confrim = JOptionPane.showConfirmDialog(this,
-                            "Are you sure you want to delete " + filename + " ?",
-                            "Confirm Delete", JOptionPane.YES_NO_OPTION);
-                    if (confrim == JOptionPane.YES_OPTION) {
-                        File filetodelete = new File("logs/" + filename);
-                        if (filetodelete.exists() && filetodelete.delete()) {
-                            tableModel.removeRow(selectedrow);
-                            JOptionPane.showMessageDialog(this, "Log deleted successfully");
+                    File[] matches = logsFolder.listFiles((dir, name) ->
+                            name.startsWith(displayName) && name.endsWith(".csv"));
+
+                    if (matches != null && matches.length > 0) {
+                        File fileToDelete = matches[0]; // use the actual matching file
+                        if (fileToDelete.delete()) {
+                            tableModel.removeRow(selectedRow);
+                            JOptionPane.showMessageDialog(this, "Log file deleted successfully.");
                         } else {
-                            JOptionPane.showMessageDialog(this,"Failed to delete log file.");
+                            JOptionPane.showMessageDialog(this, "Failed to delete log file.");
                         }
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Log file not found.");
                     }
                 } else {
-                    JOptionPane.showMessageDialog(this, "Please select log file to delete");
+                    JOptionPane.showMessageDialog(this, "Please select a log to delete.");
                 }
             }
 
