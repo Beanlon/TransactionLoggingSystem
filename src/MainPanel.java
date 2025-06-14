@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import utils.Item;
@@ -16,6 +18,9 @@ public class MainPanel extends JPanel implements ActionListener {
     JButton createnew, load, delete;
     JTable logTable;
     DefaultTableModel tableModel;
+    private JLabel lblTotalSales;
+    private JLabel lblTotalTransactions;
+    private JLabel lblMostBought;
 
     public MainPanel() {
         setLayout(null);
@@ -25,10 +30,9 @@ public class MainPanel extends JPanel implements ActionListener {
         paneloverview.setBounds(10, 10, 765, 125);
         add(paneloverview);
 
-        paneloverview.add(createInfoPanel("Total Sales", "₱12,000.00"));
-        paneloverview.add(createInfoPanel("Total Transactions", "28"));
-        paneloverview.add(createInfoPanel("Most Bought Item", "Coffee"));
-
+        lblTotalSales = createInfoPanel("Total Sales", "₱0.00", paneloverview);
+        lblTotalTransactions = createInfoPanel("Total Transactions", "0", paneloverview);
+        lblMostBought = createInfoPanel("Most Bought Item", "-", paneloverview);
         // Button panel
         pnlbtn = new JPanel();
         pnlbtn.setBounds(10, 140, 480, 26);
@@ -106,11 +110,13 @@ public class MainPanel extends JPanel implements ActionListener {
         add(paneltable);
 
         loadSavedLogs();
+        updateOverviewStats();
     }
 
-    private JPanel createInfoPanel(String title, String value) {
+    private JLabel createInfoPanel(String title, String value, JPanel container) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
+
         JPanel line = new JPanel();
         line.setPreferredSize(new Dimension(5, 125));
         line.setBackground(new Color(201, 42, 42));
@@ -136,7 +142,8 @@ public class MainPanel extends JPanel implements ActionListener {
         content.add(lblValue);
 
         panel.add(content, BorderLayout.CENTER);
-        return panel;
+        container.add(panel);
+        return lblValue;
     }
 
     private void loadSavedLogs() {
@@ -215,6 +222,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 File fileToDelete = new File(filepath);
                 if (fileToDelete.exists() && fileToDelete.delete()) {
                     tableModel.removeRow(selectedRow);
+                    updateOverviewStats();
                     JOptionPane.showMessageDialog(this, "Log file deleted successfully.");
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to delete log file.");
@@ -237,5 +245,54 @@ public class MainPanel extends JPanel implements ActionListener {
             e.printStackTrace();
         }
         return "";
+    } private void updateOverviewStats() {
+        double totalSales = 0;
+        int totalTransactions = 0; // now counts log files
+        HashMap<String, Integer> itemCount = new HashMap<>();
+
+        File dir = new File("logs");
+        if (!dir.exists()) return;
+
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
+        if (files != null) {
+            totalTransactions = files.length; // ✅ counts number of logs
+
+            for (File file : files) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    int lineCounter = 0;
+                    while ((line = reader.readLine()) != null) {
+                        lineCounter++;
+                        if (lineCounter <= 3 || line.trim().isEmpty()) continue;
+
+                        String[] parts = line.split(",");
+                        if (parts.length >= 4) {
+                            String itemName = parts[0].trim();
+                            int quantity = Integer.parseInt(parts[2].trim());
+                            double price = Double.parseDouble(parts[3].trim());
+
+                            totalSales += price * quantity;
+                            itemCount.put(itemName, itemCount.getOrDefault(itemName, 0) + quantity);
+                        }
+                    }
+                } catch (IOException | NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        lblTotalSales.setText("₱" + String.format("%,.2f", totalSales));
+        lblTotalTransactions.setText(String.valueOf(totalTransactions)); // ✅ now shows number of CSV logs
+
+        String mostBought = "-";
+        int max = 0;
+        for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
+            if (entry.getValue() > max) {
+                mostBought = entry.getKey();
+                max = entry.getValue();
+            }
+        }
+        lblMostBought.setText(mostBought);
     }
+
 }

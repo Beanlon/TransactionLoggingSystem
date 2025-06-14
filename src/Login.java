@@ -118,8 +118,6 @@ public class Login extends JFrame implements ActionListener {
         });
 
 
-
-
         btnpanel = new JPanel();
         btnpanel.setLayout(new GridLayout(0,2,10,5));
         btnpanel.setBounds(33, 267, 326, 40); // Adjust position and size to center and fit buttons
