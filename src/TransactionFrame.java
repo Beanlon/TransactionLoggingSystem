@@ -278,10 +278,34 @@ public class TransactionFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please select a row to remove.");
                 return;
             }
+            // Get item name and quantity from selected row
+            String itemName = model.getValueAt(selectedRow, 0).toString();
+            int quantity = Integer.parseInt(model.getValueAt(selectedRow, 2).toString());
+
+// Restore quantity in inventoryMap
+            InventoryManager inv = inventoryMap.get(itemName);
+            if (inv != null) {
+                inv.addQuantity(quantity); // Make sure InventoryManager has this method
+            }
+
+// Restore quantity in comboItem (the JComboBox)
+            for (int i = 0; i < comboItem.getItemCount(); i++) {
+                Item item = comboItem.getItemAt(i);
+                if (item.getName().equals(itemName)) {
+                    item.addQuantity(quantity); // Make sure Item class has this method
+                    // Force the ComboBox to refresh the display
+                    ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(i);
+                    ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(item, i);
+                    break;
+                }
+            }
+
+// Remove row from table
             model.removeRow(selectedRow);
             clearInputs();
             saved = false;
             updateTotal();
+
         } else if (source == btnclear) {
             clearInputs();
         } else if (source == btnsave) {

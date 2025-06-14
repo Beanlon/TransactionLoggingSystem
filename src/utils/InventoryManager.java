@@ -67,7 +67,8 @@ public class InventoryManager {
         this.quantity -= amount;
     }
 
-    public void increaseQuantity(int amount) {
+    public void addQuantity(int amount) {
         this.quantity += amount;
     }
+
 }

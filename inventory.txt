@@ -1,4 +1,4 @@
-Super Crunch (Sweet Corn),35,28.00
+Super Crunch (Sweet Corn),34,28.00
 Pic-A,49,70.00
-Tang (Orange),50,12.00
+Tang (Orange),45,12.00
 Wilkins Pure,46,15.00

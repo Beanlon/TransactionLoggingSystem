@@ -16,6 +16,10 @@ public class Item {
         this.quantity -= amount;
     }
 
+    public void addQuantity(int amount) {
+        this.quantity += amount;
+    }
+
     public String getName() {
         return name;
     }
