@@ -2,35 +2,41 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
+import java.text.*;
+import java.util.*;
+import javax.swing.table.*;
 
 import utils.InventoryManager;
 import utils.Item;
 
 public class MainPanel extends JPanel implements ActionListener {
-    private InventorySystem inventorySystem;
-    JPanel pnlbtn;
-    JButton createnew, load, delete;
-    JTable logTable;
-    DefaultTableModel tableModel;
-    private JLabel lblTotalSales;
-    private JLabel lblTotalTransactions;
-    private JLabel lblMostBought;
 
+    // ========== Fields ==========
+    private InventorySystem inventorySystem;
+    private JPanel pnlbtn;
+    private JButton createnew, load, delete;
+    private JTable logTable;
+    private DefaultTableModel tableModel;
+    private JLabel lblTotalSales, lblTotalTransactions, lblMostBought;
+    private JComboBox<String> monthComboBox;
+    private final Map<String, String> fileToMonthYear = new HashMap<>();
+    private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM yyyy");
+
+    // ========== Constructor ==========
     public MainPanel() {
         setLayout(null);
-        
-        
+        setupOverviewPanel();
+        setupButtons();
+        setupFilterAndSearch();
+        setupTablePanel();
+        loadSavedLogs();
+        updateOverviewStats();
+    }
 
-        // Overview panels
+    // ========== UI Setup ==========
+    private void setupOverviewPanel() {
         JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0));
         paneloverview.setBounds(10, 10, 765, 125);
         add(paneloverview);
@@ -38,39 +44,38 @@ public class MainPanel extends JPanel implements ActionListener {
         lblTotalSales = createInfoPanel("Total Sales", "₱0.00", paneloverview);
         lblTotalTransactions = createInfoPanel("Total Transactions", "0", paneloverview);
         lblMostBought = createInfoPanel("Most Bought Item", "-", paneloverview);
-        // Button panel
-        pnlbtn = new JPanel();
+    }
+
+    private void setupButtons() {
+        pnlbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlbtn.setBounds(10, 140, 480, 26);
-        pnlbtn.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlbtn.setOpaque(false);
 
-        createnew = new JButton("ADD");
-        createnew.setPreferredSize(new Dimension(90, 26));
-        createnew.addActionListener(this);
+        createnew = createButton("ADD", pnlbtn);
+        load = createButton("LOAD", pnlbtn);
+        delete = createButton("DELETE", pnlbtn);
 
-        load = new JButton("LOAD");
-        load.setPreferredSize(new Dimension(90, 26));
-        load.addActionListener(this);
-
-        delete = new JButton("DELETE");
-        delete.setPreferredSize(new Dimension(90, 26));
-        delete.addActionListener(this);
-
-        pnlbtn.add(createnew);
-        pnlbtn.add(Box.createRigidArea(new Dimension(10, 0)));
-        pnlbtn.add(load);
-        pnlbtn.add(Box.createRigidArea(new Dimension(10, 0)));
-        pnlbtn.add(delete);
         add(pnlbtn);
+    }
 
-        // Search panel
-        JPanel Searchfilter = new JPanel();
-        Searchfilter.setBounds(495, 140, 280, 26);
-        Searchfilter.setLayout(new GridLayout(1, 2, 5, 0));
-        Searchfilter.setOpaque(false);
+    private JButton createButton(String text, JPanel container) {
+        JButton btn = new JButton(text);
+        btn.setPreferredSize(new Dimension(90, 26));
+        btn.addActionListener(this);
+        container.add(btn);
+        container.add(Box.createRigidArea(new Dimension(10, 0)));
+        return btn;
+    }
 
-        JComboBox<String> month = new JComboBox<>();
-        Searchfilter.add(month);
+    private void setupFilterAndSearch() {
+        JPanel filterPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        filterPanel.setBounds(495, 140, 280, 26);
+        filterPanel.setOpaque(false);
+
+        monthComboBox = new JComboBox<>();
+        monthComboBox.addItem("Overall");
+        monthComboBox.addActionListener(e -> filterTableByMonthYear((String) monthComboBox.getSelectedItem()));
+        filterPanel.add(monthComboBox);
 
         JTextField txtSearch = new JTextField("Search..");
         txtSearch.setForeground(Color.GRAY);
@@ -89,10 +94,11 @@ public class MainPanel extends JPanel implements ActionListener {
                 }
             }
         });
-        Searchfilter.add(txtSearch);
-        add(Searchfilter);
+        filterPanel.add(txtSearch);
+        add(filterPanel);
+    }
 
-        // Table
+    private void setupTablePanel() {
         String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified", "Full Filename" };
         tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int row, int column) {
@@ -102,22 +108,20 @@ public class MainPanel extends JPanel implements ActionListener {
 
         logTable = new JTable(tableModel);
         logTable.setRowHeight(25);
-        logTable.removeColumn(logTable.getColumnModel().getColumn(4)); // hide full filename
+        logTable.removeColumn(logTable.getColumnModel().getColumn(4)); // hide filename
 
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(JLabel.CENTER);
         for (int i = 0; i < 4; i++) logTable.getColumnModel().getColumn(i).setCellRenderer(center);
 
         JScrollPane scrollPane = new JScrollPane(logTable);
-        JPanel paneltable = new JPanel(new BorderLayout());
-        paneltable.setBounds(10, 175, 765, 375);
-        paneltable.add(scrollPane);
-        add(paneltable);
-
-        loadSavedLogs();
-        updateOverviewStats();
+        JPanel panelTable = new JPanel(new BorderLayout());
+        panelTable.setBounds(10, 175, 765, 375);
+        panelTable.add(scrollPane);
+        add(panelTable);
     }
 
+    // ========== Info Panel Builder ==========
     private JLabel createInfoPanel(String title, String value, JPanel container) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
@@ -148,79 +152,164 @@ public class MainPanel extends JPanel implements ActionListener {
 
         panel.add(content, BorderLayout.CENTER);
         container.add(panel);
+
         return lblValue;
     }
 
+    // ========== Log File Loading ==========
     private void loadSavedLogs() {
         File dir = new File("logs");
         if (!dir.exists()) dir.mkdirs();
 
         File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
-        if (files != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            for (File file : files) {
-                String filename = file.getName();
-                String filepath = file.getPath();
-                String modified = sdf.format(file.lastModified());
-                String transactionNo = "", creationDate = "";
+        if (files == null) return;
 
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    reader.readLine();
-                    String dateLine = reader.readLine();
-                    String transLine = reader.readLine();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-                    if (dateLine != null && dateLine.contains(",")) {
-                        String[] parts = dateLine.split(",");
-                        if (parts.length > 1) creationDate = parts[1].trim();
-                    }
+        for (File file : files) {
+            String filename = file.getName();
+            String filepath = file.getPath();
+            String modified = sdf.format(file.lastModified());
 
-                    if (transLine != null && transLine.contains(",")) {
-                        String[] parts = transLine.split(",");
-                        if (parts.length > 1) transactionNo = parts[1].trim();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+            String transactionNo = "", creationDate = "";
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                reader.readLine();
+                String dateLine = reader.readLine();
+                String transLine = reader.readLine();
+
+                if (dateLine != null && dateLine.contains(",")) {
+                    String[] parts = dateLine.split(",");
+                    if (parts.length > 1) creationDate = parts[1].trim();
                 }
-
-                try {
-                    Path path = file.toPath();
-                    BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-                    if (creationDate.isEmpty()) {
-                        FileTime creationTime = attr.creationTime();
-                        creationDate = sdf.format(creationTime.toMillis());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (transLine != null && transLine.contains(",")) {
+                    String[] parts = transLine.split(",");
+                    if (parts.length > 1) transactionNo = parts[1].trim();
                 }
-
-                tableModel.addRow(new Object[]{filename, transactionNo, creationDate, modified, filepath});
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            try {
+                Path path = file.toPath();
+                BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+                if (creationDate.isEmpty()) {
+                    creationDate = sdf.format(attr.creationTime().toMillis());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            String monthYear = monthYearFormat.format(file.lastModified());
+            fileToMonthYear.put(filepath, monthYear);
+            if (!comboBoxHasItem(monthYear)) monthComboBox.addItem(monthYear);
+
+            tableModel.addRow(new Object[]{filename, transactionNo, creationDate, modified, filepath});
         }
     }
 
-    @Override
+    private boolean comboBoxHasItem(String item) {
+        for (int i = 0; i < monthComboBox.getItemCount(); i++) {
+            if (monthComboBox.getItemAt(i).equals(item)) return true;
+        }
+        return false;
+    }
+
+    // ========== Filtering and Stats ==========
+    private void filterTableByMonthYear(String selected) {
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        logTable.setRowSorter(sorter);
+
+        if ("Overall".equals(selected)) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                    String filepath = (String) tableModel.getValueAt(entry.getIdentifier(), 4);
+                    return selected.equals(fileToMonthYear.get(filepath));
+                }
+            });
+        }
+
+        updateFilteredOverview(selected);
+    }
+
+    private void updateOverviewStats() {
+        updateFilteredOverview("Overall");
+    }
+
+    private void updateFilteredOverview(String selectedMonthYear) {
+        double totalSales = 0;
+        int totalTransactions = 0;
+        HashMap<String, Integer> itemCount = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : fileToMonthYear.entrySet()) {
+            String filepath = entry.getKey();
+            String monthYear = entry.getValue();
+
+            if (!selectedMonthYear.equals("Overall") && !monthYear.equals(selectedMonthYear)) continue;
+
+            File file = new File(filepath);
+            totalTransactions++;
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                int lineCounter = 0;
+                while ((line = reader.readLine()) != null) {
+                    lineCounter++;
+                    if (lineCounter <= 3 || line.trim().isEmpty()) continue;
+
+                    String[] parts = line.split(",");
+                    if (parts.length >= 4) {
+                        String item = parts[0].trim();
+                        int qty = Integer.parseInt(parts[2].trim());
+                        double price = Double.parseDouble(parts[3].trim());
+                        totalSales += qty * price;
+                        itemCount.put(item, itemCount.getOrDefault(item, 0) + qty);
+                    }
+                }
+            } catch (IOException | NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        lblTotalSales.setText("₱" + String.format("%,.2f", totalSales));
+        lblTotalTransactions.setText(String.valueOf(totalTransactions));
+
+        String mostBought = "-";
+        int maxQty = 0;
+        for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
+            if (entry.getValue() > maxQty) {
+                mostBought = entry.getKey();
+                maxQty = entry.getValue();
+            }
+        }
+        lblMostBought.setText(mostBought);
+    }
+
+    // ========== Action Handling ==========
     public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
 
-        if (e.getSource() == createnew) {
+        if (src == createnew) {
             new createLog();
             if (parentWindow != null) parentWindow.dispose();
 
-        } else if (e.getSource() == load) {
-            int selectedrow = logTable.getSelectedRow();
-            if (selectedrow != -1) {
-                int modelRow = logTable.convertRowIndexToModel(selectedrow);
+        } else if (src == load) {
+            int selected = logTable.getSelectedRow();
+            if (selected != -1) {
+                int modelRow = logTable.convertRowIndexToModel(selected);
                 String logname = ((String) tableModel.getValueAt(modelRow, 0)).replace(".csv", "");
                 String filepath = (String) tableModel.getValueAt(modelRow, 4);
-                String date = extractDateFromCSV(filepath); // ✅ Get the date from CSV
-
-                new TransactionFrame(logname, date, filepath).setVisible(true); // ✅ Fixed
+                String date = extractDateFromCSV(filepath);
+                new TransactionFrame(logname, date, filepath).setVisible(true);
                 if (parentWindow != null) parentWindow.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a log file to load.");
             }
 
-        } else if (e.getSource() == delete) {
+        } else if (src == delete) {
             int selectedRow = logTable.getSelectedRow();
             if (selectedRow >= 0) {
                 String filepath = (String) tableModel.getValueAt(selectedRow, 4);
@@ -230,18 +319,15 @@ public class MainPanel extends JPanel implements ActionListener {
                         "Are you sure you want to delete this log?\nInventory will be restocked.",
                         "Confirm Deletion", JOptionPane.YES_NO_OPTION);
 
-                if (confirm == JOptionPane.YES_OPTION) {
-                    if (fileToDelete.exists()) {
-                        restockFromDeletedLog(fileToDelete); // ✅ Restock inventory first
-                        inventorySystem.refreshInventory();
-
-                        if (fileToDelete.delete()) {
-                            tableModel.removeRow(selectedRow);
-                            updateOverviewStats();
-                            JOptionPane.showMessageDialog(this, "Log file deleted and inventory restocked.");
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Failed to delete log file.");
-                        }
+                if (confirm == JOptionPane.YES_OPTION && fileToDelete.exists()) {
+                    restockFromDeletedLog(fileToDelete);
+                    inventorySystem.refreshInventory();
+                    if (fileToDelete.delete()) {
+                        tableModel.removeRow(selectedRow);
+                        updateOverviewStats();
+                        JOptionPane.showMessageDialog(this, "Log deleted and inventory restocked.");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Failed to delete log.");
                     }
                 }
             } else {
@@ -250,6 +336,7 @@ public class MainPanel extends JPanel implements ActionListener {
         }
     }
 
+    // ========== Helper Methods ==========
     private String extractDateFromCSV(String filepath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             reader.readLine();
@@ -262,82 +349,32 @@ public class MainPanel extends JPanel implements ActionListener {
             e.printStackTrace();
         }
         return "";
+    }
 
-    } private void restockFromDeletedLog(File deletedFile) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(deletedFile))) {
+    private void restockFromDeletedLog(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            int lineCounter = 0;
+            int lineCount = 0;
 
             while ((line = reader.readLine()) != null) {
-                lineCounter++;
-                if (lineCounter <= 3 || line.trim().isEmpty()) continue;
+                lineCount++;
+                if (lineCount <= 3 || line.trim().isEmpty()) continue;
 
                 String[] parts = line.split(",");
                 if (parts.length >= 3) {
                     String itemName = parts[0].trim();
                     int quantity = Integer.parseInt(parts[2].trim());
-                    // Call InventoryManager to restock
-                    utils.InventoryManager.restockItem(itemName, quantity);
+                    InventoryManager.restockItem(itemName, quantity);
                 }
             }
-            // Save the updated inventory to file
             InventoryManager.saveInventory(InventoryManager.loadInventory());
-
         } catch (IOException | NumberFormatException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error restocking inventory from deleted log.");
+            JOptionPane.showMessageDialog(this, "Error restocking inventory.");
         }
-    } private void updateOverviewStats() {
-        double totalSales = 0;
-        int totalTransactions = 0; // now counts log files
-        HashMap<String, Integer> itemCount = new HashMap<>();
-
-        File dir = new File("logs");
-        if (!dir.exists()) return;
-
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
-        if (files != null) {
-            totalTransactions = files.length; // ✅ counts number of logs
-
-            for (File file : files) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                    String line;
-                    int lineCounter = 0;
-                    while ((line = reader.readLine()) != null) {
-                        lineCounter++;
-                        if (lineCounter <= 3 || line.trim().isEmpty()) continue;
-
-                        String[] parts = line.split(",");
-                        if (parts.length >= 4) {
-                            String itemName = parts[0].trim();
-                            int quantity = Integer.parseInt(parts[2].trim());
-                            double price = Double.parseDouble(parts[3].trim());
-
-                            totalSales += price * quantity;
-                            itemCount.put(itemName, itemCount.getOrDefault(itemName, 0) + quantity);
-                        }
-                    }
-                } catch (IOException | NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        lblTotalSales.setText("₱" + String.format("%,.2f", totalSales));
-        lblTotalTransactions.setText(String.valueOf(totalTransactions)); // ✅ now shows number of CSV logs
-
-        String mostBought = "-";
-        int max = 0;
-        for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
-            if (entry.getValue() > max) {
-                mostBought = entry.getKey();
-                max = entry.getValue();
-            }
-        }
-        lblMostBought.setText(mostBought);
     }
 
     public void setInventorySystem(InventorySystem inventoryPanel) {
-        this.inventorySystem = inventoryPanel; // ✅ Correct: assign parameter to the field
+        this.inventorySystem = inventoryPanel;
     }
 }
