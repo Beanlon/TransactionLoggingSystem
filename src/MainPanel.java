@@ -32,7 +32,8 @@ public class MainPanel extends JPanel implements ActionListener {
         setupFilterAndSearch();
         setupTablePanel();
         loadSavedLogs();
-        updateOverviewStats();
+        String selectedMonth = (String) monthComboBox.getSelectedItem();
+        updateFilteredOverview(selectedMonth);
     }
 
     // ========== UI Setup ==========
@@ -324,7 +325,8 @@ public class MainPanel extends JPanel implements ActionListener {
                     inventorySystem.refreshInventory();
                     if (fileToDelete.delete()) {
                         tableModel.removeRow(selectedRow);
-                        updateOverviewStats();
+                        fileToMonthYear.remove(filepath); // Also remove from month filter map
+                        updateFilteredOverview((String) monthComboBox.getSelectedItem());
                         JOptionPane.showMessageDialog(this, "Log deleted and inventory restocked.");
                     } else {
                         JOptionPane.showMessageDialog(this, "Failed to delete log.");
