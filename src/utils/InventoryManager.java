@@ -50,6 +50,21 @@ public class InventoryManager {
         }
     }
 
+    public static void restockItem(String itemName, int quantity) {
+        Map<String, InventoryManager> inventory = loadInventory();
+
+        InventoryManager item = inventory.get(itemName);
+        if (item != null) {
+            item.addQuantity(quantity); // existing item, add to quantity
+        } else {
+            // Optional: if item doesn't exist, create it with default price (e.g., 0.0)
+            System.out.println("Item '" + itemName + "' not found in inventory. Adding with default price.");
+            inventory.put(itemName, new InventoryManager(itemName, quantity, 0.0));
+        }
+
+        saveInventory(inventory); // Save back to file
+    }
+
     // Getters and Setters
     public String getName() {
         return name;

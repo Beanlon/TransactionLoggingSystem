@@ -40,8 +40,11 @@ public class Menu extends JFrame {
         add(rightpanel, BorderLayout.CENTER);
 
         // Add panels to rightpanel
-        JPanel mainPanel = new MainPanel();
-        JPanel inventoryPanel = new InventorySystem();  // Make sure this class exists
+        InventorySystem inventoryPanel = new InventorySystem();
+        MainPanel mainPanel = new MainPanel();
+
+// 👇 This is the important line you're asking about!
+        mainPanel.setInventorySystem(inventoryPanel);
         rightpanel.add(mainPanel, "MAIN");
         rightpanel.add(inventoryPanel, "INVENTORY");
         cardLayout.show(rightpanel, "MAIN");  // Show initial panel

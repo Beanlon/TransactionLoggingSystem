@@ -11,9 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
+import utils.InventoryManager;
 import utils.Item;
 
 public class MainPanel extends JPanel implements ActionListener {
+    private InventorySystem inventorySystem;
     JPanel pnlbtn;
     JButton createnew, load, delete;
     JTable logTable;
@@ -24,6 +27,8 @@ public class MainPanel extends JPanel implements ActionListener {
 
     public MainPanel() {
         setLayout(null);
+        
+        
 
         // Overview panels
         JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0));
@@ -220,12 +225,24 @@ public class MainPanel extends JPanel implements ActionListener {
             if (selectedRow >= 0) {
                 String filepath = (String) tableModel.getValueAt(selectedRow, 4);
                 File fileToDelete = new File(filepath);
-                if (fileToDelete.exists() && fileToDelete.delete()) {
-                    tableModel.removeRow(selectedRow);
-                    updateOverviewStats();
-                    JOptionPane.showMessageDialog(this, "Log file deleted successfully.");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to delete log file.");
+
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to delete this log?\nInventory will be restocked.",
+                        "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    if (fileToDelete.exists()) {
+                        restockFromDeletedLog(fileToDelete); // ✅ Restock inventory first
+                        inventorySystem.refreshInventory();
+
+                        if (fileToDelete.delete()) {
+                            tableModel.removeRow(selectedRow);
+                            updateOverviewStats();
+                            JOptionPane.showMessageDialog(this, "Log file deleted and inventory restocked.");
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Failed to delete log file.");
+                        }
+                    }
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a log to delete.");
@@ -245,6 +262,31 @@ public class MainPanel extends JPanel implements ActionListener {
             e.printStackTrace();
         }
         return "";
+
+    } private void restockFromDeletedLog(File deletedFile) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(deletedFile))) {
+            String line;
+            int lineCounter = 0;
+
+            while ((line = reader.readLine()) != null) {
+                lineCounter++;
+                if (lineCounter <= 3 || line.trim().isEmpty()) continue;
+
+                String[] parts = line.split(",");
+                if (parts.length >= 3) {
+                    String itemName = parts[0].trim();
+                    int quantity = Integer.parseInt(parts[2].trim());
+                    // Call InventoryManager to restock
+                    utils.InventoryManager.restockItem(itemName, quantity);
+                }
+            }
+            // Save the updated inventory to file
+            InventoryManager.saveInventory(InventoryManager.loadInventory());
+
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error restocking inventory from deleted log.");
+        }
     } private void updateOverviewStats() {
         double totalSales = 0;
         int totalTransactions = 0; // now counts log files
@@ -295,4 +337,7 @@ public class MainPanel extends JPanel implements ActionListener {
         lblMostBought.setText(mostBought);
     }
 
+    public void setInventorySystem(InventorySystem inventoryPanel) {
+        this.inventorySystem = inventoryPanel; // ✅ Correct: assign parameter to the field
+    }
 }

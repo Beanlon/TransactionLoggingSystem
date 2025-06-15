@@ -15,6 +15,7 @@ public class InventorySystem extends JPanel {
     public InventorySystem() {
         setLayout(new BorderLayout());
 
+
         // Panel for input fields
         JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -178,6 +179,10 @@ public class InventorySystem extends JPanel {
                     String.format("%.2f", item.getPrice())
             });
         }
+    }
+
+    public void refreshInventory() {
+        loadFromFile(); // just reloads inventory from the file into the table
     }
 
     public static void main(String[] args) {
