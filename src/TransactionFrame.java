@@ -1,8 +1,11 @@
-// Full updated TransactionFrame.java with total panel support
+// Full updated TransactionFrame.java with total panel support and search functionality
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -25,6 +28,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
     public JButton btnadd, btnedit, btnremove, btnclear, btnsave, btnBack;
     private boolean saved = true;
     private Map<String, InventoryManager> inventoryMap;
+    private TableRowSorter<DefaultTableModel> sorter; // Added for searching
 
     public TransactionFrame(String name, String date) {
         this(name, date, null);
@@ -183,6 +187,26 @@ public class TransactionFrame extends JFrame implements ActionListener {
                 }
             }
         });
+
+        // Add DocumentListener to txtSearch for live filtering
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                searchTable(txtSearch.getText());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                searchTable(txtSearch.getText());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                searchTable(txtSearch.getText());
+            }
+        });
+
+
         panelsearch.add(Box.createHorizontalGlue());
         panelsearch.add(txtSearch);
 
@@ -192,6 +216,9 @@ public class TransactionFrame extends JFrame implements ActionListener {
         String[] columnNames = {"ITEM", "PRICE", "QUANTITY", "SUBTOTAL"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
+        sorter = new TableRowSorter<>(model); // Initialize sorter
+        table.setRowSorter(sorter); // Set sorter on the table
+
         JScrollPane scrollPane = new JScrollPane(table);
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
@@ -236,6 +263,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     private void updateTotal() {
         double total = 0.0;
+        // Iterate through the actual rows in the table model, not the visible rows if filtered
         for (int i = 0; i < model.getRowCount(); i++) {
             Object value = model.getValueAt(i, 3);
             try {
@@ -243,6 +271,22 @@ public class TransactionFrame extends JFrame implements ActionListener {
             } catch (NumberFormatException ignored) {}
         }
         lblTotalValue.setText("\u20B1" + String.format("%.2f", total));
+    }
+
+    // New method for searching the table
+    private void searchTable(String query) {
+        if (query.equals("Search..") || query.isEmpty()) { // Reset filter if default text or empty
+            sorter.setRowFilter(null);
+        } else {
+            try {
+                // Apply a regular expression filter to the first column (ITEM)
+                // Pattern.CASE_INSENSITIVE makes the search case-insensitive
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query, 0));
+            } catch (java.util.regex.PatternSyntaxException e) {
+                // Handle potential regex errors (e.g., if the user types an invalid regex)
+                sorter.setRowFilter(null);
+            }
+        }
     }
 
     @Override
@@ -256,12 +300,34 @@ public class TransactionFrame extends JFrame implements ActionListener {
                 return;
             }
             int quantityInt = Integer.parseInt(quantity);
+            if (quantityInt <= 0) {
+                JOptionPane.showMessageDialog(this, "Quantity must be greater than 0.");
+                return;
+            }
             if (quantityInt > selectedItem.getQuantity()) {
                 JOptionPane.showMessageDialog(this, "Not enough stock. Available: " + selectedItem.getQuantity());
                 return;
             }
             double subtotal = selectedItem.getPrice() * quantityInt;
-            model.addRow(new Object[]{selectedItem.getName(), selectedItem.getPrice(), quantityInt, subtotal});
+
+            // Check if item already exists in the table to update quantity and subtotal
+            boolean itemFound = false;
+            for (int i = 0; i < model.getRowCount(); i++) {
+                if (model.getValueAt(i, 0).equals(selectedItem.getName())) {
+                    int currentQuantity = (int) model.getValueAt(i, 2);
+                    double currentSubtotal = (double) model.getValueAt(i, 3);
+
+                    model.setValueAt(currentQuantity + quantityInt, i, 2); // Update quantity
+                    model.setValueAt(currentSubtotal + subtotal, i, 3);    // Update subtotal
+                    itemFound = true;
+                    break;
+                }
+            }
+
+            if (!itemFound) {
+                model.addRow(new Object[]{selectedItem.getName(), selectedItem.getPrice(), quantityInt, subtotal});
+            }
+
             selectedItem.reduceQuantity(quantityInt);
             InventoryManager inv = inventoryMap.get(selectedItem.getName());
             if (inv != null) inv.reduceQuantity(quantityInt);
@@ -273,26 +339,29 @@ public class TransactionFrame extends JFrame implements ActionListener {
             saved = false;
             updateTotal();
         } else if (source == btnremove) {
-            int selectedRow = table.getSelectedRow();
-            if (selectedRow == -1) {
+            int selectedRowView = table.getSelectedRow();
+            if (selectedRowView == -1) {
                 JOptionPane.showMessageDialog(this, "Please select a row to remove.");
                 return;
             }
-            // Get item name and quantity from selected row
-            String itemName = model.getValueAt(selectedRow, 0).toString();
-            int quantity = Integer.parseInt(model.getValueAt(selectedRow, 2).toString());
+            // Convert view row index to model row index, important if table is filtered/sorted
+            int selectedModelRow = table.convertRowIndexToModel(selectedRowView);
 
-// Restore quantity in inventoryMap
+            // Get item name and quantity from selected row (from the model, not view)
+            String itemName = model.getValueAt(selectedModelRow, 0).toString();
+            int quantity = Integer.parseInt(model.getValueAt(selectedModelRow, 2).toString());
+
+            // Restore quantity in inventoryMap
             InventoryManager inv = inventoryMap.get(itemName);
             if (inv != null) {
-                inv.addQuantity(quantity); // Make sure InventoryManager has this method
+                inv.addQuantity(quantity);
             }
 
-// Restore quantity in comboItem (the JComboBox)
+            // Restore quantity in comboItem (the JComboBox)
             for (int i = 0; i < comboItem.getItemCount(); i++) {
                 Item item = comboItem.getItemAt(i);
                 if (item.getName().equals(itemName)) {
-                    item.addQuantity(quantity); // Make sure Item class has this method
+                    item.addQuantity(quantity);
                     // Force the ComboBox to refresh the display
                     ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(i);
                     ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(item, i);
@@ -300,8 +369,8 @@ public class TransactionFrame extends JFrame implements ActionListener {
                 }
             }
 
-// Remove row from table
-            model.removeRow(selectedRow);
+            // Remove row from table model
+            model.removeRow(selectedModelRow);
             clearInputs();
             saved = false;
             updateTotal();
@@ -318,7 +387,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
             }
         } else if (source == btnBack) {
             if (this.saved) {
-                new Menu();
+                new Menu(); // Assuming Menu is another JFrame or class you want to go back to
                 dispose();
             } else {
                 int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
@@ -340,7 +409,9 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     private void clearInputs() {
         txtQuantity.setText("");
-        comboItem.setSelectedIndex(0);
+        if (comboItem.getItemCount() > 0) {
+            comboItem.setSelectedIndex(0);
+        }
     }
 
     public void saveToFile() throws IOException {
@@ -363,7 +434,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
             setNameAndDate(data.name, data.date);
             transactionNumber = data.transactionNumber;
             line2.setText(transactionNumber);
-            model.setRowCount(0);
+            model.setRowCount(0); // Clear existing rows
             for (String[] row : data.rows) {
                 if (row.length == model.getColumnCount()) {
                     model.addRow(row);
