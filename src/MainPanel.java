@@ -6,6 +6,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.*;
 import java.text.*;
 import java.util.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
 
 import utils.InventoryManager;
@@ -13,7 +15,7 @@ import utils.Item;
 
 public class MainPanel extends JPanel implements ActionListener {
 
-    // ========== Fields ==========
+    private JTextField txtSearch;
     private InventorySystem inventorySystem;
     private JPanel pnlbtn;
     private JButton createnew, load, delete;
@@ -24,7 +26,6 @@ public class MainPanel extends JPanel implements ActionListener {
     private final Map<String, String> fileToMonthYear = new HashMap<>();
     private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM yyyy");
 
-    // ========== Constructor ==========
     public MainPanel() {
         setLayout(null);
         setupOverviewPanel();
@@ -36,7 +37,6 @@ public class MainPanel extends JPanel implements ActionListener {
         updateFilteredOverview(selectedMonth);
     }
 
-    // ========== UI Setup ==========
     private void setupOverviewPanel() {
         JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0));
         paneloverview.setBounds(10, 10, 765, 125);
@@ -78,8 +78,21 @@ public class MainPanel extends JPanel implements ActionListener {
         monthComboBox.addActionListener(e -> filterTableByMonthYear((String) monthComboBox.getSelectedItem()));
         filterPanel.add(monthComboBox);
 
-        JTextField txtSearch = new JTextField("Search..");
+        txtSearch = new JTextField("Search..");
         txtSearch.setForeground(Color.GRAY);
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                filterTable();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                filterTable();
+            }
+        });
         txtSearch.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
                 if (txtSearch.getText().equals("Search..")) {
@@ -96,6 +109,7 @@ public class MainPanel extends JPanel implements ActionListener {
             }
         });
         filterPanel.add(txtSearch);
+
         add(filterPanel);
     }
 
@@ -109,7 +123,9 @@ public class MainPanel extends JPanel implements ActionListener {
 
         logTable = new JTable(tableModel);
         logTable.setRowHeight(25);
-        logTable.removeColumn(logTable.getColumnModel().getColumn(4)); // hide filename
+        logTable.setAutoCreateRowSorter(true); // Enable built-in sorting
+
+        logTable.removeColumn(logTable.getColumnModel().getColumn(4)); // hide full filename column
 
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(JLabel.CENTER);
@@ -122,7 +138,6 @@ public class MainPanel extends JPanel implements ActionListener {
         add(panelTable);
     }
 
-    // ========== Info Panel Builder ==========
     private JLabel createInfoPanel(String title, String value, JPanel container) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
@@ -157,7 +172,6 @@ public class MainPanel extends JPanel implements ActionListener {
         return lblValue;
     }
 
-    // ========== Log File Loading ==========
     private void loadSavedLogs() {
         File dir = new File("logs");
         if (!dir.exists()) dir.mkdirs();
@@ -215,8 +229,27 @@ public class MainPanel extends JPanel implements ActionListener {
         }
         return false;
     }
+    private void filterTable() {
+        String query = txtSearch.getText().trim().toLowerCase();
 
-    // ========== Filtering and Stats ==========
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        logTable.setRowSorter(sorter);
+
+        if (query.isEmpty() || query.equals("search..")) {
+            sorter.setRowFilter(null);  // Show all
+        } else {
+            sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                    for (int i = 0; i <= 2; i++) { // columns: Log Name, Transaction No., Date Created
+                        String value = entry.getStringValue(i).toLowerCase();
+                        if (value.contains(query)) return true;
+                    }
+                    return false;
+                }
+            });
+        }
+    }
+
     private void filterTableByMonthYear(String selected) {
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         logTable.setRowSorter(sorter);
@@ -233,10 +266,6 @@ public class MainPanel extends JPanel implements ActionListener {
         }
 
         updateFilteredOverview(selected);
-    }
-
-    private void updateOverviewStats() {
-        updateFilteredOverview("Overall");
     }
 
     private void updateFilteredOverview(String selectedMonthYear) {
@@ -288,7 +317,6 @@ public class MainPanel extends JPanel implements ActionListener {
         lblMostBought.setText(mostBought);
     }
 
-    // ========== Action Handling ==========
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
@@ -325,7 +353,7 @@ public class MainPanel extends JPanel implements ActionListener {
                     inventorySystem.refreshInventory();
                     if (fileToDelete.delete()) {
                         tableModel.removeRow(selectedRow);
-                        fileToMonthYear.remove(filepath); // Also remove from month filter map
+                        fileToMonthYear.remove(filepath);
                         updateFilteredOverview((String) monthComboBox.getSelectedItem());
                         JOptionPane.showMessageDialog(this, "Log deleted and inventory restocked.");
                     } else {
@@ -338,7 +366,6 @@ public class MainPanel extends JPanel implements ActionListener {
         }
     }
 
-    // ========== Helper Methods ==========
     private String extractDateFromCSV(String filepath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             reader.readLine();
