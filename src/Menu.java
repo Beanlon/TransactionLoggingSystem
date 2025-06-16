@@ -1,4 +1,5 @@
 import javax.swing.*;
+
 import java.awt.*;
 
 public class Menu extends JFrame {
@@ -8,7 +9,7 @@ public class Menu extends JFrame {
 
     public Menu() {
         setTitle("Transaction Logging System");
-        setSize(1000, 600);
+        setSize(1000, 630);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -18,20 +19,20 @@ public class Menu extends JFrame {
         JPanel dashboard = new JPanel();
         dashboard.setLayout(new BoxLayout(dashboard, BoxLayout.Y_AXIS));
         dashboard.setBackground(new Color(201, 42, 42));
-        dashboard.setPreferredSize(new Dimension(200, 0));
+        dashboard.setPreferredSize(new Dimension(105, 0));
         add(dashboard, BorderLayout.WEST);
 
         JButton btnmain = new JButton("MAIN");
         btnmain.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnmain.setMaximumSize(new Dimension(160, 40));
+        btnmain.setMaximumSize(new Dimension(105, 40));
 
         JButton btnInventory = new JButton("INVENTORY");
         btnInventory.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnInventory.setMaximumSize(new Dimension(160, 40));
+        btnInventory.setMaximumSize(new Dimension(105, 40));
 
-        dashboard.add(Box.createVerticalStrut(100));
+        dashboard.add(Box.createVerticalStrut(130));
         dashboard.add(btnmain);
-        dashboard.add(Box.createVerticalStrut(10));
+        dashboard.add(Box.createVerticalStrut(-5));
         dashboard.add(btnInventory);
 
         // Right side with CardLayout

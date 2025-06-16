@@ -9,9 +9,8 @@ import java.util.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
-
 import utils.InventoryManager;
-import utils.Item;
+
 
 public class MainPanel extends JPanel implements ActionListener {
 
@@ -24,10 +23,12 @@ public class MainPanel extends JPanel implements ActionListener {
     private JLabel lblTotalSales, lblTotalTransactions, lblMostBought;
     private JComboBox<String> monthComboBox;
     private final Map<String, String> fileToMonthYear = new HashMap<>();
-    private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM yyyy");
+    private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMMyyyy"); // Corrected to use 'yyyy' for year
 
     public MainPanel() {
         setLayout(null);
+        setPreferredSize(new Dimension(785, 630));
+
         setupOverviewPanel();
         setupButtons();
         setupFilterAndSearch();
@@ -38,13 +39,34 @@ public class MainPanel extends JPanel implements ActionListener {
     }
 
     private void setupOverviewPanel() {
-        JPanel paneloverview = new JPanel(new GridLayout(1, 3, 10, 0));
-        paneloverview.setBounds(10, 10, 765, 125);
-        add(paneloverview);
+        int panelOverviewX = 20;
+        int panelOverviewY = 20;
+        int panelOverviewWidth = 765;
+        int panelOverviewHeight = 125;
+        int gap = 17    ;
+        int infoPanelWidth = (panelOverviewWidth - (2 * gap)) / 3;
 
-        lblTotalSales = createInfoPanel("Total Sales", "₱0.00", paneloverview);
-        lblTotalTransactions = createInfoPanel("Total Transactions", "0", paneloverview);
-        lblMostBought = createInfoPanel("Most Bought Item", "-", paneloverview);
+        int cornerRadius = 25;
+
+        RoundedPanel salesPanelContainer = new RoundedPanel(cornerRadius);
+        RoundedPanel transactionsPanelContainer = new RoundedPanel(cornerRadius);
+        RoundedPanel mostBoughtPanelContainer = new RoundedPanel(cornerRadius);
+
+        salesPanelContainer.setBounds(panelOverviewX, panelOverviewY, infoPanelWidth, panelOverviewHeight);
+        transactionsPanelContainer.setBounds(panelOverviewX + infoPanelWidth + gap, panelOverviewY, infoPanelWidth, panelOverviewHeight);
+        mostBoughtPanelContainer.setBounds(panelOverviewX + (infoPanelWidth + gap) * 2, panelOverviewY, infoPanelWidth, panelOverviewHeight);
+
+        salesPanelContainer.setBackground(Color.WHITE);
+        transactionsPanelContainer.setBackground(Color.WHITE);
+        mostBoughtPanelContainer.setBackground(Color.WHITE);
+
+        add(salesPanelContainer);
+        add(transactionsPanelContainer);
+        add(mostBoughtPanelContainer);
+
+        lblTotalSales = createInfoPanel("Total Sales", "₱0.00", salesPanelContainer);
+        lblTotalTransactions = createInfoPanel("Total Transactions", "0", transactionsPanelContainer);
+        lblMostBought = createInfoPanel("Most Bought Item", "-", mostBoughtPanelContainer);
     }
 
     private void setupButtons() {
@@ -123,34 +145,45 @@ public class MainPanel extends JPanel implements ActionListener {
 
         logTable = new JTable(tableModel);
         logTable.setRowHeight(25);
-        logTable.setAutoCreateRowSorter(true); // Enable built-in sorting
+        logTable.setAutoCreateRowSorter(true);
 
-        logTable.removeColumn(logTable.getColumnModel().getColumn(4)); // hide full filename column
+        if (logTable.getColumnModel().getColumnCount() > 4) {
+            logTable.removeColumn(logTable.getColumnModel().getColumn(4));
+        }
 
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < 4; i++) logTable.getColumnModel().getColumn(i).setCellRenderer(center);
+        for (int i = 0; i < 4; i++) {
+            if (logTable.getColumnModel().getColumnCount() > i) {
+                logTable.getColumnModel().getColumn(i).setCellRenderer(center);
+            }
+        }
 
         JScrollPane scrollPane = new JScrollPane(logTable);
         JPanel panelTable = new JPanel(new BorderLayout());
         panelTable.setBounds(10, 175, 765, 375);
-        panelTable.add(scrollPane);
+        panelTable.add(scrollPane, BorderLayout.CENTER);
         add(panelTable);
     }
 
     private JLabel createInfoPanel(String title, String value, JPanel container) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+        container.setLayout(null); // Ensure the container uses null layout
+
+        int containerHeight = container.getHeight();
+        int lineHeight = 100;
+        int y = (containerHeight - lineHeight) / 2;
 
         JPanel line = new JPanel();
-        line.setPreferredSize(new Dimension(5, 125));
         line.setBackground(new Color(201, 42, 42));
-        panel.add(line, BorderLayout.WEST);
+        line.setBounds(0, y, 5, lineHeight); // Vertically centered
+        container.add(line);
 
+        // 2. Create the content panel for labels
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBackground(Color.WHITE);
-        content.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10));
+        // content.setBorder(BorderFactory.createEmptyBorder(20, 10, 10, 10)); // Remove fixed border for flexible centering
+        content.setOpaque(false);
 
         JLabel lblTitle = new JLabel(title);
         lblTitle.setFont(new Font("SansSerif", Font.BOLD, 23));
@@ -166,8 +199,17 @@ public class MainPanel extends JPanel implements ActionListener {
         content.add(Box.createVerticalStrut(10));
         content.add(lblValue);
 
-        panel.add(content, BorderLayout.CENTER);
-        container.add(panel);
+        // Calculate preferred height of the content to center it
+        content.setPreferredSize(content.getPreferredSize()); // Ensure preferred size is calculated
+        int contentWidth = container.getWidth() - 5; // Remaining width after the line
+        int contentHeight = content.getPreferredSize().height; // Get the height the content would naturally take
+
+        // Calculate the Y position to center it
+        int yPos = (container.getHeight() - contentHeight) / 2;
+        if (yPos < 0) yPos = 0; // Ensure it doesn't go off the top if content is too tall
+
+        content.setBounds(5, yPos, contentWidth, contentHeight);
+        container.add(content);
 
         return lblValue;
     }
@@ -215,7 +257,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 e.printStackTrace();
             }
 
-            String monthYear = monthYearFormat.format(file.lastModified());
+            String monthYear = monthYearFormat.format(new Date(file.lastModified()));
             fileToMonthYear.put(filepath, monthYear);
             if (!comboBoxHasItem(monthYear)) monthComboBox.addItem(monthYear);
 
@@ -229,6 +271,7 @@ public class MainPanel extends JPanel implements ActionListener {
         }
         return false;
     }
+
     private void filterTable() {
         String query = txtSearch.getText().trim().toLowerCase();
 
@@ -236,11 +279,11 @@ public class MainPanel extends JPanel implements ActionListener {
         logTable.setRowSorter(sorter);
 
         if (query.isEmpty() || query.equals("search..")) {
-            sorter.setRowFilter(null);  // Show all
+            sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
                 public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
-                    for (int i = 0; i <= 2; i++) { // columns: Log Name, Transaction No., Date Created
+                    for (int i = 0; i <= 2; i++) {
                         String value = entry.getStringValue(i).toLowerCase();
                         if (value.contains(query)) return true;
                     }
@@ -280,7 +323,11 @@ public class MainPanel extends JPanel implements ActionListener {
             if (!selectedMonthYear.equals("Overall") && !monthYear.equals(selectedMonthYear)) continue;
 
             File file = new File(filepath);
-            totalTransactions++;
+            if (file.exists() && file.isFile()) {
+                totalTransactions++;
+            } else {
+                continue;
+            }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
@@ -292,14 +339,22 @@ public class MainPanel extends JPanel implements ActionListener {
                     String[] parts = line.split(",");
                     if (parts.length >= 4) {
                         String item = parts[0].trim();
-                        int qty = Integer.parseInt(parts[2].trim());
-                        double price = Double.parseDouble(parts[3].trim());
-                        totalSales += qty * price;
+                        int qty = 0;
+                        double price = 0.0;
+                        try {
+                            qty = Integer.parseInt(parts[2].trim());
+                            price = Double.parseDouble(parts[3].trim());
+                        } catch (NumberFormatException e) {
+                            System.err.println("Skipping malformed data in CSV for quantity or price in file " + file.getName() + ": " + line);
+                            continue;
+                        }
+
+                        totalSales += (double) qty * price;
                         itemCount.put(item, itemCount.getOrDefault(item, 0) + qty);
                     }
                 }
-            } catch (IOException | NumberFormatException e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                System.err.println("Error reading log file " + file.getName() + ": " + e.getMessage());
             }
         }
 
@@ -308,10 +363,12 @@ public class MainPanel extends JPanel implements ActionListener {
 
         String mostBought = "-";
         int maxQty = 0;
-        for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
-            if (entry.getValue() > maxQty) {
-                mostBought = entry.getKey();
-                maxQty = entry.getValue();
+        if (!itemCount.isEmpty()) {
+            for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
+                if (entry.getValue() > maxQty) {
+                    mostBought = entry.getKey();
+                    maxQty = entry.getValue();
+                }
             }
         }
         lblMostBought.setText(mostBought);
@@ -339,9 +396,10 @@ public class MainPanel extends JPanel implements ActionListener {
             }
 
         } else if (src == delete) {
-            int selectedRow = logTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                String filepath = (String) tableModel.getValueAt(selectedRow, 4);
+            int selectedRowView = logTable.getSelectedRow();
+            if (selectedRowView >= 0) {
+                int selectedRowModel = logTable.convertRowIndexToModel(selectedRowView);
+                String filepath = (String) tableModel.getValueAt(selectedRowModel, 4);
                 File fileToDelete = new File(filepath);
 
                 int confirm = JOptionPane.showConfirmDialog(this,
@@ -350,9 +408,11 @@ public class MainPanel extends JPanel implements ActionListener {
 
                 if (confirm == JOptionPane.YES_OPTION && fileToDelete.exists()) {
                     restockFromDeletedLog(fileToDelete);
-                    inventorySystem.refreshInventory();
+                    if (inventorySystem != null) {
+                        inventorySystem.refreshInventory();
+                    }
                     if (fileToDelete.delete()) {
-                        tableModel.removeRow(selectedRow);
+                        tableModel.removeRow(selectedRowModel);
                         fileToMonthYear.remove(filepath);
                         updateFilteredOverview((String) monthComboBox.getSelectedItem());
                         JOptionPane.showMessageDialog(this, "Log deleted and inventory restocked.");
@@ -399,7 +459,7 @@ public class MainPanel extends JPanel implements ActionListener {
             InventoryManager.saveInventory(InventoryManager.loadInventory());
         } catch (IOException | NumberFormatException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error restocking inventory.");
+            JOptionPane.showMessageDialog(this, "Error restocking inventory: " + e.getMessage());
         }
     }
 
