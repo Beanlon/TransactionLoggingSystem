@@ -45,7 +45,7 @@ public class SupplyPurchasePanel implements ActionListener {
     public SupplyPurchasePanel() {
         myFrame = new JFrame("Supply and Purchase Management");
         myFrame.setLayout(null);
-        myFrame.setSize(1000, 600);
+        myFrame.setSize(1000, 620);
         myFrame.setLocationRelativeTo(null);
         myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myFrame.setResizable(false);
@@ -60,7 +60,7 @@ public class SupplyPurchasePanel implements ActionListener {
         // --- Supplier Information Panel (panelInfo) ---
         panelSupplierInfo = new RoundedPanel(25);
         panelSupplierInfo.setLayout(null);
-        panelSupplierInfo.setBounds(40, 60, 400, 180);
+        panelSupplierInfo.setBounds(40, 60, 380, 180);
         panelSupplierInfo.setBackground(Color.WHITE);
 
         JLabel subheaderSupplier = new JLabel("Supplier Information");
@@ -97,7 +97,7 @@ public class SupplyPurchasePanel implements ActionListener {
         // --- Selected Item Information Panel (panelInfo2) ---
         panelSelectedItemInfo = new RoundedPanel(25);
         panelSelectedItemInfo.setLayout(null);
-        panelSelectedItemInfo.setBounds(40, 250, 400, 250); // Positioned below supplier info
+        panelSelectedItemInfo.setBounds(40, 260, 380, 250); // Positioned below supplier info
         panelSelectedItemInfo.setBackground(Color.WHITE);
 
         JLabel subheaderSelectedItem = new JLabel("Selected Item Details");
@@ -106,49 +106,63 @@ public class SupplyPurchasePanel implements ActionListener {
         subheaderSelectedItem.setForeground(new Color(10, 10, 10, 255));
         panelSelectedItemInfo.add(subheaderSelectedItem);
 
+        JPanel panelselecteddetails = new JPanel(new GridBagLayout());
+        panelselecteddetails.setBounds(20,50,340,180);
+        panelselecteddetails.setOpaque(false);
+        panelSelectedItemInfo.add(panelselecteddetails);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 5, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+
         lblSelectedItem = new JLabel("Selected Item:");
         txtSelectedItem = new JTextField();
         txtSelectedItem.setEditable(false); // Display only
 
+        gbc.gridx = 0; gbc.gridy = 0;
+        panelselecteddetails.add(lblSelectedItem, gbc);
+        gbc.gridx = 1;
+        panelselecteddetails.add(txtSelectedItem, gbc);
+
         lblQuantity = new JLabel("Quantity:");
         txtQuantity = new JTextField();
-        txtQuantity = new JTextField();
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        panelselecteddetails.add(lblQuantity, gbc);
+        gbc.gridx = 1; gbc.gridy = 1;
+        panelselecteddetails.add(txtQuantity, gbc);
 
         lblCost = new JLabel("Cost (per item):");
         txtCost = new JTextField();
+
+        gbc.gridx = 0; gbc.gridy = 2;
+        panelselecteddetails.add(lblCost, gbc);
+        gbc.gridx = 1; gbc.gridy = 2;
+        panelselecteddetails.add(txtCost, gbc);
 
         lblProfitIncrease = new JLabel("Profit Increase:");
         String[] profitOptions = {"10%", "20%", "30%", "40%", "50%"};
         cboProfitIncrease = new JComboBox<>(profitOptions);
 
+        gbc.gridx = 0; gbc.gridy = 3;
+        panelselecteddetails.add(lblProfitIncrease, gbc);
+        gbc.gridx = 1; gbc.gridy = 3;
+        panelselecteddetails.add(cboProfitIncrease, gbc);
+
         lblDateSupplied = new JLabel("Date Supplied:");
         txtDateSupplied = new JTextField();
         txtDateSupplied.setEditable(false); // Displays real-time date
 
-        lblSelectedItem.setBounds(20, 50, 120, 25);
-        txtSelectedItem.setBounds(150, 50, 200, 25);
-        lblQuantity.setBounds(20, 85, 120, 25);
-        txtQuantity.setBounds(150, 85, 200, 25);
+        gbc.gridx = 0; gbc.gridy = 4;
+        panelselecteddetails.add(lblDateSupplied, gbc);
+        gbc.gridx = 1; gbc.gridy = 4;
+        panelselecteddetails.add(txtDateSupplied, gbc);
 
-        lblCost.setBounds(20, 120, 120, 25);
-        txtCost.setBounds(150, 130, 200, 25);
-        lblProfitIncrease.setBounds(20, 155, 120, 25);
-        cboProfitIncrease.setBounds(150, 155, 200, 25);
-        lblDateSupplied.setBounds(20, 190, 120, 25);
-        txtDateSupplied.setBounds(150, 190, 200, 25);
         setRealTimeDate(); // Set initial real-time date
 
-        panelSelectedItemInfo.add(lblSelectedItem);
-        panelSelectedItemInfo.add(txtSelectedItem);
-        panelSelectedItemInfo.add(lblQuantity);
-        panelSelectedItemInfo.add(txtQuantity);
-        panelSelectedItemInfo.add(lblCost);
-        panelSelectedItemInfo.add(lblProfitIncrease);
-        panelSelectedItemInfo.add(cboProfitIncrease);
-        panelSelectedItemInfo.add(lblDateSupplied);
-        panelSelectedItemInfo.add(txtDateSupplied);
         myFrame.add(panelSelectedItemInfo);
-
 
         // --- Buttons for Purchase Actions ---
         JPanel buttonPanel = new JPanel(new GridLayout(1,3,5,0));
@@ -170,7 +184,7 @@ public class SupplyPurchasePanel implements ActionListener {
         myFrame.add(buttonPanel);
 
         JLabel lblInventoryTable = new JLabel("Available Inventory Items");
-        lblInventoryTable.setBounds(460, 15, 300, 25);
+        lblInventoryTable.setBounds(440, 17, 300, 25);
         lblInventoryTable.setFont(new Font("Arial", Font.BOLD, 20));
         lblInventoryTable.setForeground(new Color(10, 10, 10, 255));
         myFrame.add(lblInventoryTable);
@@ -199,7 +213,7 @@ public class SupplyPurchasePanel implements ActionListener {
         tblInventoryItems.setRowHeight(25); // Make rows a bit taller
 
         JScrollPane scrollPaneInventory = new JScrollPane(tblInventoryItems);
-        scrollPaneInventory.setBounds(460, 100, 500, 200); // Increased height for better visibility
+        scrollPaneInventory.setBounds(440, 60, 520, 185); // Increased height for better visibility
         scrollPaneInventory.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         scrollPaneInventory.getViewport().setBackground(Color.WHITE);
         myFrame.add(scrollPaneInventory);
@@ -221,7 +235,7 @@ public class SupplyPurchasePanel implements ActionListener {
         });
 
         JLabel lblPurchaseTable = new JLabel("Current Purchase List");
-        lblPurchaseTable.setBounds(460, 220, 500, 200);
+        lblPurchaseTable.setBounds(440, 170, 500, 200);
         lblPurchaseTable.setFont(new Font("Arial", Font.BOLD, 16));
         lblPurchaseTable.setForeground(new Color(10, 10, 10, 255));
         myFrame.add(lblPurchaseTable);
@@ -255,7 +269,7 @@ public class SupplyPurchasePanel implements ActionListener {
         tblPurchaseDetails.setRowHeight(25); // Make rows a bit taller
 
         JScrollPane scrollPanePurchase = new JScrollPane(tblPurchaseDetails);
-        scrollPanePurchase.setBounds(460, 350, 500, 200);
+        scrollPanePurchase.setBounds(440, 290, 520, 215);
         scrollPanePurchase.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         scrollPanePurchase.getViewport().setBackground(Color.WHITE);
         myFrame.add(scrollPanePurchase);
@@ -265,7 +279,7 @@ public class SupplyPurchasePanel implements ActionListener {
 
         // Close button
         btnClose = new JButton("Close");
-        btnClose.setBounds(860, 60, 100, 25);
+        btnClose.setBounds(860, 15, 100, 25);
         btnClose.setBackground(new Color(200, 0, 0));
         btnClose.setForeground(Color.white);
         btnClose.addActionListener(this);
@@ -281,19 +295,12 @@ public class SupplyPurchasePanel implements ActionListener {
         autoGenerateSupplyID(); // Generate initial Supply ID
     }
 
-    /**
-     * Sets the current real-time date and time in the txtDateSupplied field.
-     */
     private void setRealTimeDate() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         txtDateSupplied.setText(now.format(formatter));
     }
 
-    /**
-     * Auto-generates a new Supply ID based on existing IDs in the purchase records table.
-     * Finds the maximum existing ID and sets the next ID as max + 1.
-     */
     private void autoGenerateSupplyID() {
         int nextId = 1;
         if (purchaseModel.getRowCount() > 0) {
@@ -426,42 +433,27 @@ public class SupplyPurchasePanel implements ActionListener {
                 purchaseDb.overwriteRecords(purchaseModel); // Save all current purchase records
                 JOptionPane.showMessageDialog(myFrame, "Purchase processed successfully! All items saved.", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
 
-                // After processing, clear the purchase model and reset for a new transaction
-                purchaseModel.setRowCount(0); // Clear the displayed purchase list
-                resetSupplierInputs(); // Clear supplier info for a new transaction
-                resetSelectedItemInputs(); // Clear item info
-                autoGenerateSupplyID(); // Generate a new ID for the next purchase
+                purchaseModel.setRowCount(0);
+                resetSupplierInputs();
+                resetSelectedItemInputs();
+                autoGenerateSupplyID();
             }
 
         } else if (e.getSource().equals(btnClose)) {
-            // Check if there are items in the purchase list that haven't been processed
             if (purchaseModel.getRowCount() > 0) {
                 int confirm = JOptionPane.showConfirmDialog(myFrame, "You have unsaved items in the purchase list. Do you want to save them before closing?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     purchaseDb.overwriteRecords(purchaseModel);
                     JOptionPane.showMessageDialog(myFrame, "Purchase data saved. Closing application.", "Saved", JOptionPane.INFORMATION_MESSAGE);
                     myFrame.dispose();
-                    // Optionally navigate back to AdminDashboard
-                    // new AdminDashboard();
                 } else if (confirm == JOptionPane.NO_OPTION) {
                     myFrame.dispose();
-                    // Optionally navigate back to AdminDashboard
-                    // new AdminDashboard();
                 }
-                // If CANCEL, do nothing and stay on the current frame
             } else {
-                // If no items in purchaseModel, just close
                 myFrame.dispose();
-                // Optionally navigate back to AdminDashboard
-                // new AdminDashboard();
             }
         }
     }
-
-    /**
-     * Inner class to handle file operations for both inventory and purchase records.
-     * This makes the Database logic self-contained.
-     */
     private class Database {
         private String filename;
 

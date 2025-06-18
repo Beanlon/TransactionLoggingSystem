@@ -25,7 +25,7 @@ public class InventorySystem1 extends JPanel {
                 inventoryFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // or EXIT_ON_CLOSE if needed
                 inventoryFrame.setVisible(true);
 
-                new InventorySystem();
+                new ItemCreate();
             }
         });
         add(panel1);

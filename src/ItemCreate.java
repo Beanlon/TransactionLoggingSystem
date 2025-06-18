@@ -9,7 +9,7 @@ import java.io.*;
 import java.util.Calendar;
 import java.util.Vector;
 
-public class    SupermarketInventory implements ActionListener {
+public class ItemCreate implements ActionListener {
 
     JFrame myFrame;
     JPanel panelInfo;
@@ -24,7 +24,7 @@ public class    SupermarketInventory implements ActionListener {
     Vector<String> field = new Vector<>();
     Database db = new Database("SupermarketInventory.txt"); // Changed filename
 
-    public SupermarketInventory() {
+    public ItemCreate() {
         myFrame = new JFrame("Supermarket Inventory");
         myFrame.setLayout(null);
         myFrame.setSize(900, 480);
@@ -401,6 +401,6 @@ public class    SupermarketInventory implements ActionListener {
 
     public static void main(String[] args) {
         // Ensure UI updates are done on the Event Dispatch Thread
-        SwingUtilities.invokeLater(SupermarketInventory::new);
+        SwingUtilities.invokeLater(ItemCreate::new);
     }
 }
