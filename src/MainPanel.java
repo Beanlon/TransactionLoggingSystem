@@ -15,7 +15,7 @@ import utils.InventoryManager;
 public class MainPanel extends JPanel implements ActionListener {
 
     private JTextField txtSearch;
-    private InventorySystem inventorySystem;
+    private InventorySystem1 inventorySystem;
     private JPanel pnlbtn;
     private JButton createnew, load, delete;
     private JTable logTable;
@@ -408,7 +408,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 if (confirm == JOptionPane.YES_OPTION && fileToDelete.exists()) {
                     restockFromDeletedLog(fileToDelete);
                     if (inventorySystem != null) {
-                        inventorySystem.refreshInventory();
+                        //inventorySystem.refreshInventory();
                     }
                     if (fileToDelete.delete()) {
                         tableModel.removeRow(selectedRowModel);
@@ -462,7 +462,7 @@ public class MainPanel extends JPanel implements ActionListener {
         }
     }
 
-    public void setInventorySystem(InventorySystem inventoryPanel) {
+    public void setInventorySystem(InventorySystem1 inventoryPanel) {
         this.inventorySystem = inventoryPanel;
     }
 }

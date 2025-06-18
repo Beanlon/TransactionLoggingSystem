@@ -6,15 +6,18 @@ import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class InventorySystem extends JPanel {
+public class InventorySystem extends JFrame {
     private JTextField txtItem, txtQuantity, txtPrice;
     private JTable table;
     private DefaultTableModel model;
     private JButton btnAdd, btnRemove, btnSave, btnEdit;
 
     public InventorySystem() {
-        setLayout(new BorderLayout());
-
+        setTitle("");
+        setSize(900, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setResizable(false);
 
         // Panel for input fields
         JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
@@ -185,14 +188,4 @@ public class InventorySystem extends JPanel {
         loadFromFile(); // just reloads inventory from the file into the table
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Inventory System");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setContentPane(new InventorySystem());
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
-    }
 }

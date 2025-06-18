@@ -51,7 +51,7 @@ public class Menu extends JFrame {
         add(rightpanel, BorderLayout.CENTER);
 
         // Add panels to rightpanel
-        InventorySystem inventoryPanel = new InventorySystem();
+        InventorySystem1 inventoryPanel = new InventorySystem1();
         MainPanel mainPanel = new MainPanel();
 
 // 👇 This is the important line you're asking about!
