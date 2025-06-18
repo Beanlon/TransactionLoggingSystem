@@ -37,17 +37,23 @@ public class SupplyPurchasePanel implements ActionListener {
     DefaultTableModel purchaseModel;
 
     // Database access for inventory items
-    Database inventoryDb = new Database("SupermarketInventory.txt");
+    Database inventoryDb = new Database("Items.txt");
     // Database for supply/purchase records (new file)
     Database purchaseDb = new Database("PurchaseRecords.txt");
 
+    // NEW: Reference to InventorySystem1 to refresh its table
+    private InventorySystem1 inventorySystem1Ref;
 
-    public SupplyPurchasePanel() {
+
+    // MODIFIED CONSTRUCTOR: Now accepts an InventorySystem1 object
+    public SupplyPurchasePanel(InventorySystem1 inventorySystem1Ref) {
+        this.inventorySystem1Ref = inventorySystem1Ref; // Store the reference
+
         myFrame = new JFrame("Supply and Purchase Management");
         myFrame.setLayout(null);
         myFrame.setSize(1000, 620);
         myFrame.setLocationRelativeTo(null);
-        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Changed to DISPOSE_ON_CLOSE for better application flow
         myFrame.setResizable(false);
 
         // Header Label
@@ -361,6 +367,58 @@ public class SupplyPurchasePanel implements ActionListener {
                 txtCost.getText().trim().isEmpty();
     }
 
+    /**
+     * Saves a summary of the current restock purchase to a text file
+     * within a "RestockSummaries" directory.
+     */
+    private void saveRestockSummary() {
+        // Create the directory if it doesn't exist
+        File directory = new File("RestockSummaries");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        // Generate filename based on current date and time
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        String filename = "RestockSummaries/RestockSummary_" + now.format(formatter) + ".txt";
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+            bw.write("--- Restock Purchase Summary ---\n");
+            bw.write("Supply ID: " + txtSupplyID.getText() + "\n");
+            bw.write("Supplier Name: " + txtSupplierName.getText() + "\n");
+            bw.write("Supplier Code: " + txtSupplierCode.getText() + "\n");
+            bw.write("Date Processed: " + txtDateSupplied.getText() + "\n");
+            bw.write("\nItems Restocked:\n");
+
+            double totalPurchaseCost = 0.0;
+            for (int i = 0; i < purchaseModel.getRowCount(); i++) {
+                String itemName = purchaseModel.getValueAt(i, 3).toString(); // Item Name
+                String quantity = purchaseModel.getValueAt(i, 4).toString(); // Quantity
+                String cost = purchaseModel.getValueAt(i, 5).toString();     // Cost
+                String sellingPrice = purchaseModel.getValueAt(i, 7).toString(); // Selling Price
+
+                bw.write(String.format("  - Item: %s, Quantity: %s, Cost/Item: %s, Selling Price/Item: %s\n",
+                        itemName, quantity, cost, sellingPrice));
+
+                try {
+                    totalPurchaseCost += Double.parseDouble(quantity) * Double.parseDouble(cost);
+                } catch (NumberFormatException ex) {
+                    // Handle cases where quantity or cost might not be valid numbers (though validated earlier)
+                    System.err.println("Error parsing quantity or cost for summary calculation: " + ex.getMessage());
+                }
+            }
+            bw.write("\nTotal Purchase Cost: " + String.format("%.2f", totalPurchaseCost) + "\n");
+            bw.write("--------------------------------\n");
+            JOptionPane.showMessageDialog(myFrame, "Restock summary saved to: " + filename, "Summary Saved", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(myFrame, "Error saving restock summary: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(btnAddItemToPurchase)) {
@@ -430,21 +488,37 @@ public class SupplyPurchasePanel implements ActionListener {
                     "This will save all items in the current list.", "Confirm Purchase", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                purchaseDb.overwriteRecords(purchaseModel); // Save all current purchase records
+                purchaseDb.overwriteRecords(purchaseModel); // 1. Save all current purchase records (to PurchaseRecords.txt)
+
+                // NEW: Save the restock summary
+                saveRestockSummary(); // 2. Save a summary of this restock
+
                 JOptionPane.showMessageDialog(myFrame, "Purchase processed successfully! All items saved.", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
 
-                purchaseModel.setRowCount(0);
-                resetSupplierInputs();
-                resetSelectedItemInputs();
-                autoGenerateSupplyID();
-            }
+                // NEW: Refresh the InventorySystem1 table after processing purchase
+                if (inventorySystem1Ref != null) {
+                    inventorySystem1Ref.loadInventoryData(); // 3. Tell InventorySystem1 to reload its inventory (from Items.txt)
+                }
 
+                // Reset the purchase table and inputs for a new purchase
+                purchaseModel.setRowCount(0); // 4. THIS IS THE LINE THAT CLEARS YOUR 'CURRENT PURCHASE LIST' TABLE
+                resetSupplierInputs();       // 5. Clear supplier info fields
+                resetSelectedItemInputs();   // 6. Clear selected item fields
+                autoGenerateSupplyID();      // 7. Generate a new Supply ID for the next purchase
+            }
+            // REMOVE THIS EXTRA CLOSING CURLY BRACE '}' HERE
         } else if (e.getSource().equals(btnClose)) {
             if (purchaseModel.getRowCount() > 0) {
                 int confirm = JOptionPane.showConfirmDialog(myFrame, "You have unsaved items in the purchase list. Do you want to save them before closing?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     purchaseDb.overwriteRecords(purchaseModel);
+                    // Decide if you want to save a summary on close as well.
+                    // For this request, it's only on "Process" click, so not adding here.
                     JOptionPane.showMessageDialog(myFrame, "Purchase data saved. Closing application.", "Saved", JOptionPane.INFORMATION_MESSAGE);
+                    // NEW: Refresh the InventorySystem1 table after saving and closing
+                    if (inventorySystem1Ref != null) {
+                        inventorySystem1Ref.loadInventoryData();
+                    }
                     myFrame.dispose();
                 } else if (confirm == JOptionPane.NO_OPTION) {
                     myFrame.dispose();
@@ -502,6 +576,10 @@ public class SupplyPurchasePanel implements ActionListener {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SupplyPurchasePanel::new);
+        // When running SupplyPurchasePanel directly for testing,
+        // you won't have an InventorySystem1 instance.
+        // For a full application, you would create InventorySystem1 first
+        // and then pass its instance to SupplyPurchasePanel.
+        SwingUtilities.invokeLater(() -> new SupplyPurchasePanel(null)); // Pass null for now if testing standalone
     }
 }

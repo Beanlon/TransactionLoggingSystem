@@ -1,0 +1,13 @@
+--- Restock Purchase Summary ---
+Supply ID: 4
+Supplier Name: 
+Supplier Code: 
+Date Processed: 19/06/2025 00:34:14
+
+Items Restocked:
+  - Item: Corned Beef, Quantity: 12, Cost/Item: 21.00, Selling Price/Item: 23.10
+  - Item: Corned Beef, Quantity: 2, Cost/Item: 21.00, Selling Price/Item: 23.10
+  - Item: Corned Beef, Quantity: 12, Cost/Item: 30.00, Selling Price/Item: 33.00
+
+Total Purchase Cost: 654.00
+--------------------------------

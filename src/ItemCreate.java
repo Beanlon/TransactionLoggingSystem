@@ -22,7 +22,7 @@ public class ItemCreate implements ActionListener {
     JComboBox<String> cboAddedDay, cboAddedMonth, cboAddedYear;
 
     Vector<String> field = new Vector<>();
-    Database db = new Database("SupermarketInventory.txt"); // Changed filename
+    Database db = new Database("Items.txt"); // Changed filename
 
     public ItemCreate() {
         myFrame = new JFrame("Supermarket Inventory");
