@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 2
+Supplier Name: sdada
+Supplier Code: sadad
+Date Processed: 21/06/2025 23:26:09
+
+Items Restocked:
+  - Item: Tuna, Quantity: 1, Cost/Item: 20.00, Selling Price/Item: 22.00
+
+Total Purchase Cost: 20.00
+--------------------------------

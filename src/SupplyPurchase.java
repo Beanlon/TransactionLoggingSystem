@@ -29,6 +29,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
 
     Database inventoryDb = new Database("Items.txt");
     Database purchaseDb = new Database("PurchaseRecords.txt");
+    InventoryManager inventoryManager = new InventoryManager("Inventory.txt");
 
     private InventorySystem1 inventorySystem1Ref;
 
@@ -263,9 +264,6 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         txtDateSupplied.setText(now.format(formatter));
     }
 
-    /**
-     * Auto-generates the next Supply ID by reading existing records from PurchaseRecords.txt.
-     */
     private void autoGenerateSupplyID() {
         int nextId = 1;
         try (BufferedReader br = new BufferedReader(new FileReader(purchaseDb.filename))) {
@@ -274,7 +272,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 String[] data = line.split(",");
                 if (data.length > 0) {
                     try {
-                        int currentId = Integer.parseInt(data[0].trim()); // Supply ID is the first column
+                        int currentId = Integer.parseInt(data[0].trim());
                         if (currentId >= nextId) {
                             nextId = currentId + 1;
                         }
@@ -285,7 +283,6 @@ public class SupplyPurchase extends JFrame implements ActionListener {
             }
         } catch (FileNotFoundException e) {
             System.out.println("PurchaseRecords.txt not found. Starting Supply ID from 1.");
-            // If file doesn't exist, nextId remains 1.
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error reading PurchaseRecords.txt for Supply ID generation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -293,60 +290,37 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         txtSupplyID.setText(String.valueOf(nextId));
     }
 
-    /**
-     * Clears input fields related to supplier information and regenerates a new Supply ID.
-     */
     private void resetSupplierInputs() {
         txtSupplierName.setText("");
         txtSupplierCode.setText("");
-        // autoGenerateSupplyID() is called separately after processing
     }
 
-    /**
-     * Clears input fields related to selected item details and clears the inventory table selection.
-     */
     private void resetSelectedItemInputs() {
         txtSelectedItem.setText("");
         txtQuantity.setText("");
         txtCost.setText("");
         cboProfitIncrease.setSelectedIndex(0);
-        tblInventoryItems.clearSelection(); // Clear inventory table selection
-        setRealTimeDate(); // Update real-time date for the next item
+        tblInventoryItems.clearSelection();
+        setRealTimeDate();
     }
 
-    /**
-     * Checks if any essential supplier information fields are empty.
-     *
-     * @return true if any supplier info field is empty, false otherwise.
-     */
     private boolean isEmptySupplierInfo() {
         return txtSupplierName.getText().trim().isEmpty() ||
                 txtSupplierCode.getText().trim().isEmpty();
     }
 
-    /**
-     * Checks if any essential selected item information fields are empty.
-     *
-     * @return true if any selected item info field is empty, false otherwise.
-     */
     private boolean isEmptySelectedItemInfo() {
         return txtSelectedItem.getText().trim().isEmpty() ||
                 txtQuantity.getText().trim().isEmpty() ||
                 txtCost.getText().trim().isEmpty();
     }
 
-    /**
-     * Saves a summary of the current restock purchase to a text file
-     * within a "RestockSummaries" directory.
-     */
     private void saveRestockSummary() {
-        // Create the directory if it doesn't exist
         File directory = new File("RestockSummaries");
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
-        // Generate filename based on current date and time
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
         String filename = "RestockSummaries/RestockSummary_" + now.format(formatter) + ".txt";
@@ -361,10 +335,10 @@ public class SupplyPurchase extends JFrame implements ActionListener {
 
             double totalPurchaseCost = 0.0;
             for (int i = 0; i < purchaseModel.getRowCount(); i++) {
-                String itemName = purchaseModel.getValueAt(i, 3).toString(); // Item Name
-                String quantity = purchaseModel.getValueAt(i, 4).toString(); // Quantity
-                String cost = purchaseModel.getValueAt(i, 5).toString();     // Cost
-                String sellingPrice = purchaseModel.getValueAt(i, 7).toString(); // Selling Price
+                String itemName = purchaseModel.getValueAt(i, 3).toString();
+                String quantity = purchaseModel.getValueAt(i, 4).toString();
+                String cost = purchaseModel.getValueAt(i, 5).toString();
+                String sellingPrice = purchaseModel.getValueAt(i, 7).toString();
 
                 bw.write(String.format("  - Item: %s, Quantity: %s, Cost/Item: %s, Selling Price/Item: %s\n",
                         itemName, quantity, cost, sellingPrice));
@@ -372,7 +346,6 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 try {
                     totalPurchaseCost += Double.parseDouble(quantity) * Double.parseDouble(cost);
                 } catch (NumberFormatException ex) {
-                    // Handle cases where quantity or cost might not be valid numbers (though validated earlier)
                     System.err.println("Error parsing quantity or cost for summary calculation: " + ex.getMessage());
                 }
             }
@@ -386,18 +359,25 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         }
     }
 
+    private void updateInventoryQuantities() {
+        for (int i = 0; i < purchaseModel.getRowCount(); i++) {
+            String itemName = purchaseModel.getValueAt(i, 3).toString();
+            int quantity = Integer.parseInt(purchaseModel.getValueAt(i, 4).toString());
+            double sellingPrice = Double.parseDouble(purchaseModel.getValueAt(i, 7).toString());
+
+            inventoryManager.updateItem(itemName, quantity, sellingPrice);
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(btnAddItemToPurchase)) {
-            // Validate supplier info first
             if (isEmptySupplierInfo()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all **Supplier Information** fields (Supplier Name, Supplier Code).", "Missing Information", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please fill in all Supplier Information fields.", "Missing Information", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            // Validate selected item info
             if (isEmptySelectedItemInfo()) {
-                JOptionPane.showMessageDialog(this, "Please select an **Item** from the inventory and fill in **Quantity** and **Cost**.", "Missing Information", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please select an Item and fill in Quantity and Cost.", "Missing Information", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -426,67 +406,61 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 purchaseData.add(String.valueOf(quantity));
                 purchaseData.add(String.format("%.2f", cost));
                 purchaseData.add(cboProfitIncrease.getSelectedItem().toString());
-                purchaseData.add(String.format("%.2f", sellingPrice)); // Add selling price
-                purchaseData.add(txtDateSupplied.getText()); // Use the real-time date
+                purchaseData.add(String.format("%.2f", sellingPrice));
+                purchaseData.add(txtDateSupplied.getText());
 
                 purchaseModel.addRow(purchaseData);
-                resetSelectedItemInputs(); // Clear item-specific inputs after adding
-                JOptionPane.showMessageDialog(this, "Item added to the **purchase list**.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                resetSelectedItemInputs();
+                JOptionPane.showMessageDialog(this, "Item added to purchase list.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Quantity and Cost must be valid numbers. Please check your input.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Quantity and Cost must be valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
             }
 
         } else if (e.getSource().equals(btnRemovePurchaseItem)) {
             int selectedRow = tblPurchaseDetails.getSelectedRow();
             if (selectedRow >= 0) {
                 purchaseModel.removeRow(selectedRow);
-                JOptionPane.showMessageDialog(this, "Selected item removed from the **purchase list**.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Item removed from purchase list.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Please select an item from the **purchase list** to remove.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please select an item to remove.", "No Selection", JOptionPane.WARNING_MESSAGE);
             }
         } else if (e.getSource().equals(btnProcessPurchase)) {
             if (purchaseModel.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(this, "No items in the **purchase list** to process.", "No Items", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No items to process.", "No Items", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Confirm with the user before processing a purchase
-            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to **process this purchase**?\n" +
-                    "This will save all items in the current list.", "Confirm Purchase", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this, "Process this purchase?", "Confirm Purchase", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                purchaseDb.appendRecords(purchaseModel); // 1. Save all current purchase records (to PurchaseRecords.txt)
+                purchaseDb.appendRecords(purchaseModel);
+                updateInventoryQuantities();
+                saveRestockSummary();
 
-                // NEW: Save the restock summary
-                saveRestockSummary(); // 2. Save a summary of this restock
-
-                // NEW: Refresh the InventorySystem1 table after processing purchase
                 if (inventorySystem1Ref != null) {
-                    inventorySystem1Ref.loadInventoryData(); // 3. Tell InventorySystem1 to reload its inventory (from Items.txt)
+                    inventorySystem1Ref.loadInventoryData();
                 }
 
-                JOptionPane.showMessageDialog(this, "Purchase processed successfully! All items saved.", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Purchase processed successfully!", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
 
-                // Reset the purchase table and inputs for a new purchase
-                purchaseModel.setRowCount(0); // 4. Clear the 'Current Purchase List' table
-                resetSupplierInputs();       // 5. Clear supplier info fields
-                resetSelectedItemInputs();   // 6. Clear selected item fields
-                autoGenerateSupplyID();      // 7. Generate a new Supply ID for the next purchase
-
+                purchaseModel.setRowCount(0);
+                resetSupplierInputs();
+                resetSelectedItemInputs();
+                autoGenerateSupplyID();
             }
         } else if (e.getSource().equals(btnClose)) {
             if (purchaseModel.getRowCount() > 0) {
-                int confirm = JOptionPane.showConfirmDialog(this, "You have unsaved items in the **purchase list**. Do you want to save them before closing?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(this, "Save changes before closing?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     purchaseDb.appendRecords(purchaseModel);
-                    JOptionPane.showMessageDialog(this, "Purchase data saved. Closing application.", "Saved", JOptionPane.INFORMATION_MESSAGE);
+                    updateInventoryQuantities();
+                    JOptionPane.showMessageDialog(this, "Data saved. Closing window.", "Saved", JOptionPane.INFORMATION_MESSAGE);
                     if (inventorySystem1Ref != null) {
                         inventorySystem1Ref.loadInventoryData();
                     }
                     menuRef.setVisible(true);
                     this.dispose();
-
                 } else if (confirm == JOptionPane.NO_OPTION) {
                     menuRef.setVisible(true);
                     this.dispose();
@@ -494,7 +468,6 @@ public class SupplyPurchase extends JFrame implements ActionListener {
             } else {
                 menuRef.setVisible(true);
                 this.dispose();
-
             }
         }
     }
@@ -507,7 +480,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         }
 
         public void displayRecord(DefaultTableModel model) {
-            model.setRowCount(0); // Clear existing data
+            model.setRowCount(0);
             try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = br.readLine()) != null) {
@@ -519,15 +492,15 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                     model.addRow(row);
                 }
             } catch (FileNotFoundException e) {
-                System.out.println("Database file '" + filename + "' not found. A new one will be created upon saving.");
+                System.out.println("Database file '" + filename + "' not found.");
             } catch (IOException e) {
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(rootPane, "Error loading data from " + filename + ": " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(rootPane, "Error loading data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
 
         public void appendRecords(DefaultTableModel model) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) { // true = append mode
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) {
                 for (int i = 0; i < model.getRowCount(); i++) {
                     StringBuilder line = new StringBuilder();
                     for (int j = 0; j < model.getColumnCount(); j++) {
@@ -541,10 +514,9 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(rootPane, "Error saving data to " + filename + ": " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(rootPane, "Error saving data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
-
     }
 
     public static void main(String[] args) {

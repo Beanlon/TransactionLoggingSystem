@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 2
+Supplier Name: dsad
+Supplier Code: sadadd
+Date Processed: 21/06/2025 23:28:43
+
+Items Restocked:
+  - Item: Corned Beef, Quantity: 1, Cost/Item: 20.00, Selling Price/Item: 22.00
+
+Total Purchase Cost: 20.00
+--------------------------------

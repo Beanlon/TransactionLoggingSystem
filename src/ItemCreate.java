@@ -19,7 +19,7 @@ public class ItemCreate extends JFrame implements ActionListener {
     Vector<String> field = new Vector<>();
     Database db = new Database("Items.txt");
 
-    public ItemCreate() {
+    public ItemCreate(InventorySystem1 inventorySystem1) {
         this.setLayout(null);
         this.setSize(900, 480);
         this.setLocationRelativeTo(null);
@@ -342,7 +342,4 @@ public class ItemCreate extends JFrame implements ActionListener {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(ItemCreate::new);
-    }
 }

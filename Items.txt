@@ -1,4 +1,2 @@
-2,Tuna,Canned Goods,1/1/2025
-3,Sardines,Canned Goods,20/6/2025
-4,Beans,Canned Goods,20/6/2025
-5,Beer,Beverages,1/1/2025
+1,Corned Beef,Canned Goods,21/6/2025
+2,Beans,Canned Goods,21/6/2025

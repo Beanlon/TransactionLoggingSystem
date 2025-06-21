@@ -9,7 +9,6 @@ import java.util.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
-import utils.InventoryManager;
 
 
 public class MainPanel extends JPanel implements ActionListener {
@@ -440,22 +439,53 @@ public class MainPanel extends JPanel implements ActionListener {
     }
 
     private void restockFromDeletedLog(File file) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            int lineCount = 0;
-
-            while ((line = reader.readLine()) != null) {
-                lineCount++;
-                if (lineCount <= 3 || line.trim().isEmpty()) continue;
-
-                String[] parts = line.split(",");
-                if (parts.length >= 3) {
-                    String itemName = parts[0].trim();
-                    int quantity = Integer.parseInt(parts[2].trim());
-                    InventoryManager.restockItem(itemName, quantity);
+        try {
+            // Step 1: Load inventory into a Map
+            Map<String, String[]> inventoryMap = new LinkedHashMap<>();
+            File inventoryFile = new File("PurchaseRecords.txt");
+            if (inventoryFile.exists()) {
+                try (BufferedReader br = new BufferedReader(new FileReader(inventoryFile))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] parts = line.split(",");
+                        if (parts.length >= 5) {
+                            inventoryMap.put(parts[0].trim(), parts);
+                        }
+                    }
                 }
             }
-            InventoryManager.saveInventory(InventoryManager.loadInventory());
+
+            // Step 2: Read deleted log and restock
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                int lineCount = 0;
+
+                while ((line = reader.readLine()) != null) {
+                    lineCount++;
+                    if (lineCount <= 3 || line.trim().isEmpty()) continue;
+
+                    String[] parts = line.split(",");
+                    if (parts.length >= 3) {
+                        String itemName = parts[0].trim();
+                        int quantity = Integer.parseInt(parts[2].trim());
+
+                        if (inventoryMap.containsKey(itemName)) {
+                            String[] itemData = inventoryMap.get(itemName);
+                            int currentStock = Integer.parseInt(itemData[2].trim());
+                            itemData[2] = String.valueOf(currentStock + quantity);
+                            itemData[4] = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()); // update restock date
+                        }
+                    }
+                }
+            }
+
+            // Step 3: Save updated inventory back
+            try (PrintWriter writer = new PrintWriter(new FileWriter("PurchaseRecords.txt"))) {
+                for (String[] item : inventoryMap.values()) {
+                    writer.println(String.join(",", item));
+                }
+            }
+
         } catch (IOException | NumberFormatException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error restocking inventory: " + e.getMessage());
