@@ -8,15 +8,13 @@ import java.util.Vector;
 
 public class ItemCreate extends JFrame implements ActionListener {
 
-
     JPanel panelInfo;
     JLabel lblID, lblName, lblCategory, lblSearch, lblDateAdded;
-    JTextField txtID, txtName, txtSearch;
+    JTextField txtID, txtName, txtSearch, txtDateAdded;
     JButton btnAdd, btnClear, btnEdit, btnDelete, btnClose, btnSearch;
     JTable tblSupply;
     DefaultTableModel supply;
     JComboBox<String> cboCategory;
-    JComboBox<String> cboAddedDay, cboAddedMonth, cboAddedYear;
 
     Vector<String> field = new Vector<>();
     Database db = new Database("Items.txt");
@@ -60,18 +58,15 @@ public class ItemCreate extends JFrame implements ActionListener {
         cboCategory = new JComboBox<>(categories);
 
         lblDateAdded = new JLabel("Date Added:");
+        txtDateAdded = new JTextField();
+        txtDateAdded.setEditable(false);
 
-        String[] days = new String[31];
-        String[] months = new String[12];
-        String[] years = new String[50];
-        for (int i = 0; i < 31; i++) days[i] = String.valueOf(i + 1);
-        for (int i = 0; i < 12; i++) months[i] = String.valueOf(i + 1);
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        for (int i = 0; i < 50; i++) years[i] = String.valueOf(currentYear - i);
-
-        cboAddedDay = new JComboBox<>(days);
-        cboAddedMonth = new JComboBox<>(months);
-        cboAddedYear = new JComboBox<>(years);
+        // Set today's date
+        Calendar today = Calendar.getInstance();
+        int day = today.get(Calendar.DAY_OF_MONTH);
+        int month = today.get(Calendar.MONTH) + 1;
+        int year = today.get(Calendar.YEAR);
+        txtDateAdded.setText(day + "/" + month + "/" + year);
 
         lblID.setBounds(20, 80, 120, 25);
         txtID.setBounds(150, 80, 200, 25);
@@ -80,10 +75,7 @@ public class ItemCreate extends JFrame implements ActionListener {
         lblCategory.setBounds(20, 150, 120, 25);
         cboCategory.setBounds(150, 150, 200, 25);
         lblDateAdded.setBounds(20, 185, 120, 25);
-
-        JPanel addedDatePanel = createDatePanel(cboAddedDay, cboAddedMonth, cboAddedYear);
-        addedDatePanel.setBounds(150, 185, 200, 25);
-        addedDatePanel.setBackground(Color.white);
+        txtDateAdded.setBounds(150, 185, 200, 25);
 
         btnAdd = new JButton("Add");
         btnClear = new JButton("Clear");
@@ -101,7 +93,7 @@ public class ItemCreate extends JFrame implements ActionListener {
         panelInfo.add(lblCategory);
         panelInfo.add(cboCategory);
         panelInfo.add(lblDateAdded);
-        panelInfo.add(addedDatePanel);
+        panelInfo.add(txtDateAdded);
         panelInfo.add(btnAdd);
         panelInfo.add(btnClear);
         this.add(panelInfo);
@@ -144,8 +136,8 @@ public class ItemCreate extends JFrame implements ActionListener {
         scrollPane.getViewport().setBackground(Color.WHITE);
         this.add(scrollPane);
 
-        db.displayRecord(supply); // Initial load
-        tblSupply.setModel(supply); // Ensure correct model is active
+        db.displayRecord(supply);
+        tblSupply.setModel(supply);
 
         btnEdit = new JButton("Edit");
         btnDelete = new JButton("Delete");
@@ -175,12 +167,7 @@ public class ItemCreate extends JFrame implements ActionListener {
                     txtID.setText(supply.getValueAt(row, 0).toString());
                     txtName.setText(supply.getValueAt(row, 1).toString());
                     cboCategory.setSelectedItem(supply.getValueAt(row, 2).toString());
-                    String[] dateAdded = supply.getValueAt(row, 3).toString().split("/");
-                    if (dateAdded.length == 3) {
-                        cboAddedDay.setSelectedItem(dateAdded[0]);
-                        cboAddedMonth.setSelectedItem(dateAdded[1]);
-                        cboAddedYear.setSelectedItem(dateAdded[2]);
-                    }
+                    txtDateAdded.setText(supply.getValueAt(row, 3).toString());
                     txtID.setEnabled(false);
                     btnAdd.setEnabled(false);
                 }
@@ -194,14 +181,6 @@ public class ItemCreate extends JFrame implements ActionListener {
 
         this.setVisible(true);
         autoGenerateID();
-    }
-
-    private JPanel createDatePanel(JComboBox<String> day, JComboBox<String> month, JComboBox<String> year) {
-        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        datePanel.add(day);
-        datePanel.add(month);
-        datePanel.add(year);
-        return datePanel;
     }
 
     private void autoGenerateID() {
@@ -223,9 +202,10 @@ public class ItemCreate extends JFrame implements ActionListener {
         txtName.setText("");
         cboCategory.setSelectedIndex(0);
         Calendar today = Calendar.getInstance();
-        cboAddedDay.setSelectedItem(String.valueOf(today.get(Calendar.DAY_OF_MONTH)));
-        cboAddedMonth.setSelectedItem(String.valueOf(today.get(Calendar.MONTH) + 1));
-        cboAddedYear.setSelectedItem(String.valueOf(today.get(Calendar.YEAR)));
+        int day = today.get(Calendar.DAY_OF_MONTH);
+        int month = today.get(Calendar.MONTH) + 1;
+        int year = today.get(Calendar.YEAR);
+        txtDateAdded.setText(day + "/" + month + "/" + year);
         txtID.setEnabled(true);
         btnAdd.setEnabled(true);
         tblSupply.clearSelection();
@@ -247,7 +227,7 @@ public class ItemCreate extends JFrame implements ActionListener {
             data.add(txtID.getText());
             data.add(txtName.getText());
             data.add(cboCategory.getSelectedItem().toString());
-            data.add(cboAddedDay.getSelectedItem() + "/" + cboAddedMonth.getSelectedItem() + "/" + cboAddedYear.getSelectedItem());
+            data.add(txtDateAdded.getText());
             supply.addRow(data);
             reset();
             db.overwriteRecords(supply);
@@ -263,7 +243,7 @@ public class ItemCreate extends JFrame implements ActionListener {
                 }
                 supply.setValueAt(txtName.getText(), row, 1);
                 supply.setValueAt(cboCategory.getSelectedItem().toString(), row, 2);
-                supply.setValueAt(cboAddedDay.getSelectedItem() + "/" + cboAddedMonth.getSelectedItem() + "/" + cboAddedYear.getSelectedItem(), row, 3);
+                supply.setValueAt(txtDateAdded.getText(), row, 3);
                 reset();
                 db.overwriteRecords(supply);
                 JOptionPane.showMessageDialog(this, "Item edited successfully!");
@@ -285,13 +265,11 @@ public class ItemCreate extends JFrame implements ActionListener {
             }
         } else if (e.getSource().equals(btnSearch) || e.getSource().equals(txtSearch)) {
             String searchTerm = txtSearch.getText().trim().toLowerCase();
-
             if (searchTerm.isEmpty()) {
-                tblSupply.setModel(supply); // Restore main model
+                tblSupply.setModel(supply);
                 db.displayRecord(supply);
                 return;
             }
-
             DefaultTableModel searchResultsModel = new DefaultTableModel();
             searchResultsModel.setColumnIdentifiers(field);
 
@@ -311,7 +289,6 @@ public class ItemCreate extends JFrame implements ActionListener {
                     found = true;
                 }
             }
-
             tblSupply.setModel(searchResultsModel);
             if (!found) {
                 JOptionPane.showMessageDialog(this, "No match found for '" + searchTerm + "'.");
