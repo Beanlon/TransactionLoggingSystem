@@ -1,10 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.*;
 import java.util.Calendar;
 import java.util.Vector;
@@ -22,7 +19,7 @@ public class ItemCreate implements ActionListener {
     JComboBox<String> cboAddedDay, cboAddedMonth, cboAddedYear;
 
     Vector<String> field = new Vector<>();
-    Database db = new Database("Items.txt"); // Changed filename
+    Database db = new Database("Items.txt");
 
     public ItemCreate() {
         myFrame = new JFrame("Supermarket Inventory");
@@ -32,14 +29,12 @@ public class ItemCreate implements ActionListener {
         myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myFrame.setResizable(false);
 
-        // Header Label
         JLabel lblHeader = new JLabel("Manage Supermarket Items");
         lblHeader.setBounds(60, 5, 400, 100);
-        lblHeader.setForeground(new Color(200, 0, 0)); // Red color
+        lblHeader.setForeground(new Color(200, 0, 0));
         lblHeader.setFont(new Font("DM Sans", Font.BOLD, 20));
         myFrame.add(lblHeader);
 
-        // Panel for item information
         panelInfo = new RoundedPanel(30);
         panelInfo.setLayout(null);
         panelInfo.setBounds(50, 80, 400, 350);
@@ -48,13 +43,12 @@ public class ItemCreate implements ActionListener {
         JLabel subheader = new JLabel("Fill Up Item Information");
         subheader.setBounds(20, 30, 300, 25);
         subheader.setFont(new Font("Arial", Font.BOLD, 18));
-        subheader.setForeground(new Color(10, 10, 10, 255));
+        subheader.setForeground(new Color(10, 10, 10));
         panelInfo.add(subheader);
 
-        // Input Fields
         lblID = new JLabel("Item ID Number: ");
         txtID = new JTextField();
-        txtID.setEditable(false); // Auto-generated
+        txtID.setEditable(false);
         lblName = new JLabel("Item Name:");
         txtName = new JTextField();
         lblCategory = new JLabel("Item Category:");
@@ -96,8 +90,8 @@ public class ItemCreate implements ActionListener {
         btnClear = new JButton("Clear");
         btnAdd.setBounds(20, 260, 360, 30);
         btnClear.setBounds(20, 300, 360, 30);
-        btnAdd.setBackground(new Color(200, 0, 0)); // Red button
-        btnClear.setBackground(new Color(200, 0, 0)); // Red button
+        btnAdd.setBackground(new Color(200, 0, 0));
+        btnClear.setBackground(new Color(200, 0, 0));
         btnAdd.setForeground(Color.white);
         btnClear.setForeground(Color.white);
 
@@ -113,7 +107,6 @@ public class ItemCreate implements ActionListener {
         panelInfo.add(btnClear);
         myFrame.add(panelInfo);
 
-        // Search Panel
         lblSearch = new JLabel("Search:");
         txtSearch = new JTextField();
         btnSearch = new JButton("Search");
@@ -121,13 +114,12 @@ public class ItemCreate implements ActionListener {
         lblSearch.setBounds(460, 60, 60, 30);
         txtSearch.setBounds(520, 60, 200, 30);
         btnSearch.setBounds(740, 60, 80, 25);
-        btnSearch.setBackground(new Color(200, 0, 0)); // Red button
+        btnSearch.setBackground(new Color(200, 0, 0));
         btnSearch.setForeground(Color.white);
         myFrame.add(lblSearch);
         myFrame.add(txtSearch);
         myFrame.add(btnSearch);
 
-        // Table setup
         field.add("ID");
         field.add("Name");
         field.add("Category");
@@ -153,9 +145,9 @@ public class ItemCreate implements ActionListener {
         scrollPane.getViewport().setBackground(Color.WHITE);
         myFrame.add(scrollPane);
 
-        db.displayRecord(supply); // Load existing records
+        db.displayRecord(supply); // Initial load
+        tblSupply.setModel(supply); // Ensure correct model is active
 
-        // Action Buttons for Table
         btnEdit = new JButton("Edit");
         btnDelete = new JButton("Delete");
         btnClose = new JButton("Close");
@@ -164,50 +156,45 @@ public class ItemCreate implements ActionListener {
         btnDelete.setBounds(650, 390, 100, 30);
         btnClose.setBounds(760, 390, 100, 30);
         for (JButton b : new JButton[]{btnEdit, btnDelete, btnClose}) {
-            b.setBackground(new Color(200, 0, 0)); // Red button
+            b.setBackground(new Color(200, 0, 0));
             b.setForeground(Color.white);
             myFrame.add(b);
         }
 
-        // Action Listeners
         btnAdd.addActionListener(this);
         btnClear.addActionListener(this);
         btnEdit.addActionListener(this);
         btnDelete.addActionListener(this);
         btnClose.addActionListener(this);
         btnSearch.addActionListener(this);
-        txtSearch.addActionListener(this); // Allow searching on Enter key
+        txtSearch.addActionListener(this);
 
-        // Table row selection listener
         tblSupply.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int row = tblSupply.getSelectedRow();
                 if (row >= 0) {
                     txtID.setText(supply.getValueAt(row, 0).toString());
                     txtName.setText(supply.getValueAt(row, 1).toString());
-                    cboCategory.setSelectedItem(supply.getValueAt(row, 2).toString()); // Category is now at index 2
-
-                    String[] dateAdded = supply.getValueAt(row, 3).toString().split("/"); // Date Added is at index 3
+                    cboCategory.setSelectedItem(supply.getValueAt(row, 2).toString());
+                    String[] dateAdded = supply.getValueAt(row, 3).toString().split("/");
                     if (dateAdded.length == 3) {
                         cboAddedDay.setSelectedItem(dateAdded[0]);
                         cboAddedMonth.setSelectedItem(dateAdded[1]);
                         cboAddedYear.setSelectedItem(dateAdded[2]);
                     }
-
-                    txtID.setEnabled(false); // ID is disabled for editing
-                    btnAdd.setEnabled(false); // Cannot add when editing
+                    txtID.setEnabled(false);
+                    btnAdd.setEnabled(false);
                 }
             }
         });
 
-        // Main background panel
         JPanel background = new JPanel();
         background.setBackground(new Color(246, 243, 243));
         background.setSize(900, 480);
         myFrame.add(background);
 
         myFrame.setVisible(true);
-        autoGenerateID(); // Generate ID on startup
+        autoGenerateID();
     }
 
     private JPanel createDatePanel(JComboBox<String> day, JComboBox<String> month, JComboBox<String> year) {
@@ -218,23 +205,16 @@ public class ItemCreate implements ActionListener {
         return datePanel;
     }
 
-    /**
-     * Auto-generates an Item ID based on existing IDs in the table.
-     * Finds the maximum existing ID and sets the next ID as max + 1.
-     */
     private void autoGenerateID() {
         int nextId = 1;
-        if (supply.getRowCount() > 0) {
-            for (int i = 0; i < supply.getRowCount(); i++) {
-                try {
-                    int currentId = Integer.parseInt(supply.getValueAt(i, 0).toString());
-                    if (currentId >= nextId) {
-                        nextId = currentId + 1;
-                    }
-                } catch (NumberFormatException e) {
-                    // Handle cases where ID might not be a valid number if data is corrupted
-                    System.err.println("Warning: Non-numeric ID found in table: " + supply.getValueAt(i, 0));
+        for (int i = 0; i < supply.getRowCount(); i++) {
+            try {
+                int currentId = Integer.parseInt(supply.getValueAt(i, 0).toString());
+                if (currentId >= nextId) {
+                    nextId = currentId + 1;
                 }
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Non-numeric ID found: " + supply.getValueAt(i, 0));
             }
         }
         txtID.setText(String.valueOf(nextId));
@@ -243,20 +223,18 @@ public class ItemCreate implements ActionListener {
     private void reset() {
         txtName.setText("");
         cboCategory.setSelectedIndex(0);
-        // Set today's date for date added, or reset to default (e.g., current date)
         Calendar today = Calendar.getInstance();
         cboAddedDay.setSelectedItem(String.valueOf(today.get(Calendar.DAY_OF_MONTH)));
-        cboAddedMonth.setSelectedItem(String.valueOf(today.get(Calendar.MONTH) + 1)); // Month is 0-indexed
+        cboAddedMonth.setSelectedItem(String.valueOf(today.get(Calendar.MONTH) + 1));
         cboAddedYear.setSelectedItem(String.valueOf(today.get(Calendar.YEAR)));
-
         txtID.setEnabled(true);
         btnAdd.setEnabled(true);
         tblSupply.clearSelection();
-        autoGenerateID(); // Generate a new ID after clearing
+        autoGenerateID();
     }
 
     private boolean isEmptyInput() {
-        return txtName.getText().trim().isEmpty(); // Only checking name as ID is auto-generated
+        return txtName.getText().trim().isEmpty();
     }
 
     @Override
@@ -266,7 +244,6 @@ public class ItemCreate implements ActionListener {
                 JOptionPane.showMessageDialog(myFrame, "Please fill in the Item Name.");
                 return;
             }
-            // ID uniqueness is handled by autoGenerateID ensuring sequential unique IDs
             Vector<String> data = new Vector<>();
             data.add(txtID.getText());
             data.add(txtName.getText());
@@ -274,7 +251,7 @@ public class ItemCreate implements ActionListener {
             data.add(cboAddedDay.getSelectedItem() + "/" + cboAddedMonth.getSelectedItem() + "/" + cboAddedYear.getSelectedItem());
             supply.addRow(data);
             reset();
-            db.overwriteRecords(supply); // Save after adding
+            db.overwriteRecords(supply);
             JOptionPane.showMessageDialog(myFrame, "Item added successfully!");
         } else if (e.getSource().equals(btnClear)) {
             reset();
@@ -282,14 +259,14 @@ public class ItemCreate implements ActionListener {
             int row = tblSupply.getSelectedRow();
             if (row >= 0) {
                 if (isEmptyInput()) {
-                    JOptionPane.showMessageDialog(myFrame, "Please fill in the Item Name before editing.");
+                    JOptionPane.showMessageDialog(myFrame, "Please fill in the Item Name.");
                     return;
                 }
                 supply.setValueAt(txtName.getText(), row, 1);
-                supply.setValueAt(cboCategory.getSelectedItem().toString(), row, 2); // Category at index 2
-                supply.setValueAt(cboAddedDay.getSelectedItem() + "/" + cboAddedMonth.getSelectedItem() + "/" + cboAddedYear.getSelectedItem(), row, 3); // Date Added at index 3
+                supply.setValueAt(cboCategory.getSelectedItem().toString(), row, 2);
+                supply.setValueAt(cboAddedDay.getSelectedItem() + "/" + cboAddedMonth.getSelectedItem() + "/" + cboAddedYear.getSelectedItem(), row, 3);
                 reset();
-                db.overwriteRecords(supply); // Save after editing
+                db.overwriteRecords(supply);
                 JOptionPane.showMessageDialog(myFrame, "Item edited successfully!");
             } else {
                 JOptionPane.showMessageDialog(myFrame, "Please select a record to edit.");
@@ -297,11 +274,11 @@ public class ItemCreate implements ActionListener {
         } else if (e.getSource().equals(btnDelete)) {
             int selectedRow = tblSupply.getSelectedRow();
             if (selectedRow >= 0) {
-                int confirm = JOptionPane.showConfirmDialog(myFrame, "Are you sure you want to delete this item?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(myFrame, "Delete this item?", "Confirm", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     supply.removeRow(selectedRow);
                     reset();
-                    db.overwriteRecords(supply); // Save after deleting
+                    db.overwriteRecords(supply);
                     JOptionPane.showMessageDialog(myFrame, "Item deleted successfully!");
                 }
             } else {
@@ -310,97 +287,86 @@ public class ItemCreate implements ActionListener {
         } else if (e.getSource().equals(btnSearch) || e.getSource().equals(txtSearch)) {
             String searchTerm = txtSearch.getText().trim().toLowerCase();
 
-            // Create a temporary model to display search results
+            if (searchTerm.isEmpty()) {
+                tblSupply.setModel(supply); // Restore main model
+                db.displayRecord(supply);
+                return;
+            }
+
             DefaultTableModel searchResultsModel = new DefaultTableModel();
-            searchResultsModel.setColumnIdentifiers(field); // Use the same column identifiers
+            searchResultsModel.setColumnIdentifiers(field);
 
             boolean found = false;
             for (int i = 0; i < supply.getRowCount(); i++) {
-                boolean rowMatches = false;
                 Vector<String> rowData = new Vector<>();
+                boolean match = false;
                 for (int j = 0; j < supply.getColumnCount(); j++) {
-                    String value = supply.getValueAt(i, j).toString().toLowerCase();
-                    rowData.add(supply.getValueAt(i, j).toString()); // Add original value to rowData
-                    if (value.contains(searchTerm)) {
-                        rowMatches = true;
+                    String cell = supply.getValueAt(i, j).toString();
+                    rowData.add(cell);
+                    if (cell.toLowerCase().contains(searchTerm)) {
+                        match = true;
                     }
                 }
-                if (rowMatches) {
+                if (match) {
                     searchResultsModel.addRow(rowData);
                     found = true;
                 }
             }
 
-            tblSupply.setModel(searchResultsModel); // Set the table to display search results
-
-            if (!found && !searchTerm.isEmpty()) {
-                JOptionPane.showMessageDialog(myFrame, "No matching record found for '" + txtSearch.getText() + "'.");
-            } else if (searchTerm.isEmpty()) {
-                db.displayRecord(supply); // Reload all records if search term is empty
+            tblSupply.setModel(searchResultsModel);
+            if (!found) {
+                JOptionPane.showMessageDialog(myFrame, "No match found for '" + searchTerm + "'.");
             }
         } else if (e.getSource().equals(btnClose)) {
             db.overwriteRecords(supply);
-            JOptionPane.showMessageDialog(myFrame, "Data saved. Closing application.");
             myFrame.dispose();
-            // Assuming AdminDashboard exists for navigation
-            // new AdminDashboard();
         }
     }
 
-    /**
-     * Inner class to handle file operations for the inventory.
-     * This keeps the Database logic self-contained within the SupermarketInventory class.
-     */
     private class Database {
-        private String filename;
+        private final String filename;
 
         public Database(String filename) {
             this.filename = filename;
         }
 
         public void displayRecord(DefaultTableModel model) {
-            model.setRowCount(0); // Clear existing data
+            model.setRowCount(0);
             try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] data = line.split(",");
-                    Vector<String> row = new Vector<>();
-                    for (String s : data) {
-                        row.add(s.trim());
+                    if (data.length >= 4) {
+                        Vector<String> row = new Vector<>();
+                        for (int i = 0; i < 4; i++) {
+                            row.add(data[i].trim());
+                        }
+                        model.addRow(row);
                     }
-                    model.addRow(row);
                 }
-            } catch (FileNotFoundException e) {
-                // File might not exist yet, which is fine for the first run
-                System.out.println("Database file not found. A new one will be created upon saving.");
             } catch (IOException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(myFrame, "Error loading data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                System.err.println("Could not load file: " + e.getMessage());
             }
         }
 
         public void overwriteRecords(DefaultTableModel model) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
                 for (int i = 0; i < model.getRowCount(); i++) {
-                    StringBuilder line = new StringBuilder();
                     for (int j = 0; j < model.getColumnCount(); j++) {
-                        line.append(model.getValueAt(i, j).toString());
+                        bw.write(model.getValueAt(i, j).toString());
                         if (j < model.getColumnCount() - 1) {
-                            line.append(",");
+                            bw.write(",");
                         }
                     }
-                    bw.write(line.toString());
                     bw.newLine();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(myFrame, "Error saving data: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                System.err.println("Could not save file: " + e.getMessage());
             }
         }
     }
 
     public static void main(String[] args) {
-        // Ensure UI updates are done on the Event Dispatch Thread
         SwingUtilities.invokeLater(ItemCreate::new);
     }
 }

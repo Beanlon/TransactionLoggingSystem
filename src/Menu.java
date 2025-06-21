@@ -65,7 +65,9 @@ public class Menu extends JFrame {
         btnInventory.addActionListener(e -> cardLayout.show(rightpanel, "INVENTORY"));
 
         setVisible(true);
+
     }
+
 
     public static void main(String[] args) {
         new Menu();

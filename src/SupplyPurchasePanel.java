@@ -43,7 +43,7 @@ public class SupplyPurchasePanel implements ActionListener {
 
     // NEW: Reference to InventorySystem1 to refresh its table
     private InventorySystem1 inventorySystem1Ref;
-
+    private Menu menuRef;
 
     // MODIFIED CONSTRUCTOR: Now accepts an InventorySystem1 object
     public SupplyPurchasePanel(InventorySystem1 inventorySystem1Ref) {
@@ -280,8 +280,9 @@ public class SupplyPurchasePanel implements ActionListener {
         scrollPanePurchase.getViewport().setBackground(Color.WHITE);
         myFrame.add(scrollPanePurchase);
 
-        purchaseDb.displayRecord(purchaseModel); // Load existing purchase records
-
+        // --- IMPORTANT CHANGE: Do NOT load existing purchase records here
+        // We want the 'Current Purchase List' to be empty when the panel opens.
+        // purchaseDb.displayRecord(purchaseModel); // REMOVED THIS LINE
 
         // Close button
         btnClose = new JButton("Close");
@@ -298,7 +299,7 @@ public class SupplyPurchasePanel implements ActionListener {
         myFrame.add(background);
 
         myFrame.setVisible(true);
-        autoGenerateSupplyID(); // Generate initial Supply ID
+        autoGenerateSupplyID(); // Generate initial Supply ID on open
     }
 
     private void setRealTimeDate() {
@@ -307,20 +308,32 @@ public class SupplyPurchasePanel implements ActionListener {
         txtDateSupplied.setText(now.format(formatter));
     }
 
+    /**
+     * Auto-generates the next Supply ID by reading existing records from PurchaseRecords.txt.
+     */
     private void autoGenerateSupplyID() {
         int nextId = 1;
-        if (purchaseModel.getRowCount() > 0) {
-            for (int i = 0; i < purchaseModel.getRowCount(); i++) {
-                try {
-                    // Assuming Supply ID is the first column in purchaseModel (index 0)
-                    int currentId = Integer.parseInt(purchaseModel.getValueAt(i, 0).toString());
-                    if (currentId >= nextId) {
-                        nextId = currentId + 1;
+        try (BufferedReader br = new BufferedReader(new FileReader(purchaseDb.filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length > 0) {
+                    try {
+                        int currentId = Integer.parseInt(data[0].trim()); // Supply ID is the first column
+                        if (currentId >= nextId) {
+                            nextId = currentId + 1;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Warning: Non-numeric Supply ID found in PurchaseRecords.txt: " + data[0]);
                     }
-                } catch (NumberFormatException e) {
-                    System.err.println("Warning: Non-numeric Supply ID found in purchase records: " + purchaseModel.getValueAt(i, 0));
                 }
             }
+        } catch (FileNotFoundException e) {
+            System.out.println("PurchaseRecords.txt not found. Starting Supply ID from 1.");
+            // If file doesn't exist, nextId remains 1.
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(myFrame, "Error reading PurchaseRecords.txt for Supply ID generation: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         txtSupplyID.setText(String.valueOf(nextId));
     }
@@ -331,7 +344,7 @@ public class SupplyPurchasePanel implements ActionListener {
     private void resetSupplierInputs() {
         txtSupplierName.setText("");
         txtSupplierCode.setText("");
-        autoGenerateSupplyID();
+        // autoGenerateSupplyID() is called separately after processing
     }
 
     /**
@@ -424,12 +437,12 @@ public class SupplyPurchasePanel implements ActionListener {
         if (e.getSource().equals(btnAddItemToPurchase)) {
             // Validate supplier info first
             if (isEmptySupplierInfo()) {
-                JOptionPane.showMessageDialog(myFrame, "Please fill in all Supplier Information fields (Supplier Name, Supplier Code).", "Missing Information", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(myFrame, "Please fill in all **Supplier Information** fields (Supplier Name, Supplier Code).", "Missing Information", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             // Validate selected item info
             if (isEmptySelectedItemInfo()) {
-                JOptionPane.showMessageDialog(myFrame, "Please select an Item from the inventory and fill in Quantity and Cost.", "Missing Information", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(myFrame, "Please select an **Item** from the inventory and fill in **Quantity** and **Cost**.", "Missing Information", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -463,7 +476,7 @@ public class SupplyPurchasePanel implements ActionListener {
 
                 purchaseModel.addRow(purchaseData);
                 resetSelectedItemInputs(); // Clear item-specific inputs after adding
-                JOptionPane.showMessageDialog(myFrame, "Item added to the purchase list.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(myFrame, "Item added to the **purchase list**.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(myFrame, "Quantity and Cost must be valid numbers. Please check your input.", "Input Error", JOptionPane.ERROR_MESSAGE);
@@ -473,49 +486,51 @@ public class SupplyPurchasePanel implements ActionListener {
             int selectedRow = tblPurchaseDetails.getSelectedRow();
             if (selectedRow >= 0) {
                 purchaseModel.removeRow(selectedRow);
-                JOptionPane.showMessageDialog(myFrame, "Selected item removed from the purchase list.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(myFrame, "Selected item removed from the **purchase list**.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(myFrame, "Please select an item from the purchase list to remove.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(myFrame, "Please select an item from the **purchase list** to remove.", "No Selection", JOptionPane.WARNING_MESSAGE);
             }
         } else if (e.getSource().equals(btnProcessPurchase)) {
             if (purchaseModel.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(myFrame, "No items in the purchase list to process.", "No Items", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(myFrame, "No items in the **purchase list** to process.", "No Items", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             // Confirm with the user before processing a purchase
-            int confirm = JOptionPane.showConfirmDialog(myFrame, "Are you sure you want to process this purchase?\n" +
+            int confirm = JOptionPane.showConfirmDialog(myFrame, "Are you sure you want to **process this purchase**?\n" +
                     "This will save all items in the current list.", "Confirm Purchase", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                purchaseDb.overwriteRecords(purchaseModel); // 1. Save all current purchase records (to PurchaseRecords.txt)
+                purchaseDb.appendRecords(purchaseModel); // 1. Save all current purchase records (to PurchaseRecords.txt)
 
                 // NEW: Save the restock summary
                 saveRestockSummary(); // 2. Save a summary of this restock
-
-                JOptionPane.showMessageDialog(myFrame, "Purchase processed successfully! All items saved.", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
 
                 // NEW: Refresh the InventorySystem1 table after processing purchase
                 if (inventorySystem1Ref != null) {
                     inventorySystem1Ref.loadInventoryData(); // 3. Tell InventorySystem1 to reload its inventory (from Items.txt)
                 }
 
+                JOptionPane.showMessageDialog(myFrame, "Purchase processed successfully! All items saved.", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
+
                 // Reset the purchase table and inputs for a new purchase
-                purchaseModel.setRowCount(0); // 4. THIS IS THE LINE THAT CLEARS YOUR 'CURRENT PURCHASE LIST' TABLE
+                purchaseModel.setRowCount(0); // 4. Clear the 'Current Purchase List' table
                 resetSupplierInputs();       // 5. Clear supplier info fields
                 resetSelectedItemInputs();   // 6. Clear selected item fields
                 autoGenerateSupplyID();      // 7. Generate a new Supply ID for the next purchase
+
+                // OPTION 1: Close the panel after processing (as per your request)
+                // myFrame.dispose();
+
+                // OPTION 2: Keep the panel open for further purchases (current behavior, more typical)
+                // No change needed here if you prefer to keep it open.
             }
-            // REMOVE THIS EXTRA CLOSING CURLY BRACE '}' HERE
         } else if (e.getSource().equals(btnClose)) {
             if (purchaseModel.getRowCount() > 0) {
-                int confirm = JOptionPane.showConfirmDialog(myFrame, "You have unsaved items in the purchase list. Do you want to save them before closing?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(myFrame, "You have unsaved items in the **purchase list**. Do you want to save them before closing?", "Unsaved Changes", JOptionPane.YES_NO_CANCEL_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    purchaseDb.overwriteRecords(purchaseModel);
-                    // Decide if you want to save a summary on close as well.
-                    // For this request, it's only on "Process" click, so not adding here.
+                    purchaseDb.appendRecords(purchaseModel);
                     JOptionPane.showMessageDialog(myFrame, "Purchase data saved. Closing application.", "Saved", JOptionPane.INFORMATION_MESSAGE);
-                    // NEW: Refresh the InventorySystem1 table after saving and closing
                     if (inventorySystem1Ref != null) {
                         inventorySystem1Ref.loadInventoryData();
                     }
@@ -528,6 +543,7 @@ public class SupplyPurchasePanel implements ActionListener {
             }
         }
     }
+
     private class Database {
         private String filename;
 
@@ -555,8 +571,8 @@ public class SupplyPurchasePanel implements ActionListener {
             }
         }
 
-        public void overwriteRecords(DefaultTableModel model) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+        public void appendRecords(DefaultTableModel model) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, true))) { // true = append mode
                 for (int i = 0; i < model.getRowCount(); i++) {
                     StringBuilder line = new StringBuilder();
                     for (int j = 0; j < model.getColumnCount(); j++) {
@@ -573,6 +589,7 @@ public class SupplyPurchasePanel implements ActionListener {
                 JOptionPane.showMessageDialog(myFrame, "Error saving data to " + filename + ": " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+
     }
 
     public static void main(String[] args) {
