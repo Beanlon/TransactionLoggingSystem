@@ -53,7 +53,7 @@ public class InventorySystem1 extends JPanel {
                     parentFrame.dispose();
                 }
                 // Pass 'this' (the InventorySystem1 instance) to SupplyPurchasePanel
-                new SupplyPurchasePanel(InventorySystem1.this);
+                new SupplyPurchase(InventorySystem1.this);
             }
         });
         add(panel2);
