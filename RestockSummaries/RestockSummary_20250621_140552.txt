@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 4
+Supplier Name: wdaawd
+Supplier Code: adawda
+Date Processed: 21/06/2025 14:05:45
+
+Items Restocked:
+  - Item: Beer, Quantity: 6, Cost/Item: 50.00, Selling Price/Item: 55.00
+
+Total Purchase Cost: 300.00
+--------------------------------
