@@ -51,8 +51,10 @@ public class Menu extends JFrame {
         add(rightpanel, BorderLayout.CENTER);
 
         // Add panels to rightpanel
-        InventorySystem1 inventoryPanel = new InventorySystem1();
+        InventorySystem1 inventoryPanel = new InventorySystem1(this);
         MainPanel mainPanel = new MainPanel();
+
+        mainPanel.setInventorySystem(inventoryPanel);
 
 // 👇 This is the important line you're asking about!
         mainPanel.setInventorySystem(inventoryPanel);
@@ -67,7 +69,9 @@ public class Menu extends JFrame {
         setVisible(true);
 
     }
-
+    public void showInventorySystem1() {
+        cardLayout.show(rightpanel,"INVENTORY");
+    }
 
     public static void main(String[] args) {
         new Menu();

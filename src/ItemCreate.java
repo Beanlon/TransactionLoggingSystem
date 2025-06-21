@@ -6,9 +6,9 @@ import java.io.*;
 import java.util.Calendar;
 import java.util.Vector;
 
-public class ItemCreate implements ActionListener {
+public class ItemCreate extends JFrame implements ActionListener {
 
-    JFrame myFrame;
+
     JPanel panelInfo;
     JLabel lblID, lblName, lblCategory, lblSearch, lblDateAdded;
     JTextField txtID, txtName, txtSearch;
@@ -22,18 +22,17 @@ public class ItemCreate implements ActionListener {
     Database db = new Database("Items.txt");
 
     public ItemCreate() {
-        myFrame = new JFrame("Supermarket Inventory");
-        myFrame.setLayout(null);
-        myFrame.setSize(900, 480);
-        myFrame.setLocationRelativeTo(null);
-        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myFrame.setResizable(false);
+        this.setLayout(null);
+        this.setSize(900, 480);
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setResizable(false);
 
         JLabel lblHeader = new JLabel("Manage Supermarket Items");
         lblHeader.setBounds(60, 5, 400, 100);
         lblHeader.setForeground(new Color(200, 0, 0));
         lblHeader.setFont(new Font("DM Sans", Font.BOLD, 20));
-        myFrame.add(lblHeader);
+        this.add(lblHeader);
 
         panelInfo = new RoundedPanel(30);
         panelInfo.setLayout(null);
@@ -105,7 +104,7 @@ public class ItemCreate implements ActionListener {
         panelInfo.add(addedDatePanel);
         panelInfo.add(btnAdd);
         panelInfo.add(btnClear);
-        myFrame.add(panelInfo);
+        this.add(panelInfo);
 
         lblSearch = new JLabel("Search:");
         txtSearch = new JTextField();
@@ -116,9 +115,9 @@ public class ItemCreate implements ActionListener {
         btnSearch.setBounds(740, 60, 80, 25);
         btnSearch.setBackground(new Color(200, 0, 0));
         btnSearch.setForeground(Color.white);
-        myFrame.add(lblSearch);
-        myFrame.add(txtSearch);
-        myFrame.add(btnSearch);
+        this.add(lblSearch);
+        this.add(txtSearch);
+        this.add(btnSearch);
 
         field.add("ID");
         field.add("Name");
@@ -143,7 +142,7 @@ public class ItemCreate implements ActionListener {
         scrollPane.setBounds(460, 100, 400, 280);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
         scrollPane.getViewport().setBackground(Color.WHITE);
-        myFrame.add(scrollPane);
+        this.add(scrollPane);
 
         db.displayRecord(supply); // Initial load
         tblSupply.setModel(supply); // Ensure correct model is active
@@ -158,7 +157,7 @@ public class ItemCreate implements ActionListener {
         for (JButton b : new JButton[]{btnEdit, btnDelete, btnClose}) {
             b.setBackground(new Color(200, 0, 0));
             b.setForeground(Color.white);
-            myFrame.add(b);
+            this.add(b);
         }
 
         btnAdd.addActionListener(this);
@@ -191,9 +190,9 @@ public class ItemCreate implements ActionListener {
         JPanel background = new JPanel();
         background.setBackground(new Color(246, 243, 243));
         background.setSize(900, 480);
-        myFrame.add(background);
+        this.add(background);
 
-        myFrame.setVisible(true);
+        this.setVisible(true);
         autoGenerateID();
     }
 
@@ -241,7 +240,7 @@ public class ItemCreate implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(btnAdd)) {
             if (isEmptyInput()) {
-                JOptionPane.showMessageDialog(myFrame, "Please fill in the Item Name.");
+                JOptionPane.showMessageDialog(this, "Please fill in the Item Name.");
                 return;
             }
             Vector<String> data = new Vector<>();
@@ -252,14 +251,14 @@ public class ItemCreate implements ActionListener {
             supply.addRow(data);
             reset();
             db.overwriteRecords(supply);
-            JOptionPane.showMessageDialog(myFrame, "Item added successfully!");
+            JOptionPane.showMessageDialog(this, "Item added successfully!");
         } else if (e.getSource().equals(btnClear)) {
             reset();
         } else if (e.getSource().equals(btnEdit)) {
             int row = tblSupply.getSelectedRow();
             if (row >= 0) {
                 if (isEmptyInput()) {
-                    JOptionPane.showMessageDialog(myFrame, "Please fill in the Item Name.");
+                    JOptionPane.showMessageDialog(this, "Please fill in the Item Name.");
                     return;
                 }
                 supply.setValueAt(txtName.getText(), row, 1);
@@ -267,22 +266,22 @@ public class ItemCreate implements ActionListener {
                 supply.setValueAt(cboAddedDay.getSelectedItem() + "/" + cboAddedMonth.getSelectedItem() + "/" + cboAddedYear.getSelectedItem(), row, 3);
                 reset();
                 db.overwriteRecords(supply);
-                JOptionPane.showMessageDialog(myFrame, "Item edited successfully!");
+                JOptionPane.showMessageDialog(this, "Item edited successfully!");
             } else {
-                JOptionPane.showMessageDialog(myFrame, "Please select a record to edit.");
+                JOptionPane.showMessageDialog(this, "Please select a record to edit.");
             }
         } else if (e.getSource().equals(btnDelete)) {
             int selectedRow = tblSupply.getSelectedRow();
             if (selectedRow >= 0) {
-                int confirm = JOptionPane.showConfirmDialog(myFrame, "Delete this item?", "Confirm", JOptionPane.YES_NO_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(this, "Delete this item?", "Confirm", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     supply.removeRow(selectedRow);
                     reset();
                     db.overwriteRecords(supply);
-                    JOptionPane.showMessageDialog(myFrame, "Item deleted successfully!");
+                    JOptionPane.showMessageDialog(this, "Item deleted successfully!");
                 }
             } else {
-                JOptionPane.showMessageDialog(myFrame, "Please select a record to delete.");
+                JOptionPane.showMessageDialog(this, "Please select a record to delete.");
             }
         } else if (e.getSource().equals(btnSearch) || e.getSource().equals(txtSearch)) {
             String searchTerm = txtSearch.getText().trim().toLowerCase();
@@ -315,11 +314,11 @@ public class ItemCreate implements ActionListener {
 
             tblSupply.setModel(searchResultsModel);
             if (!found) {
-                JOptionPane.showMessageDialog(myFrame, "No match found for '" + searchTerm + "'.");
+                JOptionPane.showMessageDialog(this, "No match found for '" + searchTerm + "'.");
             }
         } else if (e.getSource().equals(btnClose)) {
             db.overwriteRecords(supply);
-            myFrame.dispose();
+            this.dispose();
         }
     }
 

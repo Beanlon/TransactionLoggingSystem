@@ -25,14 +25,16 @@ public class SupplyPurchase extends JFrame implements ActionListener {
     DefaultTableModel inventoryModel;
     JTable tblPurchaseDetails;
     DefaultTableModel purchaseModel;
+    private Menu menuRef;
 
     Database inventoryDb = new Database("Items.txt");
     Database purchaseDb = new Database("PurchaseRecords.txt");
 
     private InventorySystem1 inventorySystem1Ref;
 
-    public SupplyPurchase(InventorySystem1 inventorySystem1Ref) {
+    public SupplyPurchase(InventorySystem1 inventorySystem1Ref, Menu menuRef) {
         this.inventorySystem1Ref = inventorySystem1Ref;
+        this.menuRef = menuRef;
 
         setTitle("Supply and Purchase Management");
         setLayout(null);
@@ -472,11 +474,6 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 resetSelectedItemInputs();   // 6. Clear selected item fields
                 autoGenerateSupplyID();      // 7. Generate a new Supply ID for the next purchase
 
-                // OPTION 1: Close the panel after processing (as per your request)
-                // myFrame.dispose();
-
-                // OPTION 2: Keep the panel open for further purchases (current behavior, more typical)
-                // No change needed here if you prefer to keep it open.
             }
         } else if (e.getSource().equals(btnClose)) {
             if (purchaseModel.getRowCount() > 0) {
@@ -487,12 +484,17 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                     if (inventorySystem1Ref != null) {
                         inventorySystem1Ref.loadInventoryData();
                     }
+                    menuRef.setVisible(true);
                     this.dispose();
+
                 } else if (confirm == JOptionPane.NO_OPTION) {
+                    menuRef.setVisible(true);
                     this.dispose();
                 }
             } else {
+                menuRef.setVisible(true);
                 this.dispose();
+
             }
         }
     }
@@ -546,6 +548,6 @@ public class SupplyPurchase extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new SupplyPurchase(null));
+        SwingUtilities.invokeLater(() -> new SupplyPurchase(null, null));
     }
 }

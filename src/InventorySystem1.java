@@ -16,12 +16,14 @@ public class InventorySystem1 extends JPanel {
     private JTable inventoryTable;
     private DefaultTableModel inventoryTableModel;
     private JPanel paneltable;
+    private Menu menuRef;
 
     // A map to store item categories from Items.txt for quick lookup
     private Map<String, String> itemCategories = new HashMap<>();
 
 
-    InventorySystem1() {
+    public InventorySystem1(Menu menuRef) {
+        this.menuRef = menuRef;
         setLayout(null);
         setPreferredSize(new Dimension(900, 520));
 
@@ -49,11 +51,14 @@ public class InventorySystem1 extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(InventorySystem1.this);
+
                 if (parentFrame != null) {
                     parentFrame.dispose();
+
+                    if (parentFrame instanceof Menu) {
+                        new SupplyPurchase(InventorySystem1.this, (Menu) parentFrame);
+                    }
                 }
-                // Pass 'this' (the InventorySystem1 instance) to SupplyPurchasePanel
-                new SupplyPurchase(InventorySystem1.this);
             }
         });
         add(panel2);
@@ -90,16 +95,11 @@ public class InventorySystem1 extends JPanel {
         paneltable.add(scrollPane, BorderLayout.CENTER);
         add(paneltable);
 
-        // Load item categories from Items.txt first
         loadItemCategories();
-        // Then load inventory data which will use these categories
         loadInventoryData();
     }
 
-    /**
-     * Loads item names and their categories from "Items.txt" into itemCategories map.
-     * Assumes Items.txt format: ID, Name, Category, Date Added
-     */
+
     private void loadItemCategories() {
         itemCategories.clear(); // Clear existing categories
         try (BufferedReader br = new BufferedReader(new FileReader("Items.txt"))) {
@@ -120,15 +120,6 @@ public class InventorySystem1 extends JPanel {
         }
     }
 
-
-    /**
-     * Loads inventory data from PurchaseRecords.txt to populate the table.
-     * Displays only items that have been purchased, aggregating stock and
-     * showing the actual last restocked date/time from purchase records.
-     * Assumes PurchaseRecords.txt format (comma-separated):
-     * [0]Supply ID, [1]Supplier Name, [2]Supplier Code, [3]Item Name, [4]Quantity,
-     * [5]Cost, [6]Profit %, [7]Selling Price, [8]Date Supplied
-     */
     public void loadInventoryData() {
         inventoryTableModel.setRowCount(0); // Clear existing data
 
