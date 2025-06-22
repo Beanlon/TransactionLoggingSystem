@@ -1,9 +1,12 @@
 package utils;
 
 public class Item {
+    private String ID;
     private String name;
     private double price;
     private int quantity;
+    private String category;
+    String lastrestocked;
 
     public Item(String name, double price, int quantity) {
         this.name = name;

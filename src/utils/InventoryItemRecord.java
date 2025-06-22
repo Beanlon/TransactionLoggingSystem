@@ -3,22 +3,22 @@ package utils;
 import java.io.*;
 import java.util.*;
 
-public class InventoryManager {
+public class InventoryItemRecord {
     private static final String FILE_NAME = "INVENTORY.txt";
     private String name;
     private double price;
     private int quantity;
 
     // Fixed constructor: quantity before price
-    public InventoryManager(String name, int quantity, double price) {
+    public InventoryItemRecord(String name, int quantity, double price) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
     }
 
     // Load inventory from file
-    public static Map<String, InventoryManager> loadInventory() {
-        Map<String, InventoryManager> inventory = new LinkedHashMap<>();
+    public static Map<String, InventoryItemRecord> loadInventory() {
+        Map<String, InventoryItemRecord> inventory = new LinkedHashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -27,7 +27,7 @@ public class InventoryManager {
                     String name = parts[0].trim();
                     int quantity = Integer.parseInt(parts[1].trim());
                     double price = Double.parseDouble(parts[2].trim());
-                    inventory.put(name, new InventoryManager(name, quantity, price));
+                    inventory.put(name, new InventoryItemRecord(name, quantity, price));
                 }
             }
         } catch (FileNotFoundException e) {
@@ -39,9 +39,9 @@ public class InventoryManager {
     }
 
     // Save inventory to file
-    public static void saveInventory(Map<String, InventoryManager> inventory) {
+    public static void saveInventory(Map<String, InventoryItemRecord> inventory) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (InventoryManager item : inventory.values()) {
+            for (InventoryItemRecord item : inventory.values()) {
                 bw.write(String.format("%s,%d,%.2f", item.name, item.quantity, item.price));
                 bw.newLine();
             }
@@ -51,15 +51,15 @@ public class InventoryManager {
     }
 
     public static void restockItem(String itemName, int quantity) {
-        Map<String, InventoryManager> inventory = loadInventory();
+        Map<String, InventoryItemRecord> inventory = loadInventory();
 
-        InventoryManager item = inventory.get(itemName);
+        InventoryItemRecord item = inventory.get(itemName);
         if (item != null) {
             item.addQuantity(quantity); // existing item, add to quantity
         } else {
             // Optional: if item doesn't exist, create it with default price (e.g., 0.0)
             System.out.println("Item '" + itemName + "' not found in inventory. Adding with default price.");
-            inventory.put(itemName, new InventoryManager(itemName, quantity, 0.0));
+            inventory.put(itemName, new InventoryItemRecord(itemName, quantity, 0.0));
         }
 
         saveInventory(inventory); // Save back to file

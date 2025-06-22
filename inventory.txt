@@ -1,2 +1,1 @@
-Beans,10,13.20
-Corned Beef,10,22.00
+Corned Beef,24,13.20

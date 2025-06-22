@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.List;
 
 import utils.Inputvalidator;
-import utils.InventoryManager;
+import utils.InventoryItemRecord;
 import utils.Item;
 import utils.TransactionFileManager;
 import utils.TransactionFileManager.TransactionData;
@@ -27,7 +27,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
     public DefaultTableModel model;
     public JButton btnadd, btnedit, btnremove, btnclear, btnsave, btnBack;
     private boolean saved = true;
-    private Map<String, InventoryManager> inventoryMap;
+    private Map<String, InventoryItemRecord> inventoryMap;
     private TableRowSorter<DefaultTableModel> sorter; // Added for searching
 
     public TransactionFrame(String name, String date) {
@@ -249,8 +249,8 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     private List<Item> loadInventoryItems() {
         List<Item> items = new ArrayList<>();
-        inventoryMap = InventoryManager.loadInventory();
-        for (InventoryManager inv : inventoryMap.values()) {
+        inventoryMap = InventoryItemRecord.loadInventory();
+        for (InventoryItemRecord inv : inventoryMap.values()) {
             items.add(new Item(inv.getName(), inv.getPrice(), inv.getQuantity()));
         }
         return items;
@@ -329,7 +329,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
             }
 
             selectedItem.reduceQuantity(quantityInt);
-            InventoryManager inv = inventoryMap.get(selectedItem.getName());
+            InventoryItemRecord inv = inventoryMap.get(selectedItem.getName());
             if (inv != null) inv.reduceQuantity(quantityInt);
             int selectedIndex = comboItem.getSelectedIndex();
             ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(selectedIndex);
@@ -352,7 +352,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
             int quantity = Integer.parseInt(model.getValueAt(selectedModelRow, 2).toString());
 
             // Restore quantity in inventoryMap
-            InventoryManager inv = inventoryMap.get(itemName);
+            InventoryItemRecord inv = inventoryMap.get(itemName);
             if (inv != null) {
                 inv.addQuantity(quantity);
             }
@@ -420,7 +420,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         String filename = "logs/" + lblNameValue.getText() + ".csv";
         File file = new File(filename);
         TransactionFileManager.saveToFile(file, lblNameValue.getText(), lblDateValue.getText(), transactionNumber, model);
-        InventoryManager.saveInventory(inventoryMap);
+        InventoryItemRecord.saveInventory(inventoryMap);
     }
 
     public void loadFromFile(String filename) {
