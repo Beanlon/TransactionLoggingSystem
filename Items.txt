@@ -1,2 +1,2 @@
-1,Corned Beef,Canned Goods,22/6/2025
-2,Tuna,Canned Goods,22/6/2025
+1,Corned Beef,Canned Goods,23/6/2025
+2,Beans,Canned Goods,23/6/2025

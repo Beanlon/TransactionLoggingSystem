@@ -15,7 +15,7 @@ public class Menu extends JFrame {
         setResizable(false);
         setLayout(new BorderLayout());
 
-        // Left red sidebar (dashboard)
+        // ----------------------------------Left red sidebar (dashboard)----------------------------------------------------
         JPanel dashboard = new JPanel();
         dashboard.setLayout(new BoxLayout(dashboard, BoxLayout.Y_AXIS));
         dashboard.setBackground(new Color(201, 42, 42));
@@ -45,7 +45,7 @@ public class Menu extends JFrame {
         dashboard.add(Box.createVerticalStrut(-5));
         dashboard.add(btnInventory);
 
-        // Right side with CardLayout
+        //-------------------------------------Right part (CardLayout)-------------------------------------------------------
         cardLayout = new CardLayout();
         rightpanel = new JPanel(cardLayout);
         add(rightpanel, BorderLayout.CENTER);
@@ -55,9 +55,8 @@ public class Menu extends JFrame {
         MainPanel mainPanel = new MainPanel();
 
         mainPanel.setInventorySystem(inventoryPanel);
-
-// 👇 This is the important line you're asking about!
         mainPanel.setInventorySystem(inventoryPanel);
+
         rightpanel.add(mainPanel, "MAIN");
         rightpanel.add(inventoryPanel, "INVENTORY");
         cardLayout.show(rightpanel, "MAIN");  // Show initial panel

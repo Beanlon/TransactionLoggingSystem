@@ -4,39 +4,40 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Vector;
+import java.text.DecimalFormat; // Import DecimalFormat
 
 public class SupplyPurchase extends JFrame implements ActionListener {
 
-    RoundedPanel panelSupplierInfo;
-    JLabel lblSupplyID, lblSupplierName, lblSupplierCode;
-    JTextField txtSupplyID, txtSupplierName, txtSupplierCode;
-    RoundedPanel panelSelectedItemInfo;
-    JLabel lblSelectedItem, lblQuantity, lblCost, lblProfitIncrease, lblDateSupplied;
-    JTextField txtSelectedItem, txtQuantity, txtCost;
-    JComboBox<String> cboProfitIncrease;
-    JTextField txtDateSupplied;
-    JButton btnAddItemToPurchase, btnRemovePurchaseItem, btnProcessPurchase, btnClose;
-    JTable tblInventoryItems;
-    DefaultTableModel inventoryModel;
-    JTable tblPurchaseDetails;
-    DefaultTableModel purchaseModel;
+    private RoundedPanel panelSupplierInfo;
+    private JLabel lblSupplyID, lblSupplierName, lblSupplierCode;
+    private JTextField txtSupplyID, txtSupplierName, txtSupplierCode;
+    private RoundedPanel panelSelectedItemInfo;
+    private JLabel lblSelectedItem, lblQuantity, lblCost, lblProfitIncrease, lblDateSupplied;
+    private JTextField txtSelectedItem, txtQuantity, txtCost;
+    private JComboBox<String> cboProfitIncrease;
+    private JTextField txtDateSupplied;
+    private JButton btnAddItemToPurchase, btnRemovePurchaseItem, btnProcessPurchase, btnClose;
+    private JTable tblInventoryItems;
+    private DefaultTableModel inventoryModel;
+    private JTable tblPurchaseDetails;
+    private DefaultTableModel purchaseModel;
     private Menu menuRef;
-
-    Database inventoryDb = new Database("Items.txt");
-    Database purchaseDb = new Database("PurchaseRecords.txt");
-    InventoryManager inventoryManager = new InventoryManager("Inventory.txt");
-
+    private Database inventoryDb = new Database("Items.txt");
+    private Database purchaseDb = new Database("PurchaseRecords.txt");
+    private InventoryManager inventoryManager = new InventoryManager("Inventory.txt");
     private InventorySystem1 inventorySystem1Ref;
 
+    //=====================================|Supply Purchase with parameters|===========================================
     public SupplyPurchase(InventorySystem1 inventorySystem1Ref, Menu menuRef) {
         this.inventorySystem1Ref = inventorySystem1Ref;
         this.menuRef = menuRef;
 
+        //Dimensions and the intial output
         setTitle("Supply and Purchase Management");
         setLayout(null);
         setSize(1000, 620);
@@ -44,12 +45,14 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
 
+        // Header label
         JLabel lblHeader = new JLabel("Supply & Purchase Management");
         lblHeader.setBounds(40, 15, 500, 30);
         lblHeader.setForeground(new Color(200, 0, 0));
         lblHeader.setFont(new Font("DM Sans", Font.BOLD, 20));
         add(lblHeader);
 
+        // Supplier Information Panel
         panelSupplierInfo = new RoundedPanel(25);
         panelSupplierInfo.setLayout(null);
         panelSupplierInfo.setBounds(40, 60, 380, 180);
@@ -85,6 +88,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         panelSupplierInfo.add(txtSupplierCode);
         add(panelSupplierInfo);
 
+        // Selected Item Panel
         panelSelectedItemInfo = new RoundedPanel(25);
         panelSelectedItemInfo.setLayout(null);
         panelSelectedItemInfo.setBounds(40, 260, 380, 250);
@@ -152,6 +156,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         setRealTimeDate();
         add(panelSelectedItemInfo);
 
+        // Buttons Panel
         JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 5, 0));
         buttonPanel.setBounds(40, 515, 400, 30);
         buttonPanel.setBackground(new Color(246, 243, 243));
@@ -169,6 +174,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         }
         add(buttonPanel);
 
+        // Inventory Items Table
         JLabel lblInventoryTable = new JLabel("Available Inventory Items");
         lblInventoryTable.setBounds(440, 17, 300, 25);
         lblInventoryTable.setFont(new Font("Arial", Font.BOLD, 20));
@@ -210,6 +216,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
             }
         });
 
+        // Purchase Details Table
         JLabel lblPurchaseTable = new JLabel("Current Purchase List");
         lblPurchaseTable.setBounds(440, 250, 500, 25);
         lblPurchaseTable.setFont(new Font("Arial", Font.BOLD, 16));
@@ -242,6 +249,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         scrollPanePurchase.setBounds(440, 280, 520, 215);
         add(scrollPanePurchase);
 
+        // Close Button
         btnClose = new JButton("Close");
         btnClose.setBounds(860, 15, 100, 25);
         btnClose.setBackground(new Color(200, 0, 0));
@@ -249,6 +257,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         btnClose.addActionListener(this);
         add(btnClose);
 
+        // Background
         JPanel background = new JPanel();
         background.setBackground(new Color(246, 243, 243));
         background.setSize(1000, 750);
@@ -340,7 +349,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 String cost = purchaseModel.getValueAt(i, 5).toString();
                 String sellingPrice = purchaseModel.getValueAt(i, 7).toString();
 
-                bw.write(String.format("  - Item: %s, Quantity: %s, Cost/Item: %s, Selling Price/Item: %s\n",
+                bw.write(String.format(" - Item: %s, Quantity: %s, Cost/Item: %s, Selling Price/Item: %s\n",
                         itemName, quantity, cost, sellingPrice));
 
                 try {
@@ -366,6 +375,11 @@ public class SupplyPurchase extends JFrame implements ActionListener {
             double sellingPrice = Double.parseDouble(purchaseModel.getValueAt(i, 7).toString());
 
             inventoryManager.updateItem(itemName, quantity, sellingPrice);
+        }
+
+        // Refresh the inventory system display if reference exists
+        if (inventorySystem1Ref != null) {
+            inventorySystem1Ref.refreshInventory();
         }
     }
 
@@ -396,7 +410,14 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 String profitPercentageStr = cboProfitIncrease.getSelectedItem().toString().replace("%", "");
                 double profitPercentage = Double.parseDouble(profitPercentageStr) / 100.0;
 
-                double sellingPrice = cost * (1 + profitPercentage);
+                double rawSellingPrice = cost * (1 + profitPercentage);
+                // Round to the nearest whole number first
+                double roundedSellingPrice = Math.round(rawSellingPrice);
+
+                // Format to two decimal places for display
+                DecimalFormat df = new DecimalFormat("0.00");
+                String formattedSellingPrice = df.format(roundedSellingPrice);
+
 
                 Vector<String> purchaseData = new Vector<>();
                 purchaseData.add(txtSupplyID.getText());
@@ -406,7 +427,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 purchaseData.add(String.valueOf(quantity));
                 purchaseData.add(String.format("%.2f", cost));
                 purchaseData.add(cboProfitIncrease.getSelectedItem().toString());
-                purchaseData.add(String.format("%.2f", sellingPrice));
+                purchaseData.add(formattedSellingPrice); // Use the formatted selling price here
                 purchaseData.add(txtDateSupplied.getText());
 
                 purchaseModel.addRow(purchaseData);
@@ -438,8 +459,9 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                 updateInventoryQuantities();
                 saveRestockSummary();
 
+                // This will refresh the inventory display
                 if (inventorySystem1Ref != null) {
-                    inventorySystem1Ref.loadInventoryData();
+                    inventorySystem1Ref.refreshInventory();
                 }
 
                 JOptionPane.showMessageDialog(this, "Purchase processed successfully!", "Purchase Complete", JOptionPane.INFORMATION_MESSAGE);
@@ -457,7 +479,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
                     updateInventoryQuantities();
                     JOptionPane.showMessageDialog(this, "Data saved. Closing window.", "Saved", JOptionPane.INFORMATION_MESSAGE);
                     if (inventorySystem1Ref != null) {
-                        inventorySystem1Ref.loadInventoryData();
+                        inventorySystem1Ref.refreshInventory();
                     }
                     menuRef.setVisible(true);
                     this.dispose();

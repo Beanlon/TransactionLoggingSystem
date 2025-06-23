@@ -3,13 +3,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class InventorySystem1 extends JPanel {
 
@@ -18,10 +15,12 @@ public class InventorySystem1 extends JPanel {
     private JPanel paneltable;
     private Menu menuRef;
     private InventoryManager inventoryManager;
+    private Map<String, String> lastRestockDates;
 
     public InventorySystem1(Menu menuRef) {
         this.menuRef = menuRef;
-        this.inventoryManager = new InventoryManager("inventory.txt");
+        this.inventoryManager = new InventoryManager("Inventory.txt");
+        this.lastRestockDates = new HashMap<>();
         setLayout(null);
         setPreferredSize(new Dimension(900, 520));
 
@@ -37,7 +36,7 @@ public class InventorySystem1 extends JPanel {
                 if (parentFrame != null) {
                     parentFrame.dispose();
                 }
-                new ItemCreate(InventorySystem1.this); // Pass reference to update inventory after creation
+                new ItemCreate(InventorySystem1.this);
             }
         });
         add(panel1);
@@ -65,22 +64,14 @@ public class InventorySystem1 extends JPanel {
         paneltable.setBackground(Color.white);
         paneltable.setLayout(new BorderLayout());
 
-        // Define column names for the inventory table
-        Vector<String> columnNames = new Vector<>();
-        columnNames.add("ID");
-        columnNames.add("Item");
-        columnNames.add("Category");
-        columnNames.add("Price");
-        columnNames.add("Stock");
-        columnNames.add("Date Added");
-
-        inventoryTableModel = new DefaultTableModel() {
+        // Define column names
+        String[] columnNames = {"ID", "Item Name", "Category", "Price", "Stock", "Last Restocked"};
+        inventoryTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
-        inventoryTableModel.setColumnIdentifiers(columnNames);
 
         inventoryTable = new JTable(inventoryTableModel);
         inventoryTable.setBackground(Color.WHITE);
@@ -93,94 +84,117 @@ public class InventorySystem1 extends JPanel {
         paneltable.add(scrollPane, BorderLayout.CENTER);
         add(paneltable);
 
-        // Load the inventory data when the panel is initialized
         loadInventoryData();
     }
 
-    /**
-     * Loads inventory data from both Items.txt and Inventory.txt
-     * Combines the data for display in the table
-     */
     public void loadInventoryData() {
-        inventoryTableModel.setRowCount(0); // Clear existing data
+        // First load purchase records to get restock dates
+        loadPurchaseRecords();
 
-        // First load from Items.txt for detailed item information
-        Map<String, Vector<Object>> itemsData = new HashMap<>();
+        inventoryTableModel.setRowCount(0); // Clear the table
+        Map<String, Vector<Object>> itemsMap = new HashMap<>();
 
+        // 1. Load ALL items from Items.txt (this is where ID and Category come from)
         try (BufferedReader br = new BufferedReader(new FileReader("Items.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
-                if (data.length >= 7) {
-                    try {
-                        String id = data[0].trim();
-                        String itemName = data[1].trim();
-                        String category = data[2].trim();
-                        String dateAdded = data[3].trim();
-                        double sellingPrice = Double.parseDouble(data[6].trim());
-
-                        Vector<Object> row = new Vector<>();
-                        row.add(id);
-                        row.add(itemName);
-                        row.add(category);
-                        row.add(String.format("%.2f", sellingPrice));
-                        row.add(0); // Placeholder for quantity (will be updated from Inventory.txt)
-                        row.add(dateAdded);
-
-                        itemsData.put(itemName, row);
-                    } catch (NumberFormatException e) {
-                        System.err.println("Warning: Invalid numeric data in Items.txt: " + line);
-                    }
+                if (data.length >= 3) { // We only need first 3 columns for ID, Name, Category
+                    Vector<Object> row = new Vector<>();
+                    row.add(data[0].trim()); // ID (FIRST COLUMN)
+                    row.add(data[1].trim()); // Item Name
+                    row.add(data[2].trim()); // CATEGORY (THIRD COLUMN)
+                    row.add("₱0.00"); // Price placeholder
+                    row.add(0); // Stock placeholder
+                    row.add("-"); // Restock date placeholder
+                    itemsMap.put(data[1].trim().toLowerCase(), row);
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading Items.txt: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Failed to load item data. Please check Items.txt",
+                    "Data Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Then update quantities from Inventory.txt
+        // 2. Update with inventory quantities and prices
         try (BufferedReader br = new BufferedReader(new FileReader("Inventory.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
                 if (data.length >= 3) {
                     String itemName = data[0].trim();
-                    int quantity = Integer.parseInt(data[1].trim());
+                    String itemKey = itemName.toLowerCase();
 
-                    if (itemsData.containsKey(itemName)) {
-                        itemsData.get(itemName).set(4, quantity); // Update quantity
+                    if (itemsMap.containsKey(itemKey)) {
+                        // Update existing item
+                        Vector<Object> row = itemsMap.get(itemKey);
+                        row.set(3, "₱" + data[2].trim()); // Price
+                        row.set(4, Integer.parseInt(data[1].trim())); // Stock
                     } else {
-                        // Item exists in Inventory.txt but not in Items.txt
+                        // Create new entry for items not in Items.txt
                         Vector<Object> row = new Vector<>();
-                        row.add("N/A"); // No ID
-                        row.add(itemName);
-                        row.add("Uncategorized");
-                        row.add(data[2].trim()); // Price from Inventory.txt
-                        row.add(quantity);
-                        row.add("Unknown");
-                        itemsData.put(itemName, row);
+                        row.add("N/A"); // No ID available
+                        row.add(itemName); // Item Name
+                        row.add("Uncategorized"); // Default category
+                        row.add("₱" + data[2].trim()); // Price
+                        row.add(Integer.parseInt(data[1].trim())); // Stock
+                        row.add("-"); // Restock date
+                        itemsMap.put(itemKey, row);
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | NumberFormatException e) {
             System.err.println("Error reading Inventory.txt: " + e.getMessage());
         }
 
-        // Add all combined data to the table
-        for (Vector<Object> row : itemsData.values()) {
+        // 3. Update with restock dates
+        for (Map.Entry<String, String> entry : lastRestockDates.entrySet()) {
+            String itemKey = entry.getKey().toLowerCase();
+            if (itemsMap.containsKey(itemKey)) {
+                itemsMap.get(itemKey).set(5, entry.getValue());
+            }
+        }
+
+        // Finally add all items to the table
+        for (Vector<Object> row : itemsMap.values()) {
             inventoryTableModel.addRow(row);
         }
     }
 
-    /**
-     * Refreshes the inventory table from both data sources
-     */
+    private void loadPurchaseRecords() {
+        try (BufferedReader br = new BufferedReader(new FileReader("PurchaseRecords.txt"))) {
+            String line;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length >= 9) {
+                    String itemName = data[3].trim();
+                    String dateStr = data[8].trim();
+
+                    try {
+                        Date currentDate = dateFormat.parse(dateStr);
+                        String existingDate = lastRestockDates.get(itemName);
+                        if (existingDate == null || currentDate.after(dateFormat.parse(existingDate))) {
+                            lastRestockDates.put(itemName, dateStr);
+                        }
+                    } catch (ParseException e) {
+                        System.err.println("Invalid date format: " + dateStr);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading PurchaseRecords.txt: " + e.getMessage());
+        }
+    }
+
     public void refreshInventory() {
+        lastRestockDates.clear();
+        loadPurchaseRecords();
         loadInventoryData();
     }
 
-    /**
-     * Gets the inventory manager instance
-     */
     public InventoryManager getInventoryManager() {
         return inventoryManager;
     }

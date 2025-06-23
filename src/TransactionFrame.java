@@ -263,7 +263,6 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     private void updateTotal() {
         double total = 0.0;
-        // Iterate through the actual rows in the table model, not the visible rows if filtered
         for (int i = 0; i < model.getRowCount(); i++) {
             Object value = model.getValueAt(i, 3);
             try {
