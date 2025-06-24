@@ -93,30 +93,30 @@ public class Register extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == back) {
-            new Login();
-            this.dispose();
+            new Login(); // it goes back to the login GUI
+            this.dispose(); //disposes the current frame displayed
         }
 
         if (e.getSource() == btnreg) {
-            String user = txtusername.getText().trim();
-            String pass1 = txtpassword1.getText().trim();
-            String pass2 = new String(txtpassword2.getPassword()).trim();
+            String user = txtusername.getText().trim(); // creates the string user which gets the username entered
+            String pass1 = txtpassword1.getText().trim(); // creates the string password that gets the unrevealed password
+            String pass2 = new String(txtpassword2.getPassword()).trim(); // creates the string pass2 which is gets from the passwordfield
 
-            if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) {
+            if (user.isEmpty() || pass1.isEmpty() || pass2.isEmpty()) { // if condition that checks if either of the string are empty then it shows a prompt
                 JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (!pass1.equals(pass2)) {
+            if (!pass1.equals(pass2)) { //if the pass1(unrevealed password) is not equal to pass2(hidden password) then it shows the prompt
                 JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (auth.register(user, pass1)) {
+            if (auth.register(user, pass1)) { //if conditionn that uses the register function from UserAuth and getting the required parameters which is user and pass1
                 JOptionPane.showMessageDialog(this, "Registration successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                new Login();
+                new Login(); // opens the login page after the registrationis successful
                 this.dispose();
-            } else {
+            } else { //shows this prompt when the user already exists
                 JOptionPane.showMessageDialog(this, "Username already exists.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }

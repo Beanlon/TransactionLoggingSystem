@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 5
+Supplier Name: SM
+Supplier Code: 12345
+Date Processed: 24/06/2025 15:50:58
+
+Items Restocked:
+ - Item: Zesto, Quantity: 12, Cost/Item: 7.00, Selling Price/Item: 10.00
+
+Total Purchase Cost: 84.00
+--------------------------------

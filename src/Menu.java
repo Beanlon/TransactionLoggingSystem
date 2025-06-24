@@ -7,6 +7,7 @@ public class Menu extends JFrame {
     CardLayout cardLayout;
     JPanel rightpanel;
 
+
     public Menu() {
         setTitle("Transaction Logging System");
         setSize(920, 640);
@@ -55,31 +56,19 @@ public class Menu extends JFrame {
         MainPanel mainPanel = new MainPanel();
 
         mainPanel.setInventorySystem(inventoryPanel);
-        mainPanel.setInventorySystem(inventoryPanel);
 
-        rightpanel.add(mainPanel, "MAIN");
-        rightpanel.add(inventoryPanel, "INVENTORY");
+        rightpanel.add(mainPanel, "MAIN"); //shows mainpanel under the constraint "Menu"
+        rightpanel.add(inventoryPanel, "INVENTORY"); //shows inventorypanel under the constraint "Inventory"
         cardLayout.show(rightpanel, "MAIN");  // Show initial panel
 
         // Button actions
-        btnmain.addActionListener(e -> cardLayout.show(rightpanel, "MAIN"));
-        btnInventory.addActionListener(e -> cardLayout.show(rightpanel, "INVENTORY"));
-
+        btnmain.addActionListener(e -> cardLayout.show(rightpanel, "MAIN")); //when btnmain is clicked it should show mainpanel
+        btnInventory.addActionListener(e -> cardLayout.show(rightpanel, "INVENTORY")); //when btnInventory is clicked it shows the InventoryPanel
 
         setVisible(true);
 
     }
-    public void setPanel(JPanel panel) {
-        getContentPane().removeAll();
-        getContentPane().add(panel);
-        revalidate();
-        repaint();
 
-    }
-
-    public void showInventorySystem1() {
-        cardLayout.show(rightpanel,"INVENTORY");
-    }
 
     public static void main(String[] args) {
         new Menu();

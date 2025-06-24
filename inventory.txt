@@ -1,2 +1,3 @@
+Zesto,10,10.00
 Beans,18,17.00
-Corned Beef,18,18.00
+Corned Beef,16,18.00

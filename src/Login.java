@@ -30,8 +30,6 @@ public class Login extends JFrame implements ActionListener {
         imagelabel.setBounds(394,37, 300, 300);
         add(imagelabel);
 
-
-
         JPanel rightPanel = new JPanel();
         rightPanel.setBounds(400, 0, 300, 420);
 
@@ -176,7 +174,7 @@ public class Login extends JFrame implements ActionListener {
             // uses a function from userauth called login calling parameters username, password to be reffered back from the userauth class
             if (auth.login(username, password)) {
                 JOptionPane.showMessageDialog(this, "Login successful!");
-                new Menu(); // Open main page
+                new Menu(); // Open menu page
                 this.dispose(); // Close login window
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid username or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
