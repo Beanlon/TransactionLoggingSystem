@@ -433,7 +433,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please select a log file to load.", "No Log Selected", JOptionPane.WARNING_MESSAGE);
             }
 
-        } else if (e.getSource() == delete) {
+        }else if (e.getSource() == delete) {
             int selectedRowView = logTable.getSelectedRow();
             if (selectedRowView >= 0) {
                 int selectedRowModel = logTable.convertRowIndexToModel(selectedRowView);
@@ -441,22 +441,37 @@ public class MainPanel extends JPanel implements ActionListener {
                 String filepath = (String) tableModel.getValueAt(selectedRowModel, filePathCol);
                 File fileToDelete = new File(filepath);
 
-                int confirm = JOptionPane.showConfirmDialog(this,
-                        "Are you sure you want to delete this log?\nInventory will be restocked.",
-                        "Confirm Deletion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                int confirm = JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to delete this log?",
+                        "Confirm Deletion",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
 
                 if (confirm == JOptionPane.YES_OPTION) {
+                    int restock = JOptionPane.showConfirmDialog(
+                            this,
+                            "Do you want to return stock to inventory?",
+                            "Return Stock?",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE
+                    );
+
+                    boolean shouldRestock = (restock == JOptionPane.YES_OPTION);
+
                     if (fileToDelete.exists()) {
-                        restockFromDeletedLog(fileToDelete);
-                        if (inventorySystem != null) {
-                            inventorySystem.refreshInventory();
+                        if (shouldRestock) {
+                            restockFromDeletedLog(fileToDelete);
+                            if (inventorySystem != null) {
+                                inventorySystem.refreshInventory();
+                            }
                         }
                         if (fileToDelete.delete()) {
-                            // No need to removeRow here, just reload the table
                             fileToMonthYear.remove(filepath);
                             loadSavedLogs();
                             updateFilteredOverview((String) monthComboBox.getSelectedItem());
-                            JOptionPane.showMessageDialog(this, "Log deleted and inventory restocked.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showMessageDialog(this, "Log deleted" + (shouldRestock ? " and inventory restocked." : "."), "Success", JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JOptionPane.showMessageDialog(this, "Failed to delete log. Please check file permissions.", "Deletion Error", JOptionPane.ERROR_MESSAGE);
                         }
@@ -490,6 +505,7 @@ public class MainPanel extends JPanel implements ActionListener {
 
     private void restockFromDeletedLog(File file) {
         try {
+            // Step 1: Read inventory into map
             Map<String, String[]> inventoryMap = new LinkedHashMap<>();
             File inventoryFile = new File("Inventory.txt");
             if (inventoryFile.exists()) {
@@ -503,57 +519,63 @@ public class MainPanel extends JPanel implements ActionListener {
                     }
                 }
             } else {
-                System.out.println("Inventory.txt not found. Cannot restock from deleted log.");
+                JOptionPane.showMessageDialog(this, "Inventory.txt not found. Cannot restock.", "Restock Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // Step 2: Read log and update map
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
-                int lineCount = 0;
-
+                int lineNum = 0;
                 while ((line = reader.readLine()) != null) {
-                    lineCount++;
-                    if (lineCount <= 3 || line.trim().isEmpty()) continue;
+                    lineNum++;
+                    if (lineNum <= 3 || line.trim().isEmpty()) continue; // skip header
 
                     String[] parts = line.split(",");
-                    if (parts.length >= 3) {
-                        String itemName = parts[0].trim();
-                        int quantitySold = 0;
+                    if (parts.length < 3) continue;
+
+                    String itemName = parts[0].trim();
+                    if (itemName.equalsIgnoreCase("Subtotal") || itemName.equalsIgnoreCase("Total") ||
+                            itemName.equalsIgnoreCase("Discount") || itemName.isEmpty())
+                        continue;
+
+                    int quantitySold = 0;
+                    try {
+                        quantitySold = Integer.parseInt(parts[2].trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Skipping malformed quantity: " + Arrays.toString(parts));
+                        continue;
+                    }
+                    String[] itemData = inventoryMap.get(itemName);
+                    if (itemData != null) {
+                        int currentStock = 0;
                         try {
-                            quantitySold = Integer.parseInt(parts[2].trim());
+                            currentStock = Integer.parseInt(itemData[1].trim());
                         } catch (NumberFormatException e) {
-                            System.err.println("Skipping malformed quantity in deleted log file " + file.getName() + ": " + line);
+                            System.out.println("Skipping malformed inventory stock for " + itemName);
                             continue;
                         }
-
-                        if (inventoryMap.containsKey(itemName)) {
-                            String[] itemData = inventoryMap.get(itemName);
-                            double currentStockDouble = 0.0;
-                            try {
-                                currentStockDouble = Double.parseDouble(itemData[2].trim());
-                            } catch (NumberFormatException e) {
-                                System.err.println("Malformed current stock in Inventory.txt for item " + itemName + ": " + itemData[2] + ". Setting to 0.");
-                                currentStockDouble = 0.0;
-                            }
-                            int updatedStock = (int) Math.round(currentStockDouble + quantitySold);
-                            itemData[2] = String.valueOf(updatedStock);
-                        } else {
-                            System.out.println("Warning: Item '" + itemName + "' from deleted log not found in Inventory.txt. Cannot restock.");
-                        }
+                        int updatedStock = currentStock + quantitySold;
+                        itemData[1] = String.valueOf(updatedStock);
+                        inventoryMap.put(itemName, itemData);
+                        System.out.println("Restocked " + itemName + " by " + quantitySold + " (new stock: " + updatedStock + ")");
+                    } else {
+                        System.out.println("Log item not found in inventory: " + itemName);
                     }
                 }
             }
 
-            try (PrintWriter writer = new PrintWriter(new FileWriter("Inventory.txt"))) {
+            // Step 3: Write inventory map back to Inventory.txt
+            try (PrintWriter writer = new PrintWriter(new FileWriter(inventoryFile))) {
                 for (String[] item : inventoryMap.values()) {
                     writer.println(String.join(",", item));
                 }
             }
-            System.out.println("Inventory updated successfully from deleted log: " + file.getName());
+            System.out.println("Inventory.txt updated successfully.");
 
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error restocking inventory: " + e.getMessage(), "Restock Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error updating inventory: " + e.getMessage(), "Restock Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

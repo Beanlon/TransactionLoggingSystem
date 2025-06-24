@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public class Login extends JFrame implements ActionListener {
 
+
     JLabel lblusername, lblpassword, lblTitle;
     JTextField txtusername ;
     JPasswordField txtpassword;
@@ -152,23 +153,27 @@ public class Login extends JFrame implements ActionListener {
     }
 
 
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == Regbtn) {
-            // Open your main entry page here
+            // Opens the register panel
             new Register();
             this.dispose(); // Optionally close login window
         } else if (e.getSource() == loginbtn) {
-            String username = txtusername.getText();
-            String password = txtpassword.getText();
+            String username = txtusername.getText(); //gets the username
+            String password = txtpassword.getText(); //gets the password
 
+            // Shows errors if there is nothing inside the textfield
             if (username.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-            UserAuth auth = new UserAuth("users.txt");
+            // calls userauth with the name auth to call the util class with the methods
+            UserAuth auth = new UserAuth("users.txt"); //it refers to the users when checking the file
 
+            // uses a function from userauth called login calling parameters username, password to be reffered back from the userauth class
             if (auth.login(username, password)) {
                 JOptionPane.showMessageDialog(this, "Login successful!");
                 new Menu(); // Open main page
