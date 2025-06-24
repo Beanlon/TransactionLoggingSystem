@@ -58,7 +58,7 @@ public class Menu extends JFrame {
         mainPanel.setInventorySystem(inventoryPanel);
 
         rightpanel.add(mainPanel, "MAIN"); //shows mainpanel under the constraint "Menu"
-        rightpanel.add(inventoryPanel, "INVENTORY"); //shows inventorypanel under the constraint "Inventory"
+        rightpanel.add(inventoryPanel, "INVENTORY"); //shows inventorypanel under the constraint "Inventory "
         cardLayout.show(rightpanel, "MAIN");  // Show initial panel
 
         // Button actions
