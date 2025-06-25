@@ -1,3 +1,2 @@
-1,Corned Beef,Canned Goods,23/6/2025
-2,Beans,Canned Goods,23/6/2025
-3,Zesto,Canned Goods,24/6/2025
+1,corned beef,Canned Goods,25/6/2025
+3,safeguard,Personal Care,25/6/2025

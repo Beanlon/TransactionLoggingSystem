@@ -36,7 +36,7 @@ public class InventorySystem1 extends JPanel {
                 if (parentFrame != null) {
                     parentFrame.dispose();
                 }
-                new ItemCreate(InventorySystem1.this);
+                new ItemCreate(InventorySystem1.this, menuRef);
             }
         });
         add(panel1);

@@ -15,11 +15,16 @@ public class ItemCreate extends JFrame implements ActionListener {
     JTable tblSupply;
     DefaultTableModel supply;
     JComboBox<String> cboCategory;
+    private Menu menuRef;
+    private InventorySystem1 inventorySystem1Ref;
 
     Vector<String> field = new Vector<>();
     Database db = new Database("Items.txt");
 
-    public ItemCreate(InventorySystem1 inventorySystem1) {
+    public ItemCreate(InventorySystem1 inventorySystem1, Menu menuRef) {
+        this.inventorySystem1Ref = inventorySystem1Ref;
+        this.menuRef = menuRef;
+
         this.setLayout(null);
         this.setSize(900, 480);
         this.setLocationRelativeTo(null);
@@ -295,6 +300,7 @@ public class ItemCreate extends JFrame implements ActionListener {
             }
         } else if (e.getSource().equals(btnClose)) {
             db.overwriteRecords(supply);
+            menuRef.setVisible(true);
             this.dispose();
         }
     }

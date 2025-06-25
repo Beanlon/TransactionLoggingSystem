@@ -18,25 +18,26 @@ import utils.TransactionFileManager.TransactionData;
 
 public class TransactionFrame extends JFrame implements ActionListener {
     private final RoundedPanel panelLogDetails;
-    private String transactionNumber;
+    private String transactionID;
     private JTextField txtQuantity, txtSearch, TxtNameValue, TxtDateValue, txtTransactionIDValue;
     private JComboBox<Item> comboItem;
     private JLabel  lblTotalValue;
     private JTable table;
     public DefaultTableModel model;
-    public JButton btnadd, btnedit, btnremove, btnclear, btnsave, btnClose;
+    public JButton btnadd, btnremove, btnclear, btnsave, btnClose;
     private boolean saved = true;
-    private Map<String, InventoryItemRecord> inventoryMap;
+    private Map<String, InventoryItemRecord> inventoryMap; //an arraylist map that requires a string and has values from InventoryItemRecord
     private TableRowSorter<DefaultTableModel> sorter; // Added for searching
 
+    // this constructor takes parameters name and date
     public TransactionFrame(String name, String date) {
         this(name, date, null);
-        setNameAndDate(name, date);
+        setNameAndDate(name, date); //Gets the name and date to be used later
     }
 
     public TransactionFrame(String logname, String date, String filepath) {
         setTitle("Transaction Panel");
-        setSize(900, 650);
+        setSize(1000, 580);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -44,19 +45,9 @@ public class TransactionFrame extends JFrame implements ActionListener {
         JPanel contentPane = new JPanel(null);
         setContentPane(contentPane);
 
-        // Top-right Close Button
-        btnClose = new JButton("Close");
-        btnClose.setFocusPainted(false);
-        btnClose.setBackground(new Color(201, 42, 42));
-        btnClose.setForeground(Color.WHITE);
-        btnClose.setBounds(750, 12, 80, 32);
-        btnClose.addActionListener(this);
-        contentPane.add(btnClose);
-
-
         panelLogDetails = new RoundedPanel(25);
         panelLogDetails.setLayout(null);
-        panelLogDetails.setBounds(35, 45, 365, 220);
+        panelLogDetails.setBounds(35, 60, 365, 220);
         panelLogDetails.setBackground(Color.white);
 
         // Subheader (optional)
@@ -90,7 +81,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
         JLabel lblTransactionID = new JLabel("TRANSACTION NO:");
         String generatedID = generateRandomTransactionID();
-        txtTransactionIDValue = new JTextField(generatedID); // <-- THIS IS THE LINE TO CHANGE
+        txtTransactionIDValue = new JTextField(generatedID);
         txtTransactionIDValue.setEditable(false);
         txtTransactionIDValue.setPreferredSize(new Dimension(140, 28));
 
@@ -114,20 +105,24 @@ public class TransactionFrame extends JFrame implements ActionListener {
         gbc.gridx = 1;
         panelinside.add(txtTransactionIDValue, gbc);
 
-// Add inner panel to outer panel using BorderLayout.CENTER for perfect fit
         panelLogDetails.add(panelinside);
         contentPane.add(panelLogDetails);
 
 
 
         RoundedPanel panelItemInput = new RoundedPanel(25);
-        panelItemInput.setBounds(35, 320, 365, 150); // Move so it doesn't overlap panelLogDetails and is in the visible area
-        panelItemInput.setBackground(new Color(201, 42, 42)); // Give it a visible background
-        panelItemInput.setLayout(null); // Use absolute positioning for child panel
+        panelItemInput.setBounds(35, 305, 365, 160);
+        panelItemInput.setBackground(new Color(201, 42, 42));
+        panelItemInput.setLayout(null);
 
+        JLabel panelitemtitle = new JLabel("ITEM LIST");
+        panelitemtitle.setBounds(20, 15, 300, 25);
+        panelitemtitle.setFont(new Font("Arial", Font.BOLD, 16));
+        panelitemtitle.setForeground(Color.white);
+        panelItemInput.add(panelitemtitle);
 // Inner grid panel for input fields
         JPanel panelItemGrid = new JPanel(new GridBagLayout());
-        panelItemGrid.setBounds(15, 15, 335, 120); // Position within panelItemInput
+        panelItemGrid.setBounds(15, 25, 335, 120); // Position within panelItemInput
         panelItemGrid.setOpaque(false); // Let the rounded panel background show through
 
 // Add components to panelItemGrid as before
@@ -147,7 +142,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
         gbc2.gridx = 0; gbc2.gridy = 0; gbc2.anchor = GridBagConstraints.EAST;
         panelItemGrid.add(lblItem, gbc2);
-        gbc2.gridy = 1; gbc2.anchor = GridBagConstraints.WEST;
+        gbc2.gridx = 1; gbc2.anchor = GridBagConstraints.WEST;
         panelItemGrid.add(comboItem, gbc2);
 
         JLabel lblQuantity = new JLabel("QUANTITY:");
@@ -160,205 +155,255 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
         gbc2.gridx = 0; gbc2.gridy = 2; gbc2.anchor = GridBagConstraints.EAST;
         panelItemGrid.add(lblQuantity, gbc2);
-        gbc2.gridy = 3; gbc2.anchor = GridBagConstraints.WEST;
+        gbc2.gridx = 1; gbc2.anchor = GridBagConstraints.WEST;
         panelItemGrid.add(txtQuantity, gbc2);
 
-// Add the grid to the rounded panel and the rounded panel to the content pane
         panelItemInput.add(panelItemGrid);
         contentPane.add(panelItemInput);
 
-        // Input and Search Panel
-        JPanel panelInputMain = new JPanel(new BorderLayout());
-        panelInputMain.setBounds(10, 190, 565, 35);
-        panelInputMain.setBorder(BorderFactory.createEtchedBorder());
-        panelInputMain.setBackground(Color.WHITE);
-        contentPane.add(panelInputMain);
+        JPanel panelBtn = new JPanel(new GridLayout(1, 5, 12, 0));
+        panelBtn.setBounds(230, 490, 500, 30);
 
-        JPanel panelBtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-        panelBtn.setBackground(Color.WHITE);
         btnadd = new JButton("ADD");
         btnremove = new JButton("REMOVE");
         btnclear = new JButton("CLEAR");
         btnsave = new JButton("SAVE");
+        btnClose = new JButton("Close"); // Moved to panelBtn
+
+        Dimension smallBtnSize = new Dimension(50, 25);
+        btnadd.setPreferredSize(smallBtnSize);
+        btnremove.setPreferredSize(smallBtnSize);
+        btnclear.setPreferredSize(smallBtnSize);
+        btnsave.setPreferredSize(smallBtnSize);
+        btnClose.setPreferredSize(smallBtnSize);
+
+        Font btnFont = new Font("Arial", Font.PLAIN, 13);
+        btnadd.setFont(btnFont);
+        btnremove.setFont(btnFont);
+        btnclear.setFont(btnFont);
+        btnsave.setFont(btnFont);
+        btnClose.setFont(btnFont);
+
         btnadd.addActionListener(this);
         btnremove.addActionListener(this);
         btnclear.addActionListener(this);
         btnsave.addActionListener(this);
+        btnClose.addActionListener(this);
+
+        btnClose.setFocusPainted(false);
+        btnClose.setBackground(new Color(201, 42, 42));
+        btnClose.setForeground(Color.WHITE);
+
+        btnadd.setFocusPainted(false);
+        btnadd.setBackground(new Color(201, 42, 42));
+        btnadd.setForeground(Color.WHITE);
+
+        btnremove.setFocusPainted(false);
+        btnremove.setBackground(new Color(201, 42, 42));
+        btnremove.setForeground(Color.WHITE);
+
+        btnsave.setFocusPainted(false);
+        btnsave.setBackground(new Color(201, 42, 42));
+        btnsave.setForeground(Color.WHITE);
+
+        btnclear.setFocusPainted(false);
+        btnclear.setBackground(new Color(201, 42, 42));
+        btnclear.setForeground(Color.WHITE);
+
         panelBtn.add(btnadd);
         panelBtn.add(btnremove);
         panelBtn.add(btnclear);
         panelBtn.add(btnsave);
+        panelBtn.add(btnClose);
 
-        JPanel panelSearch = new JPanel();
-        panelSearch.setLayout(new BoxLayout(panelSearch, BoxLayout.X_AXIS));
-        panelSearch.setBackground(Color.WHITE);
-        panelSearch.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        txtSearch = new JTextField("Search..");
-        txtSearch.setPreferredSize(new Dimension(150, 30));
-        txtSearch.setMaximumSize(new Dimension(150, 30));
+        contentPane.add(panelBtn);
+
+        JPanel panelSearch = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panelSearch.setBounds(790, 27, 180, 30);
+
+        txtSearch = new JTextField();
+        txtSearch.setPreferredSize(new Dimension(170, 30));
         txtSearch.setForeground(Color.GRAY);
+        txtSearch.setText("Search");
+
+
+        //It allows you have an interaction with the search textfield
         txtSearch.addFocusListener(new FocusAdapter() {
+            @Override
             public void focusGained(FocusEvent e) {
-                if (txtSearch.getText().equals("Search") || txtSearch.getText().equals("Search..")) {
+                // Only clear if the textfield is being clicked and follows this conditions if it does the sets the empty text
+                if (txtSearch.getForeground().equals(Color.GRAY) && txtSearch.getText().trim().equals("Search")) {
                     txtSearch.setText("");
-                    txtSearch.setForeground(Color.BLACK);
+                    txtSearch.setForeground(Color.BLACK); //it turns the text to black
                 }
             }
+            //If the focus from the textfield dissapears it puts back the foreground and it puts back the text inside
+            @Override
             public void focusLost(FocusEvent e) {
-                if (txtSearch.getText().isEmpty()) {
+                if (txtSearch.getText().trim().isEmpty()) {
                     txtSearch.setForeground(Color.GRAY);
-                    txtSearch.setText("Search..");
+                    txtSearch.setText("Search");
                 }
             }
         });
 
-        // Add DocumentListener to txtSearch for live filtering
+        //This will enable for the item to be searched when it has already been scaned for customer purchase
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            private boolean isPlaceholder() {
+                return txtSearch.getForeground().equals(Color.GRAY) && txtSearch.getText().trim().equals("Search");
+            }
             @Override
             public void insertUpdate(DocumentEvent e) {
-                searchTable(txtSearch.getText());
+                if (!isPlaceholder()) searchTable(txtSearch.getText());
             }
-
             @Override
             public void removeUpdate(DocumentEvent e) {
-                searchTable(txtSearch.getText());
+                if (!isPlaceholder()) searchTable(txtSearch.getText());
+                else searchTable("");
             }
-
             @Override
             public void changedUpdate(DocumentEvent e) {
-                searchTable(txtSearch.getText());
             }
         });
-
-        panelSearch.add(Box.createHorizontalGlue());
         panelSearch.add(txtSearch);
+        contentPane.add(panelSearch);
 
-        panelInputMain.add(panelBtn, BorderLayout.WEST);
-        panelInputMain.add(panelSearch, BorderLayout.EAST);
 
+        // Creates a tablemodel which based on the string array as the bases of the column to put the details in
         String[] columnNames = {"ITEM", "PRICE", "QUANTITY", "SUBTOTAL"};
-        model = new DefaultTableModel(columnNames, 0);
-        table = new JTable(model);
-        sorter = new TableRowSorter<>(model); // Initialize sorter
-        table.setRowSorter(sorter); // Set sorter on the table
+        model = new DefaultTableModel(columnNames, 0);  //Starts the row at zero meaning empty
+        table = new JTable(model); // Creates a table based on the model
+        sorter = new TableRowSorter<>(model); //Allows us to sort the rows of the table based on the columns
+        table.setRowSorter(sorter); //Enables to us to sort based on the sorter created
 
+        //Allows us to scroll on the table created when rows overlap the height of the panel
         JScrollPane scrollPane = new JScrollPane(table);
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer(); //Allows the text to be centered
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER); // the horizontal alignment is centered
+        for (int i = 0; i < table.getColumnCount(); i++) { //creates the loop that checks all columns, it only ends when there is no more column left
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer); //for every column it takes every detail from that column makes the text centered
         }
+
+        //Creates a panelTable where the scrollpane will be added to easily set the table's coordinates and size
         JPanel panelTable = new JPanel(new BorderLayout());
-        panelTable.setBounds(200, 240, 565, 330);
+        panelTable.setBounds(430, 65, 530, 350);
         panelTable.add(scrollPane, BorderLayout.CENTER);
         contentPane.add(panelTable);
 
-        JPanel panelTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        panelTotal.setBounds(10, 580, 565, 30);
+        //Creates a panel to display the total of the transcation
+        RoundedPanel panelTotal = new RoundedPanel(15);
+        panelTotal.setBounds(735, 430, 225, 35);
+        panelTotal.setLayout(new FlowLayout(FlowLayout.LEFT));
         panelTotal.setBackground(Color.WHITE);
-        panelTotal.setBorder(BorderFactory.createLineBorder(new Color(201, 42, 42)));
         JLabel lblTotalText = new JLabel("TOTAL: ");
-        lblTotalText.setFont(new Font("Arial", Font.BOLD, 16));
-        lblTotalValue = new JLabel("\u20B10.00");
-        lblTotalValue.setFont(new Font("Arial", Font.BOLD, 16));
+        lblTotalText.setFont(new Font("Arial", Font.BOLD, 20));
+        lblTotalValue = new JLabel("\u20B10.00"); //creates a unicode of pesos with the 0.00 as initial total
+        lblTotalValue.setFont(new Font("Arial", Font.BOLD, 20));
         panelTotal.add(lblTotalText);
         panelTotal.add(lblTotalValue);
         contentPane.add(panelTotal);
 
+        //It checks if the filepath is not null and is not empty meaning it will load this file if the conditions are met
         if (filepath != null && !filepath.isEmpty()) {
             loadFromFile(filepath);
         }
     }
 
+    // creates a list to show the products available
     private List<Item> loadInventoryItems() {
-        List<Item> items = new ArrayList<>();
-        inventoryMap = InventoryItemRecord.loadInventory();
+        List<Item> items = new ArrayList<>(); //creates a new arraylist based on the Item class that were items added
+        inventoryMap = InventoryItemRecord.loadInventory(); //Uses inventoryMap which allows us to load the inventory to be seen the JCombobox
         for (InventoryItemRecord inv : inventoryMap.values()) {
-            items.add(new Item(inv.getName(), inv.getPrice(), inv.getQuantity()));
+            items.add(new Item(inv.getName(), inv.getPrice(), inv.getQuantity())); //Adds item from the including the name, price and quantity
         }
         return items;
     }
 
+    // The name and date that was made from createlog will be placed inside the TxtNameValue and TxtDateValue
     public void setNameAndDate(String name, String date) {
         TxtNameValue.setText(name);
         TxtDateValue.setText(date);
     }
 
+    //Updates the total cost of the transaction
     private void updateTotal() {
-        double total = 0.0;
-        for (int i = 0; i < model.getRowCount(); i++) {
-            Object value = model.getValueAt(i, 3);
-            try {
+        double total = 0.0; //intializes as 0
+        for (int i = 0; i < model.getRowCount(); i++) {// For loop to check all of the rows
+            Object value = model.getValueAt(i, 3);// Gets the value at column 4(Subtotal) which has an index of 3
+            try { //uses try catch to get the total of all rows and uses NumberFormatException to detect the error
                 total += Double.parseDouble(value.toString());
             } catch (NumberFormatException ignored) {}
         }
-        lblTotalValue.setText("\u20B1" + String.format("%.2f", total));
+        lblTotalValue.setText("\u20B1" + String.format("%.2f", total)); //Updates the Total value using string format with the total value with two decimals
     }
 
+    //Used to filter or search and uses query as the parameter
     private void searchTable(String query) {
-        if (query.equals("Search..") || query.isEmpty()) {
-            sorter.setRowFilter(null);
-        } else {
+        if (query.trim().isEmpty() || query.trim().equals("Search")) { //If the string query is empty or just shows Search then it won't sort anything
+            sorter.setRowFilter(null); // it will show all rows in the table
+        } else { // else it will try to sort rows
             try {
-                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query, 0));
+                sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query, 0)); //sorts rows and they are case sensitive with the string query which filters the first column
             } catch (java.util.regex.PatternSyntaxException e) {
                 sorter.setRowFilter(null);
             }
         }
     }
 
+    //@Override used for button when implementing ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
-        Object source = e.getSource();
-        if (source == btnadd) {
-            Item selectedItem = (Item) comboItem.getSelectedItem();
-            String quantity = txtQuantity.getText().trim();
-            if (selectedItem == null || quantity.isEmpty()) {
+        if (e.getSource() == btnadd) { //If btnAdd is clicked it adds the item and quantity unto the column
+            Item selectedItem = (Item) comboItem.getSelectedItem(); //selected item comes from the Item class inside the JCombobox
+            String quantity = txtQuantity.getText().trim(); //Uses string quantity under txtQuantity and gets the string
+            if (selectedItem == null || quantity.isEmpty()) { //If the item is null or quantity is empty it prompts a message
                 JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
                 return;
             }
-            int quantityInt = Integer.parseInt(quantity);
-            if (quantityInt <= 0) {
+            int quantityInt = Integer.parseInt(quantity); //Parses the string(Quantity) to an integer
+            if (quantityInt <= 0) { // If quantity is lesser than or equal to zero then it prompts this message
                 JOptionPane.showMessageDialog(this, "Quantity must be greater than 0.");
                 return;
             }
-            if (quantityInt > selectedItem.getQuantity()) {
+            if (quantityInt > selectedItem.getQuantity()) { //If the quantity is greater than the stock then it prompts this message
                 JOptionPane.showMessageDialog(this, "Not enough stock. Available: " + selectedItem.getQuantity());
                 return;
             }
-            double subtotal = selectedItem.getPrice() * quantityInt;
+            double subtotal = selectedItem.getPrice() * quantityInt; //creates the subtotal based on the product bought multiplied the quantity
 
             // Check if item already exists in the table to update quantity and subtotal
-            boolean itemFound = false;
-            for (int i = 0; i < model.getRowCount(); i++) {
-                if (model.getValueAt(i, 0).equals(selectedItem.getName())) {
-                    int currentQuantity = (int) model.getValueAt(i, 2);
-                    double currentSubtotal = (double) model.getValueAt(i, 3);
+            boolean itemFound = false; // sets it initially to false, will be used to track if the item is found 
+            for (int i = 0; i < model.getRowCount(); i++) { //loops through all the rows
+                if (model.getValueAt(i, 0).equals(selectedItem.getName())) { //If the item already exists on the table
+                    int currentQuantity = (int) model.getValueAt(i, 2); //Gets the amount of item currently on the table in column 2
+                    double currentSubtotal = (double) model.getValueAt(i, 3); //Gets the subtotal from column 3
 
-                    model.setValueAt(currentQuantity + quantityInt, i, 2); // Update quantity
-                    model.setValueAt(currentSubtotal + subtotal, i, 3);    // Update subtotal
-                    itemFound = true;
+                    model.setValueAt(currentQuantity + quantityInt, i, 2); // Update quantity based on currentquantity plus the added quantity in column 2
+                    model.setValueAt(currentSubtotal + subtotal, i, 3);    // Update subtotal + the new subtotal in column 3
+                    itemFound = true; // it then 
                     break;
                 }
             }
 
-            if (!itemFound) {
+            if (!itemFound) { // If item is not found then it will add a row along with the selected Item, price quantity and subtotal
                 model.addRow(new Object[]{selectedItem.getName(), selectedItem.getPrice(), quantityInt, subtotal});
             }
 
-            selectedItem.reduceQuantity(quantityInt);
-            InventoryItemRecord inv = inventoryMap.get(selectedItem.getName());
-            if (inv != null) inv.reduceQuantity(quantityInt);
+
+            selectedItem.reduceQuantity(quantityInt); // calls method to reduce quantity from the quantityInt
+            InventoryItemRecord inv = inventoryMap.get(selectedItem.getName()); //gets from the inventorymap to get the item by its name
+            if (inv != null) inv.reduceQuantity(quantityInt);// If inv is or the item is found then it reduces the quantity from itemRecord
             int selectedIndex = comboItem.getSelectedIndex();
-            ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(selectedIndex);
-            ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(selectedItem, selectedIndex);
+            ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(selectedIndex); //removes item at the selected index
+            ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(selectedItem, selectedIndex); //inserts elements back at the same index
             comboItem.setSelectedIndex(selectedIndex);
             clearInputs();
             saved = false;
             updateTotal();
-        } else if (source == btnremove) {
+
+        } else if (e.getSource() == btnremove) {
             int selectedRowView = table.getSelectedRow();
-            if (selectedRowView == -1) {
+            if (selectedRowView == -1) { //if there is no chosen selectedRow then it will prompt to pick one
                 JOptionPane.showMessageDialog(this, "Please select a row to remove.");
                 return;
             }
@@ -393,9 +438,10 @@ public class TransactionFrame extends JFrame implements ActionListener {
             saved = false;
             updateTotal();
 
-        } else if (source == btnclear) {
+        } else if (e.getSource() == btnclear) {
             clearInputs();
-        } else if (source == btnsave) {
+        } else if (e.getSource() == btnsave) {
+            //Uses try-catch to save to file and shows error using IOException
             try {
                 saveToFile();
                 saved = true;
@@ -403,13 +449,13 @@ public class TransactionFrame extends JFrame implements ActionListener {
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
             }
-        } else if (source == btnClose) {
-            if (this.saved) {
+        } else if (e.getSource() == btnClose) {
+            if (this.saved) { //If already saved it will automacticaly close and go back to menu
                 new Menu();
                 dispose();
-            } else {
+            } else { //else it will show a prompt asking you to save changes
                 int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
-                if (choice == JOptionPane.YES_OPTION) {
+                if (choice == JOptionPane.YES_OPTION) { //If yes it will save the file
                     try {
                         saveToFile();
                         new Menu();
@@ -417,14 +463,17 @@ public class TransactionFrame extends JFrame implements ActionListener {
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
                     }
-                } else if (choice == JOptionPane.NO_OPTION) {
+                } else if (choice == JOptionPane.NO_OPTION) { //If no it won't
                     new Menu();
                     dispose();
+                } else if (choice == JOptionPane.CANCEL_OPTION) {
+
                 }
             }
         }
     }
 
+    //a method to remove everything placed in the textfields
     private void clearInputs() {
         txtQuantity.setText("");
         if (comboItem.getItemCount() > 0) {
@@ -432,46 +481,49 @@ public class TransactionFrame extends JFrame implements ActionListener {
         }
     }
 
+    //Methods that saves the file
     public void saveToFile() throws IOException {
-        File dir = new File("logs");
-        if (!dir.exists()) dir.mkdir();
-        String filename = "logs/" + TxtNameValue.getText() + ".csv";
-        File file = new File(filename);
-        TransactionFileManager.saveToFile(file, TxtNameValue.getText(), TxtDateValue.getText(),txtTransactionIDValue.getText(), model);
-        InventoryItemRecord.saveInventory(inventoryMap);
+        File dir = new File("logs"); //creates a file directory named logs
+        if (!dir.exists()) dir.mkdir(); //if the directory does not exist it creates that directory
+        String filename = "logs/" + TxtNameValue.getText() + ".csv"; //gets the name of the transaction as the name of the csv file
+        File file = new File(filename); //creates the file under that filename
+        TransactionFileManager.saveToFile(file, TxtNameValue.getText(), TxtDateValue.getText(),txtTransactionIDValue.getText(), model); //Saves file using
+        InventoryItemRecord.saveInventory(inventoryMap); //saves inventory based on the JCombobox
     }
 
+    //loads file
     public void loadFromFile(String filename) {
         try {
-            File file = new File(filename);
-            if (!file.exists()) {
+            File file = new File(filename); //creates a file object based on the file you used
+            if (!file.exists()) { //if the file is not found it prompts this message
                 JOptionPane.showMessageDialog(this, "File not found: " + filename);
                 return;
-            }
+            } //Loads data from file
             TransactionData data = TransactionFileManager.loadFromFile(file);
-            setNameAndDate(data.name, data.date);
-            transactionNumber = data.transactionNumber;
-            txtTransactionIDValue.setText(transactionNumber);
+            setNameAndDate(data.name, data.date); //gets the name and date
+            transactionID = data.transactionID; //gets the transactionId from the file
+            txtTransactionIDValue.setText(transactionID); //settext to the textfield
             model.setRowCount(0); // Clear existing rows
-            for (String[] row : data.rows) {
-                if (row.length == model.getColumnCount()) {
+            for (String[] row : data.rows) { //loops through rows
+                if (row.length == model.getColumnCount()) { //if the row has the right amount of columns it adds the row to that table
                     model.addRow(row);
                 }
             }
-            updateTotal();
+            updateTotal(); //calls method to update the total
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage()); //detects error
         }
     }
 
+    //a method in generating the Transaction ID using letters and numbers
     private String generateRandomTransactionID() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder(6);
-        for (int i = 0; i < 6; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; //a string full of numbers and characters
+        Random random = new Random(); //creates an object
+        StringBuilder sb = new StringBuilder(6); //Creates a string out of the given numbers and letters and number with 6 max
+        for (int i = 0; i < 6; i++) {  //loops until it fulfills for 6 values
+            sb.append(chars.charAt(random.nextInt(chars.length()))); //picks from the string chars, adds it to the end of string builder
         }
-        return sb.toString();
+        return sb.toString(); //returns the string builder to the string itself
     }
 
     public static void main(String[] args) {

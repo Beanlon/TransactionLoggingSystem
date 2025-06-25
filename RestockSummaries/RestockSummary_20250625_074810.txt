@@ -1,0 +1,12 @@
+--- Restock Purchase Summary ---
+Supply ID: 1
+Supplier Name: nccc
+Supplier Code: 1022
+Date Processed: 25/06/2025 07:47:41
+
+Items Restocked:
+ - Item: corned beef, Quantity: 10, Cost/Item: 82.00, Selling Price/Item: 90.00
+ - Item: safeguard, Quantity: 10, Cost/Item: 55.00, Selling Price/Item: 66.00
+
+Total Purchase Cost: 1370.00
+--------------------------------
