@@ -26,7 +26,7 @@ public class InventorySystem1 extends JPanel {
 
         // --- Panel 1: For ItemCreate ---
         RoundedPanel panel1 = new RoundedPanel(30);
-        panel1.setBounds(40, 50, 340, 180);
+        panel1.setBounds(40, 30, 340, 180);
         panel1.setBackground(new Color(255, 255, 255, 255));
         panel1.setLayout(null);
         panel1.addMouseListener(new MouseAdapter() {
@@ -43,7 +43,7 @@ public class InventorySystem1 extends JPanel {
 
         // --- Panel 2: For SupplyPurchase ---
         RoundedPanel panel2 = new RoundedPanel(30);
-        panel2.setBounds(415, 50, 340, 180);
+        panel2.setBounds(415, 30, 340, 180);
         panel2.setBackground(new Color(255, 255, 255, 255));
         panel2.setLayout(null);
         panel2.addMouseListener(new MouseAdapter() {
@@ -58,9 +58,31 @@ public class InventorySystem1 extends JPanel {
         });
         add(panel2);
 
+        RoundedPanel panel3 = new RoundedPanel(30);
+        panel3.setBounds(555, 535, 200, 47); // stack below panel1, adjust Y as needed
+        panel3.setBackground(new Color(255, 255, 255, 255));
+        panel3.setLayout(null);
+        panel3.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new RestockSummaryBrowser();
+            }
+        });
+        JLabel lblRestock = new JLabel("Restock Summaries");
+        lblRestock.setFont(new Font("Arial", Font.BOLD, 18));
+        lblRestock.setBounds(10, 17, 300, 17);
+        panel3.add(lblRestock);
+
+        add(panel3);
+
+        JLabel HeaderItem = new JLabel("Inventory Items");
+        HeaderItem.setBounds(43, 230, 300, 25);
+        HeaderItem.setFont(new Font("Arial", Font.BOLD, 25));
+        this.add(HeaderItem);
+
         // --- Inventory Table Panel ---
         paneltable = new JPanel();
-        paneltable.setBounds(40, 250, 717, 250);
+        paneltable.setBounds(40, 275, 717, 250);
         paneltable.setBackground(Color.white);
         paneltable.setLayout(new BorderLayout());
 

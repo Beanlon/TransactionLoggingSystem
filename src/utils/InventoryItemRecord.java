@@ -3,13 +3,14 @@ package utils;
 import java.io.*;
 import java.util.*;
 
+//Used for recording items in the inventory
 public class InventoryItemRecord {
-    private static final String FILE_NAME = "INVENTORY.txt";
+    private static final String FILE_NAME = "INVENTORY.txt"; //declares the constant file name
     private String name;
     private double price;
     private int quantity;
 
-    // Fixed constructor: quantity before price
+    //constructor that initializes the item with name quantity and price
     public InventoryItemRecord(String name, int quantity, double price) {
         this.name = name;
         this.quantity = quantity;
@@ -18,24 +19,24 @@ public class InventoryItemRecord {
 
     // Load inventory from file
     public static Map<String, InventoryItemRecord> loadInventory() {
-        Map<String, InventoryItemRecord> inventory = new LinkedHashMap<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3) {
+        Map<String, InventoryItemRecord> inventory = new LinkedHashMap<>(); //This makes sure that the Inventory is kept at the same order on the file
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) { //Uses BufferedReader to read the file line by line
+            String line; //Declares a varible line to hold each line
+            while ((line = br.readLine()) != null) { //loops over each line in the file until there are no more lines left
+                String[] parts = line.split(","); //Splits the line using comma
+                if (parts.length == 3) { //if the length of the line is seperated by three parts then the name, quantity and price are all placed inside the inventory.txt
                     String name = parts[0].trim();
                     int quantity = Integer.parseInt(parts[1].trim());
                     double price = Double.parseDouble(parts[2].trim());
                     inventory.put(name, new InventoryItemRecord(name, quantity, price));
                 }
             }
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {//It will catch that the inventory is not found
             System.out.println("No existing inventory found. A new file will be created.");
-        } catch (IOException e) {
+        } catch (IOException e) {//It will catch if there is an error with the overall method
             System.out.println("Error reading inventory: " + e.getMessage());
         }
-        return inventory;
+        return inventory;//It will return to the inventory.txt
     }
 
     // Save inventory to file

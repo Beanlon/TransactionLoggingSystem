@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 2
+Supplier Name: awdawddawdd
+Supplier Code: awdada
+Date Processed: 26/06/2025 09:44:59
+
+Items Restocked:
+ - Item: corned beef, Quantity: 2, Cost/Item: 30.00, Selling Price/Item: 33.00
+
+Total Purchase Cost: 60.00
+--------------------------------

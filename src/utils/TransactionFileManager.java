@@ -56,11 +56,6 @@ public class TransactionFileManager {
         public String transactionID;
         public List<String[]> rows;
 
-        public TransactionData(String name, String date, List<String[]> rows) {
-            this.name = name;
-            this.date = date;
-            this.rows = rows;
-        }
 
         public TransactionData() {
 

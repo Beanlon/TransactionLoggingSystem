@@ -1,2 +1,1 @@
-corned beef,10,90.00
-safeguard,10,66.00
+corned beef,9,22.00

@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 5
+Supplier Name: wad
+Supplier Code: dwa
+Date Processed: 26/06/2025 09:53:59
+
+Items Restocked:
+ - Item: corned beef, Quantity: 1, Cost/Item: 12.00, Selling Price/Item: 13.00
+
+Total Purchase Cost: 12.00
+--------------------------------

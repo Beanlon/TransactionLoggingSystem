@@ -35,6 +35,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         setNameAndDate(name, date); //Gets the name and date to be used later
     }
 
+    //initializes the panel
     public TransactionFrame(String logname, String date, String filepath) {
         setTitle("Transaction Panel");
         setSize(1000, 580);
@@ -136,8 +137,8 @@ public class TransactionFrame extends JFrame implements ActionListener {
         lblItem.setFont(new Font("Arial", Font.BOLD, 13));
         lblItem.setForeground(Color.WHITE);
         comboItem = new JComboBox<>();
-        for (Item item : loadInventoryItems()) comboItem.addItem(item);
-        if (comboItem.getItemCount() > 0) comboItem.setSelectedIndex(0);
+        for (Item item : loadInventoryItems()) comboItem.addItem(item); //for every item loaded from inventory its added inside the Combobox
+        if (comboItem.getItemCount() > 0) comboItem.setSelectedIndex(0); //if the ComboItemcount is greater than 0 the selected index is 0 meaning it will show the first tem
         comboItem.setPreferredSize(new Dimension(140, 30));
 
         gbc2.gridx = 0; gbc2.gridy = 0; gbc2.anchor = GridBagConstraints.EAST;
@@ -375,8 +376,8 @@ public class TransactionFrame extends JFrame implements ActionListener {
             boolean itemFound = false; // sets it initially to false, will be used to track if the item is found 
             for (int i = 0; i < model.getRowCount(); i++) { //loops through all the rows
                 if (model.getValueAt(i, 0).equals(selectedItem.getName())) { //If the item already exists on the table
-                    int currentQuantity = (int) model.getValueAt(i, 2); //Gets the amount of item currently on the table in column 2
-                    double currentSubtotal = (double) model.getValueAt(i, 3); //Gets the subtotal from column 3
+                    int currentQuantity = Integer.parseInt(model.getValueAt(i, 2).toString()); //Gets the amount of item currently on the table in column 2
+                    double currentSubtotal = Double.parseDouble(model.getValueAt(i, 3).toString());//Gets the subtotal from column 3
 
                     model.setValueAt(currentQuantity + quantityInt, i, 2); // Update quantity based on currentquantity plus the added quantity in column 2
                     model.setValueAt(currentSubtotal + subtotal, i, 3);    // Update subtotal + the new subtotal in column 3
