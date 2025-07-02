@@ -162,9 +162,9 @@ public class Login extends JFrame implements ActionListener {
                 return;
             }
 
-            UserAuth auth = new UserAuth("users.txt");
+            UserAuth auth = new UserAuth("users.txt"); //Creates an instance of UserAuth with the path to users.txt
 
-            if (auth.login(username, password)) {
+            if (auth.login(username, password)) {// Checks if the login is successful which calls on this parameters
                 JOptionPane.showMessageDialog(this, "Login successful!");
                 new Menu();
                 this.dispose();

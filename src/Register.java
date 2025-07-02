@@ -25,8 +25,7 @@ public class Register extends JFrame implements ActionListener {
         this.setResizable(false);
         this.setLayout(null);
 
-        // Initialize UserAuth with filename
-        auth = new UserAuth("users.txt");
+
 
         Title = new JPanel(new FlowLayout());
         Title.setBounds(10, 34, 365, 80);
@@ -104,6 +103,8 @@ public class Register extends JFrame implements ActionListener {
             new Login(); // it goes back to the login GUI
             this.dispose(); //disposes the current frame displayed
         }
+// Initialize UserAuth with filename
+        auth = new UserAuth("users.txt");
 
         if (e.getSource() == btnreg) {
             String user = txtusername.getText().trim(); // creates the string user which gets the username entered

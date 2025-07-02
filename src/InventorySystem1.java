@@ -18,7 +18,7 @@ public class InventorySystem1 extends JPanel {
     private Map<String, String> lastRestockDates;
 
     public InventorySystem1(Menu menuRef) {
-        this.menuRef = menuRef;
+        this.menuRef = menuRef; //
         this.inventoryManager = new InventoryManager("Inventory.txt");
         this.lastRestockDates = new HashMap<>();
         setLayout(null);
@@ -80,10 +80,10 @@ public class InventorySystem1 extends JPanel {
                 if (row >= 0) {
                     String itemName = inventoryTableModel.getValueAt(row, 1).toString();
                     String itemCategory = inventoryTableModel.getValueAt(row, 2).toString();
-                    int stock = Integer.parseInt(inventoryTableModel.getValueAt(row, 4).toString()); // <-- FIX
+                    int stock = Integer.parseInt(inventoryTableModel.getValueAt(row, 4).toString());
 
                     JLabel lblInfo = new JLabel("Remove from: " + itemName + " (" + itemCategory + ")");
-                    JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 1, stock, 1)); // min 1, max 100
+                    JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 1, stock, 1)); // min 1, max stock
 
                     JPanel panel = new JPanel();
                     panel.setLayout(new GridLayout(2, 1));
@@ -164,26 +164,27 @@ public class InventorySystem1 extends JPanel {
     }
 
     public void loadInventoryData() {
-        // First load purchase records to get restock dates
         loadPurchaseRecords();
-
-        inventoryTableModel.setRowCount(0); // Clear the table
+        inventoryTableModel.setRowCount(0); // Clear table
         Map<String, Vector<Object>> itemsMap = new HashMap<>();
+        Set<String> itemsTxtKeys = new HashSet<>();
 
-        // 1. Load ALL items from Items.txt (this is where ID and Category come from)
+        // 1. Load ALL items from Items.txt
         try (BufferedReader br = new BufferedReader(new FileReader("Items.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
-                if (data.length >= 3) { // We only need first 3 columns for ID, Name, Category
+                if (data.length >= 3) {
                     Vector<Object> row = new Vector<>();
-                    row.add(data[0].trim()); // ID (FIRST COLUMN)
-                    row.add(data[1].trim()); // Item Name
-                    row.add(data[2].trim()); // CATEGORY (THIRD COLUMN)
-                    row.add("₱0.00"); // Price placeholder
-                    row.add(0); // Stock placeholder
-                    row.add("-"); // Restock date placeholder
-                    itemsMap.put(data[1].trim().toLowerCase(), row);
+                    row.add(data[0].trim());
+                    row.add(data[1].trim());
+                    row.add(data[2].trim());
+                    row.add("₱0.00");
+                    row.add(0);
+                    row.add("-");
+                    String itemKey = data[1].trim().toLowerCase();
+                    itemsMap.put(itemKey, row);
+                    itemsTxtKeys.add(itemKey);
                 }
             }
         } catch (IOException e) {
@@ -201,22 +202,26 @@ public class InventorySystem1 extends JPanel {
                 if (data.length >= 3) {
                     String itemName = data[0].trim();
                     String itemKey = itemName.toLowerCase();
+                    int stock = Integer.parseInt(data[1].trim());
+                    String price = data[2].trim();
 
                     if (itemsMap.containsKey(itemKey)) {
-                        // Update existing item
                         Vector<Object> row = itemsMap.get(itemKey);
-                        row.set(3, "₱" + data[2].trim()); // Price
-                        row.set(4, Integer.parseInt(data[1].trim())); // Stock
+                        row.set(3, "₱" + price);
+                        row.set(4, stock);
                     } else {
-                        // Create new entry for items not in Items.txt
-                        Vector<Object> row = new Vector<>();
-                        row.add("N/A"); // No ID available
-                        row.add(itemName); // Item Name
-                        row.add("Uncategorized"); // Default category
-                        row.add("₱" + data[2].trim()); // Price
-                        row.add(Integer.parseInt(data[1].trim())); // Stock
-                        row.add("-"); // Restock date
-                        itemsMap.put(itemKey, row);
+                        // This is an item not in Items.txt (i.e., deleted from ItemCreate)
+                        // Only show it if stock > 0
+                        if (stock > 0) {
+                            Vector<Object> row = new Vector<>();
+                            row.add("N/A");
+                            row.add(itemName);
+                            row.add("Uncategorized");
+                            row.add("₱" + price);
+                            row.add(stock);
+                            row.add("-");
+                            itemsMap.put(itemKey, row);
+                        }
                     }
                 }
             }
@@ -232,9 +237,15 @@ public class InventorySystem1 extends JPanel {
             }
         }
 
-        // Finally add all items to the table
+        // 4. Add items to the table:
+        // - If in Items.txt, always show (even stock 0)
+        // - If removed from Items.txt, only show if stock > 0
         for (Vector<Object> row : itemsMap.values()) {
-            inventoryTableModel.addRow(row);
+            String itemName = ((String) row.get(1)).toLowerCase();
+            int stock = (Integer) row.get(4);
+            if (itemsTxtKeys.contains(itemName) || stock > 0) {
+                inventoryTableModel.addRow(row);
+            }
         }
     }
 

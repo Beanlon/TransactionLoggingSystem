@@ -27,7 +27,6 @@ public class MainPanel extends JPanel implements ActionListener {
         setLayout(null);
         setPreferredSize(new Dimension(785, 630));
 
-        // --- Overview Panel, with manual bounds, no calculation ---
         RoundedPanel salesPanelContainer = new RoundedPanel(25);
         salesPanelContainer.setBounds(20, 20, 243, 125);
         salesPanelContainer.setBackground(Color.WHITE);
@@ -166,15 +165,15 @@ public class MainPanel extends JPanel implements ActionListener {
             }
         });
         txtSearch.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (txtSearch.getText().equals("Search")) {
+            public void focusGained(FocusEvent e) { // When the text field gains focus
+                if (txtSearch.getText().equals("Search")) { // If the text is "Search", clear it
                     txtSearch.setText("");
                     txtSearch.setForeground(Color.BLACK);
                 }
             }
 
-            public void focusLost(FocusEvent e) {
-                if (txtSearch.getText().isEmpty()) {
+            public void focusLost(FocusEvent e) { // When the text field loses focus
+                if (txtSearch.getText().isEmpty()) { // If the text field is empty, set it back to "Search"
                     txtSearch.setText("Search");
                     txtSearch.setForeground(Color.GRAY);
                 }
@@ -185,15 +184,15 @@ public class MainPanel extends JPanel implements ActionListener {
         add(filterPanel);
     }
 
-    private void setupTablePanel() {
-        String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified", "Full Filename" };
-        tableModel = new DefaultTableModel(columns, 0) {
+    private void setupTablePanel() { // Creates the table to display logs
+        String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified", "Full Filename" }; // Column names for the table
+        tableModel = new DefaultTableModel(columns, 0) { //Sets the the table moddel with the column names and the row begins at 0
             public boolean isCellEditable(int row, int column) {
                 return false;
-            }
+            } //tables are not editable
         };
 
-        logTable = new JTable(tableModel);
+        logTable = new JTable(tableModel); // Creates a new JTable with the table model
         logTable.setRowHeight(25);
         logTable.setAutoCreateRowSorter(true);
 
@@ -201,16 +200,16 @@ public class MainPanel extends JPanel implements ActionListener {
             logTable.removeColumn(logTable.getColumnModel().getColumn(4));
         }
 
-        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-        center.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < 4; i++) {
-            if (logTable.getColumnModel().getColumnCount() > i) {
-                logTable.getColumnModel().getColumn(i).setCellRenderer(center);
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer(); // Creates a cell renderer to center-align text in the table cells
+        center.setHorizontalAlignment(JLabel.CENTER); // Sets the horizontal alignment of the cell renderer to center
+        for (int i = 0; i < 4; i++) { //for every column in the table
+            if (logTable.getColumnModel().getColumnCount() > i) { // Checks if the column exists
+                logTable.getColumnModel().getColumn(i).setCellRenderer(center); // Sets the cell renderer for the column to center-align text
             }
         }
 
-        JScrollPane scrollPane = new JScrollPane(logTable);
-        JPanel panelTable = new JPanel(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane(logTable); //Creates a scroll pane to hold the table
+        JPanel panelTable = new JPanel(new BorderLayout()); //Creates a panel to hold the table thats inside a scroll pane
         panelTable.setBounds(20, 205, 763, 375);
         panelTable.add(scrollPane, BorderLayout.CENTER);
         add(panelTable);
@@ -231,17 +230,17 @@ public class MainPanel extends JPanel implements ActionListener {
 
         tableModel.setRowCount(0); // Clear existing table data before repopulating
 
-        for (File file : files) {
-            String filename = file.getName();
-            String filepath = file.getPath();
-            String modified = sdf.format(file.lastModified());
+        for (File file : files) { // for every file in the files array
+            String filename = file.getName(); //get the file name
+            String filepath = file.getPath(); //get the file path
+            String modified = sdf.format(file.lastModified()); //get the last modified date and time of the file
 
-            String transactionNo = "", creationDate = "";
+            String transactionNo = "", creationDate = ""; //Leaves empty strings for transaction number and creation date since they are placed during log creation
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 reader.readLine(); // Skip header
-                String dateLine = reader.readLine();
-                String transLine = reader.readLine();
+                String dateLine = reader.readLine(); //Reads this line's date
+                String transLine = reader.readLine(); //Reads this line's transaction number/ID
 
                 if (dateLine != null && dateLine.contains(",")) {
                     String[] parts = dateLine.split(",");

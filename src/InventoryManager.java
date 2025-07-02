@@ -44,14 +44,32 @@ public class InventoryManager {
         saveInventory();
     }
 
-    public void removeStock(String itemName, int quantityToRemove) {
-        InventoryItem item = items.get(itemName);
-        if (item != null) {
-            item.quantity = Math.max(0, item.quantity - quantityToRemove);
-            if (item.quantity == 0) {
-                items.remove(itemName); // Remove item completely if quantity is zero
+    public void removeStock(String itemName, int removeCount) {
+        List<String[]> items = new ArrayList<>();
+        // 1. Read all lines
+        try (BufferedReader br = new BufferedReader(new FileReader("Inventory.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].trim().equalsIgnoreCase(itemName)) {
+                    int stock = Integer.parseInt(parts[1].trim());
+                    int newStock = Math.max(0, stock - removeCount); // Avoid negative
+                    parts[1] = String.valueOf(newStock);
+                }
+                items.add(parts);
             }
-            saveInventory();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 2. Write all lines back
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("Inventory.txt"))) {
+            for (String[] item : items) {
+                bw.write(String.join(",", item));
+                bw.newLine();
+            }
+            bw.flush(); // Ensure all data is written
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

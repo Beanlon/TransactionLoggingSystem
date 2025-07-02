@@ -6,11 +6,11 @@ import java.util.Scanner;
 public class UserAuth {
     private final String filename;
 
-    //has a parameter filename which is the name of the file that will be created when using this class
+    // Constructor: ensures the user file exists, creates it if not
     public UserAuth(String filename) {
         this.filename = filename;
         try {
-            File file = new File(filename); // creates a file that will be named later on
+            File file = new File(filename); // Creates a File object for the given filename
             if (!file.exists()) { //if file does not exist it creates a new file under that name
                 file.createNewFile();
             }
@@ -21,7 +21,7 @@ public class UserAuth {
 
     //the register function is under boolean
     public boolean register(String username, String password) { //uses parameter username and password
-        if (userExists(username)) { // checks if the user already exists if it doesnt returns false
+        if (userExists(username)) { // checks if the user already exists if it doesn't returns false
             return false;
         }
 
@@ -38,7 +38,7 @@ public class UserAuth {
     public boolean login(String username, String password) {
         try (Scanner scanner = new Scanner(new File(filename))) { //Scans the file created
             while (scanner.hasNextLine()) { //ues the while loop checking if the file still has another line
-                String[] parts = scanner.nextLine().split(","); // creates a string array called parts that splits the line into comma
+                String[] parts = scanner.nextLine().split(","); // creates a string array called parts that splits the line based on the comma
                 if (parts.length == 2 && parts[0].equals(username) && parts[1].equals(password)) { // if the length of the line is two string and the indexes are under username and password
                     return true; //It returns true
                 }
