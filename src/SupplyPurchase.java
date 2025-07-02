@@ -1,3 +1,6 @@
+import utils.Inputvalidator;
+import utils.NoSpaceKeyListener;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -46,10 +49,10 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         setResizable(false);
 
         // Header label
-        JLabel lblHeader = new JLabel("Supply & Purchase Management");
-        lblHeader.setBounds(40, 15, 500, 30);
+        JLabel lblHeader = new JLabel("SUPPLY & PURCHASE MANAGEMENT");
+        lblHeader.setBounds(42, 25, 500, 25);
         lblHeader.setForeground(new Color(200, 0, 0));
-        lblHeader.setFont(new Font("DM Sans", Font.BOLD, 20));
+        lblHeader.setFont(new Font("DM Sans", Font.BOLD, 18));
         add(lblHeader);
 
         // Supplier Information Panel
@@ -58,19 +61,19 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         panelSupplierInfo.setBounds(40, 60, 380, 180);
         panelSupplierInfo.setBackground(Color.WHITE);
 
-        JLabel subheaderSupplier = new JLabel("Supplier Information");
+        JLabel subheaderSupplier = new JLabel("SUPPLIER INFORMATION");
         subheaderSupplier.setBounds(20, 15, 300, 25);
         subheaderSupplier.setFont(new Font("Arial", Font.BOLD, 16));
         panelSupplierInfo.add(subheaderSupplier);
 
-        lblSupplyID = new JLabel("Supply ID:");
+        lblSupplyID = new JLabel("SUPPLY ID:");
         txtSupplyID = new JTextField();
         txtSupplyID.setEditable(false);
 
-        lblSupplierName = new JLabel("Supplier Name:");
+        lblSupplierName = new JLabel("SUPPLIER NAME:");
         txtSupplierName = new JTextField();
 
-        lblSupplierCode = new JLabel("Supplier Code:");
+        lblSupplierCode = new JLabel("SUPPLIER CODE:");
         txtSupplierCode = new JTextField();
 
         lblSupplyID.setBounds(20, 50, 120, 25);
@@ -94,7 +97,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         panelSelectedItemInfo.setBounds(40, 260, 380, 250);
         panelSelectedItemInfo.setBackground(Color.WHITE);
 
-        JLabel subheaderSelectedItem = new JLabel("Selected Item Details");
+        JLabel subheaderSelectedItem = new JLabel("SELECTED ITEM DETAILS");
         subheaderSelectedItem.setBounds(20, 15, 300, 25);
         subheaderSelectedItem.setFont(new Font("Arial", Font.BOLD, 16));
         panelSelectedItemInfo.add(subheaderSelectedItem);
@@ -110,21 +113,25 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
-        lblSelectedItem = new JLabel("Selected Item:");
+        lblSelectedItem = new JLabel("SELECTED ITEM:");
         txtSelectedItem = new JTextField();
         txtSelectedItem.setEditable(false);
 
-        lblQuantity = new JLabel("Quantity:");
+        lblQuantity = new JLabel("QUANTITY:");
         txtQuantity = new JTextField();
+        txtQuantity.addKeyListener(new NoSpaceKeyListener());
+        Inputvalidator.makeNumericOnly(txtQuantity);
 
-        lblCost = new JLabel("Cost (per item):");
+        lblCost = new JLabel("COST (PER ITEM):");
         txtCost = new JTextField();
+        txtCost.addKeyListener(new NoSpaceKeyListener());
+        Inputvalidator.makeNumericOnly(txtCost);
 
-        lblProfitIncrease = new JLabel("Profit Increase:");
-        String[] profitOptions = {"10%", "20%", "30%", "40%", "50%"};
+        lblProfitIncrease = new JLabel("PROFIT INCREASE:");
+        String[] profitOptions = {"5%", "10%", "15%", "20%"};
         cboProfitIncrease = new JComboBox<>(profitOptions);
 
-        lblDateSupplied = new JLabel("Date Supplied:");
+        lblDateSupplied = new JLabel("DATE SUPPLIED:");
         txtDateSupplied = new JTextField();
         txtDateSupplied.setEditable(false);
 
@@ -161,9 +168,9 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         buttonPanel.setBounds(40, 515, 400, 30);
         buttonPanel.setBackground(new Color(246, 243, 243));
 
-        btnAddItemToPurchase = new JButton("Add to Purchase");
-        btnRemovePurchaseItem = new JButton("Remove");
-        btnProcessPurchase = new JButton("Process");
+        btnAddItemToPurchase = new JButton("ADD");
+        btnRemovePurchaseItem = new JButton("REMOVE");
+        btnProcessPurchase = new JButton("PROCESS");
 
         JButton[] actionButtons = {btnAddItemToPurchase, btnRemovePurchaseItem, btnProcessPurchase};
         for (JButton b : actionButtons) {
@@ -175,9 +182,9 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         add(buttonPanel);
 
         // Inventory Items Table
-        JLabel lblInventoryTable = new JLabel("Available Inventory Items");
-        lblInventoryTable.setBounds(440, 17, 300, 25);
-        lblInventoryTable.setFont(new Font("Arial", Font.BOLD, 20));
+        JLabel lblInventoryTable = new JLabel("AVAILABLE INVENTORY ITEMS");
+        lblInventoryTable.setBounds(440, 30, 320, 20);
+        lblInventoryTable.setFont(new Font("Arial", Font.BOLD, 18));
         add(lblInventoryTable);
 
         Vector<String> inventoryField = new Vector<>();
@@ -200,7 +207,7 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         tblInventoryItems.getTableHeader().setForeground(Color.WHITE);
 
         JScrollPane scrollPaneInventory = new JScrollPane(tblInventoryItems);
-        scrollPaneInventory.setBounds(440, 60, 520, 185);
+        scrollPaneInventory.setBounds(440, 62, 520, 185);
         add(scrollPaneInventory);
 
         inventoryDb.displayRecord(inventoryModel);
@@ -217,9 +224,9 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         });
 
         // Purchase Details Table
-        JLabel lblPurchaseTable = new JLabel("Current Purchase List");
-        lblPurchaseTable.setBounds(440, 250, 500, 25);
-        lblPurchaseTable.setFont(new Font("Arial", Font.BOLD, 16));
+        JLabel lblPurchaseTable = new JLabel("CURRENT PURCHASE LIST");
+        lblPurchaseTable.setBounds(440, 260, 500, 25);
+        lblPurchaseTable.setFont(new Font("Arial", Font.BOLD, 18));
         add(lblPurchaseTable);
 
         Vector<String> purchaseField = new Vector<>();
@@ -246,11 +253,11 @@ public class SupplyPurchase extends JFrame implements ActionListener {
         tblPurchaseDetails.getTableHeader().setForeground(Color.WHITE);
 
         JScrollPane scrollPanePurchase = new JScrollPane(tblPurchaseDetails);
-        scrollPanePurchase.setBounds(440, 280, 520, 215);
+        scrollPanePurchase.setBounds(440, 290, 520, 215);
         add(scrollPanePurchase);
 
         // Close Button
-        btnClose = new JButton("Close");
+        btnClose = new JButton("CLOSE");
         btnClose.setBounds(860, 15, 100, 25);
         btnClose.setBackground(new Color(200, 0, 0));
         btnClose.setForeground(Color.white);

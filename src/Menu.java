@@ -38,7 +38,7 @@ public class Menu extends JFrame {
         btnInventory.setForeground(new Color(255, 255, 255));
         btnInventory.setContentAreaFilled(false);
         btnInventory.setFocusPainted(false);
-        btnInventory.setOpaque(false);
+        btnInventory.setOpaque(false);  
         btnInventory.setBorderPainted(false);
 
         dashboard.add(Box.createVerticalStrut(130));
@@ -59,7 +59,7 @@ public class Menu extends JFrame {
 
         rightpanel.add(mainPanel, "MAIN"); //shows mainpanel under the constraint "Menu"
         rightpanel.add(inventoryPanel, "INVENTORY"); //shows inventorypanel under the constraint "Inventory "
-        cardLayout.show(rightpanel, "MAIN");  // Show initial panel
+        cardLayout.show(rightpanel, "MAIN"); // Show initial panel
 
         // Button actions
         btnmain.addActionListener(e -> cardLayout.show(rightpanel, "MAIN")); //when btnmain is clicked it should show mainpanel

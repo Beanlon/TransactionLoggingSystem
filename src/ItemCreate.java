@@ -22,7 +22,7 @@ public class ItemCreate extends JFrame implements ActionListener {
     Database db = new Database("Items.txt");
 
     public ItemCreate(InventorySystem1 inventorySystem1, Menu menuRef) {
-        this.inventorySystem1Ref = inventorySystem1Ref;
+        this.inventorySystem1Ref = inventorySystem1;
         this.menuRef = menuRef;
 
         this.setLayout(null);
@@ -236,7 +236,11 @@ public class ItemCreate extends JFrame implements ActionListener {
             supply.addRow(data);
             reset();
             db.overwriteRecords(supply);
+            db.overwriteRecords(supply);
             JOptionPane.showMessageDialog(this, "Item added successfully!");
+            if (inventorySystem1Ref != null) {
+                inventorySystem1Ref.refreshInventory();
+            }
         } else if (e.getSource().equals(btnClear)) {
             reset();
         } else if (e.getSource().equals(btnEdit)) {
@@ -252,6 +256,9 @@ public class ItemCreate extends JFrame implements ActionListener {
                 reset();
                 db.overwriteRecords(supply);
                 JOptionPane.showMessageDialog(this, "Item edited successfully!");
+                if (inventorySystem1Ref != null) {
+                    inventorySystem1Ref.refreshInventory();
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a record to edit.");
             }
@@ -264,6 +271,9 @@ public class ItemCreate extends JFrame implements ActionListener {
                     reset();
                     db.overwriteRecords(supply);
                     JOptionPane.showMessageDialog(this, "Item deleted successfully!");
+                    if (inventorySystem1Ref != null) {
+                        inventorySystem1Ref.refreshInventory();
+                    }
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a record to delete.");
@@ -300,8 +310,11 @@ public class ItemCreate extends JFrame implements ActionListener {
             }
         } else if (e.getSource().equals(btnClose)) {
             db.overwriteRecords(supply);
+            if (inventorySystem1Ref != null) {
+                inventorySystem1Ref.refreshInventory();
+            }
             menuRef.setVisible(true);
-            this.dispose();
+            dispose();
         }
     }
 

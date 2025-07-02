@@ -10,10 +10,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-import utils.Inputvalidator;
-import utils.InventoryItemRecord;
-import utils.Item;
-import utils.TransactionFileManager;
+import utils.*;
 import utils.TransactionFileManager.TransactionData;
 
 public class TransactionFrame extends JFrame implements ActionListener {
@@ -52,7 +49,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         panelLogDetails.setBackground(Color.white);
 
         // Subheader (optional)
-        JLabel subheaderSelectedItem = new JLabel("Transaction Details");
+        JLabel subheaderSelectedItem = new JLabel("TRANSACTION DETAILS");
         subheaderSelectedItem.setBounds(20, 15, 300, 25);
         subheaderSelectedItem.setFont(new Font("Arial", Font.BOLD, 16));
         panelLogDetails.add(subheaderSelectedItem);
@@ -151,6 +148,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         lblQuantity.setForeground(Color.WHITE);
 
         txtQuantity = new JTextField();
+        txtQuantity.addKeyListener(new NoSpaceKeyListener());
         txtQuantity.setPreferredSize(new Dimension(140, 30));
         Inputvalidator.makeNumericOnly(txtQuantity);
 

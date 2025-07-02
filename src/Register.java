@@ -1,3 +1,4 @@
+import utils.NoSpaceKeyListener;
 import utils.UserAuth;
 
 import javax.swing.*;
@@ -9,8 +10,8 @@ public class Register extends JFrame implements ActionListener {
 
     JPanel Title, Register, btnPanel;
     JLabel lbltitle, username, createpassword, enterpassword;
-    JTextField txtusername, txtpassword1;
-    JPasswordField txtpassword2;
+    JTextField txtusername;
+    JPasswordField txtpassword1, txtpassword2;
     JButton btnreg, back;
 
     // Declare UserAuth instance
@@ -39,24 +40,31 @@ public class Register extends JFrame implements ActionListener {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
 
-        username = new JLabel("Username");
+        username = new JLabel("Create Username:");
         txtusername = new JTextField();
+        txtusername.addKeyListener(new NoSpaceKeyListener());
         txtusername.setPreferredSize(new Dimension(210, 30));
 
         createpassword = new JLabel("Create Password:");
-        txtpassword1 = new JTextField();
+        txtpassword1 = new JPasswordField();
+        txtpassword1.addKeyListener(new NoSpaceKeyListener());
         txtpassword1.setPreferredSize(new Dimension(210, 30));
 
         enterpassword = new JLabel("Enter Password:");
         txtpassword2 = new JPasswordField();
+        txtpassword2.addKeyListener(new NoSpaceKeyListener());
         txtpassword2.setPreferredSize(new Dimension(210, 30));
 
         btnreg = new JButton("REGISTER");
         btnreg.setPreferredSize(new Dimension(130, 30));
+        btnreg.setBackground(new Color(201, 42, 42));
+        btnreg.setForeground(Color.white);
         btnreg.addActionListener(this);
 
         back = new JButton("BACK");
         back.setPreferredSize(new Dimension(130, 30));
+        back.setBackground(new Color(201, 42, 42));
+        back.setForeground(Color.white);
         back.addActionListener(this);
 
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.CENTER;

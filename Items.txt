@@ -1,2 +1,1 @@
-1,corned beef,Canned Goods,25/6/2025
-3,safeguard,Personal Care,25/6/2025
+1,Tuna,Canned Goods,2/7/2025

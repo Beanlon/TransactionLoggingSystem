@@ -24,7 +24,6 @@ public class InventorySystem1 extends JPanel {
         setLayout(null);
         setPreferredSize(new Dimension(900, 520));
 
-        // --- Panel 1: For ItemCreate ---
         RoundedPanel panel1 = new RoundedPanel(30);
         panel1.setBounds(40, 30, 340, 180);
         panel1.setBackground(new Color(255, 255, 255, 255));
@@ -39,9 +38,14 @@ public class InventorySystem1 extends JPanel {
                 new ItemCreate(InventorySystem1.this, menuRef);
             }
         });
+        JLabel addItemLabel = new JLabel("ADD ITEM +", SwingConstants.CENTER);
+        addItemLabel.setForeground(new Color (201, 42, 42));
+        addItemLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        addItemLabel.setBounds(0, 60, 340, 40);
+        panel1.add(addItemLabel);
+
         add(panel1);
 
-        // --- Panel 2: For SupplyPurchase ---
         RoundedPanel panel2 = new RoundedPanel(30);
         panel2.setBounds(415, 30, 340, 180);
         panel2.setBackground(new Color(255, 255, 255, 255));
@@ -56,7 +60,56 @@ public class InventorySystem1 extends JPanel {
                 }
             }
         });
+
+        JLabel addSupplyLabel = new JLabel("ADD SUPPLY +", SwingConstants.CENTER);
+        addSupplyLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        addSupplyLabel.setForeground(new Color (201, 42, 42));
+        addSupplyLabel.setBounds(0, 60, 340, 40);
+        panel2.add(addSupplyLabel);
+
         add(panel2);
+
+        RoundedPanel paneldelete = new RoundedPanel(30);
+        paneldelete.setBounds(446, 535, 100, 47); // stack below panel1, adjust Y as needed
+        paneldelete.setBackground(new Color(201, 42, 42, 255));
+        paneldelete.setLayout(null);
+        paneldelete.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = inventoryTable.getSelectedRow();
+                if (row >= 0) {
+                    String itemName = inventoryTableModel.getValueAt(row, 1).toString();
+                    String itemCategory = inventoryTableModel.getValueAt(row, 2).toString();
+                    int stock = Integer.parseInt(inventoryTableModel.getValueAt(row, 4).toString()); // <-- FIX
+
+                    JLabel lblInfo = new JLabel("Remove from: " + itemName + " (" + itemCategory + ")");
+                    JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 1, stock, 1)); // min 1, max 100
+
+                    JPanel panel = new JPanel();
+                    panel.setLayout(new GridLayout(2, 1));
+                    panel.add(lblInfo);
+                    panel.add(spinner);
+
+                    int result = JOptionPane.showConfirmDialog(
+                            null, panel, "Remove Items", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+                    );
+
+                    if (result == JOptionPane.OK_OPTION) {
+                        int removeCount = (Integer) spinner.getValue();
+                        inventoryManager.removeStock(itemName, removeCount); // Updates Inventory.txt
+                        refreshInventory(); // Reloads table from file
+                        JOptionPane.showMessageDialog(null, "You removed " + removeCount + " items from " + itemName + ".");
+                    }
+                }
+            }
+        });
+
+        JLabel lbldelete = new JLabel("DELETE");
+        lbldelete.setFont(new Font("Arial", Font.BOLD, 18));
+        lbldelete.setForeground(new Color (255, 253, 253));
+        lbldelete.setBounds(13, 17, 300, 17);
+        paneldelete.add(lbldelete);
+        add(paneldelete);
 
         RoundedPanel panel3 = new RoundedPanel(30);
         panel3.setBounds(555, 535, 200, 47); // stack below panel1, adjust Y as needed
@@ -68,14 +121,15 @@ public class InventorySystem1 extends JPanel {
                 new RestockSummaryBrowser();
             }
         });
-        JLabel lblRestock = new JLabel("Restock Summaries");
+        JLabel lblRestock = new JLabel("RESTOCK SUMMARY");
         lblRestock.setFont(new Font("Arial", Font.BOLD, 18));
-        lblRestock.setBounds(10, 17, 300, 17);
+        lblRestock.setForeground(new Color (201, 42, 42));
+        lblRestock.setBounds(5, 17, 300, 17);
         panel3.add(lblRestock);
 
         add(panel3);
 
-        JLabel HeaderItem = new JLabel("Inventory Items");
+        JLabel HeaderItem = new JLabel("INVENTORY ITEMS");
         HeaderItem.setBounds(43, 230, 300, 25);
         HeaderItem.setFont(new Font("Arial", Font.BOLD, 25));
         this.add(HeaderItem);

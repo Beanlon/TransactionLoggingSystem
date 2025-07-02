@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 1
+Supplier Name: awddad
+Supplier Code: wdwa
+Date Processed: 02/07/2025 17:35:16
+
+Items Restocked:
+ - Item: Tuna, Quantity: 12, Cost/Item: 12.00, Selling Price/Item: 13.00
+
+Total Purchase Cost: 144.00
+--------------------------------

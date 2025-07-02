@@ -10,7 +10,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
 
-
 public class MainPanel extends JPanel implements ActionListener {
 
     private JTextField txtSearch;
@@ -24,54 +23,98 @@ public class MainPanel extends JPanel implements ActionListener {
     private final Map<String, String> fileToMonthYear = new HashMap<>();
     private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMMyyyy");
 
-    // Made these class-level fields so they can be revalidated/repainted
-    private RoundedPanel salesPanelContainer;
-    private RoundedPanel transactionsPanelContainer;
-    private RoundedPanel mostBoughtPanelContainer;
-
     public MainPanel() {
         setLayout(null);
         setPreferredSize(new Dimension(785, 630));
 
-        setupOverviewPanel();
+        // --- Overview Panel, with manual bounds, no calculation ---
+        RoundedPanel salesPanelContainer = new RoundedPanel(25);
+        salesPanelContainer.setBounds(20, 20, 243, 125);
+        salesPanelContainer.setBackground(Color.WHITE);
+
+        RoundedPanel transactionsPanelContainer = new RoundedPanel(25);
+        transactionsPanelContainer.setBounds(280, 20, 243, 125);
+        transactionsPanelContainer.setBackground(Color.WHITE);
+
+        RoundedPanel mostBoughtPanelContainer = new RoundedPanel(25);
+        mostBoughtPanelContainer.setBounds(540, 20, 243, 125);
+        mostBoughtPanelContainer.setBackground(Color.WHITE);
+
+        // ---- Sales Panel content ----
+        salesPanelContainer.setLayout(null);
+        JPanel salesLine = new JPanel();
+        salesLine.setBackground(new Color(201, 42, 42));
+        salesLine.setBounds(0, 12, 5, 100);
+        salesPanelContainer.add(salesLine);
+
+        JLabel lblSalesTitle = new JLabel("TOTAL SALES");
+        lblSalesTitle.setFont(new Font("SansSerif", Font.BOLD, 21));
+        lblSalesTitle.setForeground(new Color(201, 42, 42));
+        lblSalesTitle.setBounds(10, 10, 150, 21);
+        lblSalesTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblSalesTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        salesPanelContainer.add(lblSalesTitle);
+
+        lblTotalSales = new JLabel("₱ 0.00");
+        lblTotalSales.setFont(new Font("SansSerif", Font.PLAIN, 21));
+        lblTotalSales.setForeground(new Color(201, 42, 42));
+        lblTotalSales.setBounds(20, 55, 200, 30);
+        lblTotalSales.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblTotalSales.setHorizontalAlignment(SwingConstants.CENTER);
+        salesPanelContainer.add(lblTotalSales);
+
+        // ---- Transactions Panel content ----
+        transactionsPanelContainer.setLayout(null);
+        JPanel transactionsLine = new JPanel();
+        transactionsLine.setBackground(new Color(201, 42, 42));
+        transactionsLine.setBounds(0, 12, 5, 100);
+        transactionsPanelContainer.add(transactionsLine);
+
+        JLabel lblTransactionsTitle = new JLabel("<html>TRANSACTIONS<br>MADE</html>");
+        lblTransactionsTitle.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblTransactionsTitle.setForeground(new Color(201, 42, 42));
+        lblTransactionsTitle.setBounds(10, 10, 220, 45);
+        transactionsPanelContainer.add(lblTransactionsTitle);
+
+        lblTotalTransactions = new JLabel("0");
+        lblTotalTransactions.setFont(new Font("SansSerif", Font.PLAIN, 21));
+        lblTotalTransactions.setForeground(new Color(201, 42, 42));
+        lblTotalTransactions.setBounds(20, 60, 200, 30);
+        lblTotalTransactions.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblTotalTransactions.setHorizontalAlignment(SwingConstants.CENTER);
+        transactionsPanelContainer.add(lblTotalTransactions);
+
+        // ---- Most Bought Panel content ----
+        mostBoughtPanelContainer.setLayout(null);
+        JPanel mostBoughtLine = new JPanel();
+        mostBoughtLine.setBackground(new Color(201, 42, 42));
+        mostBoughtLine.setBounds(0, 12, 5, 100);
+        mostBoughtPanelContainer.add(mostBoughtLine);
+
+        JLabel lblMostBoughtTitle = new JLabel("<html>MOST BOUGHT<br>ITEM</html>");
+        lblMostBoughtTitle.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblMostBoughtTitle.setForeground(new Color(201, 42, 42));
+        lblMostBoughtTitle.setBounds(10, 10, 220, 45);
+        mostBoughtPanelContainer.add(lblMostBoughtTitle);
+
+        lblMostBought = new JLabel("-");
+        lblMostBought.setFont(new Font("SansSerif", Font.PLAIN, 17));
+        lblMostBought.setForeground(new Color(201, 42, 42));
+        lblMostBought.setBounds(20, 60, 200, 30);
+        lblMostBought.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblMostBought.setHorizontalAlignment(SwingConstants.CENTER);
+        mostBoughtPanelContainer.add(lblMostBought);
+
+        add(salesPanelContainer);
+        add(transactionsPanelContainer);
+        add(mostBoughtPanelContainer);
+
         setupButtons();
         setupFilterAndSearch();
         setupTablePanel();
         loadSavedLogs();
         String selectedMonth = (String) monthComboBox.getSelectedItem();
         updateFilteredOverview(selectedMonth); // Initial update
-    }
-
-    private void setupOverviewPanel() {
-        int panelOverviewX = 20;
-        int panelOverviewY = 20;
-        int panelOverviewWidth = 765;
-        int panelOverviewHeight = 125;
-        int gap = 17;
-        int infoPanelWidth = (panelOverviewWidth - (2 * gap)) / 3;
-
-        int cornerRadius = 25;
-
-        // Initialize class-level fields
-        salesPanelContainer = new RoundedPanel(cornerRadius);
-        transactionsPanelContainer = new RoundedPanel(cornerRadius);
-        mostBoughtPanelContainer = new RoundedPanel(cornerRadius);
-
-        salesPanelContainer.setBounds(panelOverviewX, panelOverviewY, infoPanelWidth, panelOverviewHeight);
-        transactionsPanelContainer.setBounds(panelOverviewX + infoPanelWidth + gap, panelOverviewY, infoPanelWidth, panelOverviewHeight);
-        mostBoughtPanelContainer.setBounds(panelOverviewX + (infoPanelWidth + gap) * 2, panelOverviewY, infoPanelWidth, panelOverviewHeight);
-
-        salesPanelContainer.setBackground(Color.WHITE);
-        transactionsPanelContainer.setBackground(Color.WHITE);
-        mostBoughtPanelContainer.setBackground(Color.WHITE);
-
-        add(salesPanelContainer);
-        add(transactionsPanelContainer);
-        add(mostBoughtPanelContainer);
-
-        lblTotalSales = createInfoPanel("Total Sales", "₱0.00", salesPanelContainer);
-        lblTotalTransactions = createInfoPanel("Total Transactions", "0", transactionsPanelContainer);
-        lblMostBought = createInfoPanel("Most Bought Item", "-", mostBoughtPanelContainer);
     }
 
     private void setupButtons() {
@@ -88,6 +131,8 @@ public class MainPanel extends JPanel implements ActionListener {
 
     private JButton createButton(String text, JPanel container) {
         JButton btn = new JButton(text);
+        btn.setForeground(Color.white);
+        btn.setBackground(new Color(201, 42, 42));
         btn.setPreferredSize(new Dimension(90, 26));
         btn.addActionListener(this);
         container.add(btn);
@@ -171,61 +216,18 @@ public class MainPanel extends JPanel implements ActionListener {
         add(panelTable);
     }
 
-    private JLabel createInfoPanel(String title, String value, JPanel container) {
-        container.setLayout(null);
-
-        int containerHeight = container.getHeight();
-        int lineHeight = 100;
-        int y = (containerHeight - lineHeight) / 2;
-
-        JPanel line = new JPanel();
-        line.setBackground(new Color(201, 42, 42));
-        line.setBounds(0, y, 5, lineHeight);
-        container.add(line);
-
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBackground(Color.WHITE);
-        content.setOpaque(false);
-
-        JLabel lblTitle = new JLabel(title);
-        lblTitle.setFont(new Font("SansSerif", Font.BOLD, 23));
-        lblTitle.setForeground(new Color(201, 42, 42));
-        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel lblValue = new JLabel(value);
-        lblValue.setFont(new Font("SansSerif", Font.PLAIN, 20));
-        lblValue.setForeground(new Color(201, 42, 42));
-        lblValue.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        content.add(lblTitle);
-        content.add(Box.createVerticalStrut(10));
-        content.add(lblValue);
-
-        content.setPreferredSize(content.getPreferredSize());
-        int contentWidth = container.getWidth() - 5;
-        int contentHeight = content.getPreferredSize().height;
-
-        int yPos = (container.getHeight() - contentHeight) / 2;
-        if (yPos < 0) yPos = 0;
-
-        content.setBounds(5, yPos, contentWidth, contentHeight);
-        container.add(content);
-
-        return lblValue;
-    }
-
+    // method for loading saved logs that are creates a new file under a directory
     private void loadSavedLogs() {
-        File dir = new File("logs");
-        if (!dir.exists()) dir.mkdirs();
+        File dir = new File("logs"); // Directory where logs are stored
+        if (!dir.exists()) dir.mkdirs(); // Create directory if it doesn't exist
 
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
-        if (files == null) return;
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv")); // Filter for CSV files
+        if (files == null) return; //It returns when no files are found
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //Creates a date format and last modified date
 
-        monthComboBox.removeAllItems();
-        monthComboBox.addItem("Overall");
+        monthComboBox.removeAllItems(); //removes all item from the monthcombobox
+        monthComboBox.addItem("Overall"); //It always adds "Overall" as the first item
 
         tableModel.setRowCount(0); // Clear existing table data before repopulating
 
@@ -401,15 +403,7 @@ public class MainPanel extends JPanel implements ActionListener {
             }
         }
         lblMostBought.setText(mostBought);
-
-        salesPanelContainer.revalidate();
-        salesPanelContainer.repaint();
-        transactionsPanelContainer.revalidate();
-        transactionsPanelContainer.repaint();
-        mostBoughtPanelContainer.revalidate();
-        mostBoughtPanelContainer.repaint();
     }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {

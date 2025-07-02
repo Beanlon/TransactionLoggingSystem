@@ -44,6 +44,17 @@ public class InventoryManager {
         saveInventory();
     }
 
+    public void removeStock(String itemName, int quantityToRemove) {
+        InventoryItem item = items.get(itemName);
+        if (item != null) {
+            item.quantity = Math.max(0, item.quantity - quantityToRemove);
+            if (item.quantity == 0) {
+                items.remove(itemName); // Remove item completely if quantity is zero
+            }
+            saveInventory();
+        }
+    }
+
     private void saveInventory() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
             for (InventoryItem item : items.values()) {
