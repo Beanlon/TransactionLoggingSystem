@@ -235,7 +235,7 @@ public class MainPanel extends JPanel implements ActionListener {
             String filepath = file.getPath(); //get the file path
             String modified = sdf.format(file.lastModified()); //get the last modified date and time of the file
 
-            String transactionNo = "", creationDate = ""; //Leaves empty strings for transaction number and creation date since they are placed during log creation
+            String transactionId = "", creationDate = ""; //Leaves empty strings for transaction number and creation date since they are placed during log creation
 
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 reader.readLine(); // Skip header
@@ -248,7 +248,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 }
                 if (transLine != null && transLine.contains(",")) { //checks if the transaction line exists and contains a comma
                     String[] parts = transLine.split(","); //it will be split into parts
-                    if (parts.length > 1) transactionNo = parts[1].trim(); // If there are more than one part, the second part is the transaction number
+                    if (parts.length > 1) transactionId = parts[1].trim(); // If there are more than one part, the second part is the transaction number
                 }
             } catch (IOException e) {
                 System.err.println("Error reading metadata from log file " + file.getName() + ": " + e.getMessage());
@@ -268,7 +268,7 @@ public class MainPanel extends JPanel implements ActionListener {
             fileToMonthYear.put(filepath, monthYear);// Maps the file path to its month-year format for filtering
             if (!comboBoxHasItem(monthYear)) monthComboBox.addItem(monthYear);
 
-            tableModel.addRow(new Object[]{filename, transactionNo, creationDate, modified, filepath});
+            tableModel.addRow(new Object[]{filename, transactionId, creationDate, modified, filepath});
         }
     }
 
