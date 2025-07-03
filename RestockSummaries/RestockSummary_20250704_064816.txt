@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 2
+Supplier Name: SM
+Supplier Code: ADWAD
+Date Processed: 04/07/2025 06:48:13
+
+Items Restocked:
+ - Item: Corned Beef, Quantity: 12, Cost/Item: 16.00, Selling Price/Item: 17.00
+
+Total Purchase Cost: 192.00
+--------------------------------

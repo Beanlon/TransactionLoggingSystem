@@ -1,0 +1,12 @@
+--- Restock Purchase Summary ---
+Supply ID: 1
+Supplier Name: NCCC
+Supplier Code: DWAD2
+Date Processed: 03/07/2025 22:12:22
+
+Items Restocked:
+ - Item: Century Tuna, Quantity: 12, Cost/Item: 15.00, Selling Price/Item: 16.00
+ - Item: Beans, Quantity: 13, Cost/Item: 14.00, Selling Price/Item: 15.00
+
+Total Purchase Cost: 362.00
+--------------------------------

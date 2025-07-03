@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 4
+Supplier Name: sba
+Supplier Code: sada
+Date Processed: 04/07/2025 07:21:14
+
+Items Restocked:
+ - Item: Tuna, Quantity: 12, Cost/Item: 12.00, Selling Price/Item: 13.00
+
+Total Purchase Cost: 144.00
+--------------------------------

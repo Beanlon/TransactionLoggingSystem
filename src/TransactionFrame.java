@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-import utils.*;
+import utils.*; // Import all utilities classes
 import utils.TransactionFileManager.TransactionData;
 
 public class TransactionFrame extends JFrame implements ActionListener {
@@ -40,6 +40,10 @@ public class TransactionFrame extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         setResizable(false);
 
+        // Load inventory once at the start of the application
+        // This ensures inventoryMap always reflects the file system's current state
+        inventoryMap = InventoryItemRecord.loadInventory(); // <--- Moved this here and it's crucial
+
         JPanel contentPane = new JPanel(null);
         setContentPane(contentPane);
 
@@ -54,7 +58,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         subheaderSelectedItem.setFont(new Font("Arial", Font.BOLD, 16));
         panelLogDetails.add(subheaderSelectedItem);
 
-// Inner panel
+        // Inner panel
         JPanel panelinside = new JPanel(new GridBagLayout());
         panelinside.setBounds(20, 48, 320, 145);
         panelinside.setOpaque(false); // Make sure the background looks like the parent
@@ -83,7 +87,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         txtTransactionIDValue.setEditable(false);
         txtTransactionIDValue.setPreferredSize(new Dimension(140, 28));
 
-// Add components to the inside panel
+        // Add components to the inside panel
         gbc.gridx = 0; gbc.gridy = 0;
         panelinside.add(lblName, gbc);
         gbc.gridx = 1;
@@ -106,8 +110,6 @@ public class TransactionFrame extends JFrame implements ActionListener {
         panelLogDetails.add(panelinside);
         contentPane.add(panelLogDetails);
 
-
-
         RoundedPanel panelItemInput = new RoundedPanel(25);
         panelItemInput.setBounds(35, 305, 365, 160);
         panelItemInput.setBackground(new Color(201, 42, 42));
@@ -118,12 +120,12 @@ public class TransactionFrame extends JFrame implements ActionListener {
         panelitemtitle.setFont(new Font("Arial", Font.BOLD, 16));
         panelitemtitle.setForeground(Color.white);
         panelItemInput.add(panelitemtitle);
-// Inner grid panel for input fields
+        // Inner grid panel for input fields
         JPanel panelItemGrid = new JPanel(new GridBagLayout());
         panelItemGrid.setBounds(15, 25, 335, 120); // Position within panelItemInput
         panelItemGrid.setOpaque(false); // Let the rounded panel background show through
 
-// Add components to panelItemGrid as before
+        // Add components to panelItemGrid as before
         GridBagConstraints gbc2 = new GridBagConstraints();
         gbc2.insets = new Insets(5, 10, 5, 10);
         gbc2.anchor = GridBagConstraints.WEST;
@@ -134,8 +136,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         lblItem.setFont(new Font("Arial", Font.BOLD, 13));
         lblItem.setForeground(Color.WHITE);
         comboItem = new JComboBox<>();
-        for (Item item : loadInventoryItems()) comboItem.addItem(item); //for every item loaded from inventory its added inside the Combobox
-        if (comboItem.getItemCount() > 0) comboItem.setSelectedIndex(0); //if the ComboItemcount is greater than 0 the selected index is 0 meaning it will show the first tem
+        loadItemsIntoComboBox(); // Initial population of combo box based on the loaded inventoryMap
         comboItem.setPreferredSize(new Dimension(140, 30));
 
         gbc2.gridx = 0; gbc2.gridy = 0; gbc2.anchor = GridBagConstraints.EAST;
@@ -225,7 +226,6 @@ public class TransactionFrame extends JFrame implements ActionListener {
         txtSearch.setForeground(Color.GRAY);
         txtSearch.setText("Search");
 
-
         //It allows you have an interaction with the search textfield
         txtSearch.addFocusListener(new FocusAdapter() {
             @Override
@@ -267,7 +267,6 @@ public class TransactionFrame extends JFrame implements ActionListener {
         panelSearch.add(txtSearch);
         contentPane.add(panelSearch);
 
-
         // Creates a tablemodel which based on the string array as the bases of the column to put the details in
         String[] columnNames = {"ITEM", "PRICE", "QUANTITY", "SUBTOTAL"};
         model = new DefaultTableModel(columnNames, 0);  //Starts the row at zero meaning empty
@@ -296,7 +295,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         panelTotal.setBackground(Color.WHITE);
         JLabel lblTotalText = new JLabel("TOTAL: ");
         lblTotalText.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTotalValue = new JLabel("\u20B10.00"); //creates a unicode of pesos with the 0.00 as initial total
+        lblTotalValue = new JLabel("₱0.00"); //creates a unicode of pesos with the 0.00 as initial total
         lblTotalValue.setFont(new Font("Arial", Font.BOLD, 20));
         panelTotal.add(lblTotalText);
         panelTotal.add(lblTotalValue);
@@ -308,14 +307,18 @@ public class TransactionFrame extends JFrame implements ActionListener {
         }
     }
 
-    // creates a list to show the products available
-    private List<Item> loadInventoryItems() {
-        List<Item> items = new ArrayList<>(); //creates a new arraylist based on the Item class that were items added
-        inventoryMap = InventoryItemRecord.loadInventory(); //Uses inventoryMap which allows us to load the inventory to be seen the JCombobox
-        for (InventoryItemRecord inv : inventoryMap.values()) {
-            items.add(new Item(inv.getName(), inv.getPrice(), inv.getQuantity())); //Adds item from the including the name, price and quantity
+    // New method to load and filter inventory items into the JComboBox
+    // This method now *only* populates the combo box based on the *current* inventoryMap
+    private void loadItemsIntoComboBox() {
+        comboItem.removeAllItems(); // Clear existing items
+        for (InventoryItemRecord inv : inventoryMap.values()) { // Iterate over the already loaded inventoryMap
+            if (inv.getQuantity() > 0) { // Only add if quantity is greater than 0
+                comboItem.addItem(new Item(inv.getName(), inv.getPrice(), inv.getQuantity()));
+            }
         }
-        return items;
+        if (comboItem.getItemCount() > 0) {
+            comboItem.setSelectedIndex(0);
+        }
     }
 
     // The name and date that was made from createlog will be placed inside the TxtNameValue and TxtDateValue
@@ -333,7 +336,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
                 total += Double.parseDouble(value.toString()); // Parses the value to a double and adds it to the total
             } catch (NumberFormatException ignored) {}
         }
-        lblTotalValue.setText("\u20B1" + String.format("%.2f", total)); //Updates the Total value using string format with the total value with two decimals
+        lblTotalValue.setText("₱" + String.format("%.2f", total)); //Updates the Total value using string format with the total value with two decimals
     }
 
     //Used to filter or search and uses query as the parameter
@@ -353,83 +356,109 @@ public class TransactionFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnadd) { //If btnAdd is clicked it adds the item and quantity unto the column
-            Item selectedItem = (Item) comboItem.getSelectedItem(); //selected item comes from the Item class inside the JCombobox
-            String quantity = txtQuantity.getText().trim(); //Uses string quantity under txtQuantity and gets the string
-            if (selectedItem == null || quantity.isEmpty()) { //If the item is null or quantity is empty it prompts a message
-                JOptionPane.showMessageDialog(this, "Please fill in all fields before adding.");
+            Item selectedItemInCombo = (Item) comboItem.getSelectedItem(); // The Item object from the JComboBox
+            String quantityStr = txtQuantity.getText().trim();
+
+            if (selectedItemInCombo == null || quantityStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please select an item and enter a quantity.");
                 return;
             }
-            int quantityInt = Integer.parseInt(quantity); //Parses the string(Quantity) to an integer
-            if (quantityInt <= 0) { // If quantity is lesser than or equal to zero then it prompts this message
+
+            int quantityInt = 0;
+            try {
+                quantityInt = Integer.parseInt(quantityStr);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Quantity must be a valid number.");
+                return;
+            }
+
+            if (quantityInt <= 0) {
                 JOptionPane.showMessageDialog(this, "Quantity must be greater than 0.");
                 return;
             }
-            if (quantityInt > selectedItem.getQuantity()) { //If the quantity is greater than the stock then it prompts this message
-                JOptionPane.showMessageDialog(this, "Not enough stock. Available: " + selectedItem.getQuantity());
+
+            // Get the authoritative InventoryItemRecord from the inventoryMap
+            InventoryItemRecord invRecord = inventoryMap.get(selectedItemInCombo.getName());
+
+            if (invRecord == null) {
+                JOptionPane.showMessageDialog(this, "Item not found in inventory: " + selectedItemInCombo.getName() + "\nPlease check inventory.csv.");
+                loadItemsIntoComboBox(); // Refresh combo box in case of discrepancy
                 return;
             }
-            double subtotal = selectedItem.getPrice() * quantityInt; //creates the subtotal based on the product bought multiplied the quantity
+
+            if (quantityInt > invRecord.getQuantity()) { // Check against the actual inventory stock
+                JOptionPane.showMessageDialog(this, "Not enough stock. Available: " + invRecord.getQuantity());
+                return;
+            }
+
+            double subtotal = invRecord.getPrice() * quantityInt; // Calculate subtotal based on inventory price
 
             // Check if item already exists in the table to update quantity and subtotal
-            boolean itemFound = false; // sets it initially to false, will be used to track if the item is found 
-            for (int i = 0; i < model.getRowCount(); i++) { //loops through all the rows
-                if (model.getValueAt(i, 0).equals(selectedItem.getName())) { //If the item already exists on the table
-                    int currentQuantity = Integer.parseInt(model.getValueAt(i, 2).toString()); //Gets the amount of item currently on the table in column 2
-                    double currentSubtotal = Double.parseDouble(model.getValueAt(i, 3).toString());//Gets the subtotal from column 3
+            boolean itemFoundInTable = false;
+            for (int i = 0; i < model.getRowCount(); i++) {
+                if (model.getValueAt(i, 0).equals(selectedItemInCombo.getName())) {
+                    int currentQuantityInTable = Integer.parseInt(model.getValueAt(i, 2).toString());
+                    double currentSubtotalInTable = Double.parseDouble(model.getValueAt(i, 3).toString());
 
-                    model.setValueAt(currentQuantity + quantityInt, i, 2); // Update quantity based on currentquantity plus the added quantity in column 2
-                    model.setValueAt(currentSubtotal + subtotal, i, 3);    // Update subtotal + the new subtotal in column 3
-                    itemFound = true; // it then 
+                    model.setValueAt(currentQuantityInTable + quantityInt, i, 2);
+                    model.setValueAt(currentSubtotalInTable + subtotal, i, 3);
+                    itemFoundInTable = true;
                     break;
                 }
             }
 
-            if (!itemFound) { // If item is not found then it will add a row along with the selected Item, price quantity and subtotal
-                model.addRow(new Object[]{selectedItem.getName(), selectedItem.getPrice(), quantityInt, subtotal});
+            if (!itemFoundInTable) {
+                model.addRow(new Object[]{selectedItemInCombo.getName(), invRecord.getPrice(), quantityInt, subtotal});
             }
 
+            // Reduce quantity in the authoritative inventory record
+            invRecord.reduceQuantity(quantityInt);
 
-            selectedItem.reduceQuantity(quantityInt); // calls method to reduce quantity from the quantityInt
-            InventoryItemRecord inv = inventoryMap.get(selectedItem.getName()); //gets from the inventorymap to get the item by its name
-            if (inv != null) inv.reduceQuantity(quantityInt);// If inv is or the item is found then it reduces the quantity from itemRecord
-            int selectedIndex = comboItem.getSelectedIndex();
-            ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(selectedIndex); //removes item at the selected index
-            ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(selectedItem, selectedIndex); //inserts elements back at the same index
-            comboItem.setSelectedIndex(selectedIndex);
+            // Save inventory changes immediately after reducing quantity
+            try {
+                InventoryItemRecord.saveInventory(inventoryMap);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error saving inventory after adding item: " + ex.getMessage());
+            }
+
+            // Re-load items into combo box to reflect updated quantity or removal if quantity is 0
+            loadItemsIntoComboBox();
+
             clearInputs();
             saved = false;
             updateTotal();
 
         } else if (e.getSource() == btnremove) {
             int selectedRowView = table.getSelectedRow();
-            if (selectedRowView == -1) { //if there is no chosen selectedRow then it will prompt to pick one
+            if (selectedRowView == -1) {
                 JOptionPane.showMessageDialog(this, "Please select a row to remove.");
                 return;
             }
             // Convert view row index to model row index, important if table is filtered/sorted
             int selectedModelRow = table.convertRowIndexToModel(selectedRowView);
 
-            // Get item name and quantity from selected row (from the model, not view)
+            // Get item name and quantity from selected row (from the model)
             String itemName = model.getValueAt(selectedModelRow, 0).toString();
-            int quantity = Integer.parseInt(model.getValueAt(selectedModelRow, 2).toString());
+            int quantityToRemove = Integer.parseInt(model.getValueAt(selectedModelRow, 2).toString());
 
-            // Restore quantity in inventoryMap
-            InventoryItemRecord inv = inventoryMap.get(itemName);
-            if (inv != null) {
-                inv.addQuantity(quantity);
+            // Restore quantity in the authoritative inventoryMap
+            InventoryItemRecord invRecord = inventoryMap.get(itemName);
+            if (invRecord != null) {
+                invRecord.addQuantity(quantityToRemove);
+            } else {
+                // This shouldn't happen if inventory is consistent, but handle defensively
+                System.err.println("Error: Item " + itemName + " not found in inventory map when trying to restore quantity.");
             }
 
-            // Restore quantity in comboItem (the JComboBox)
-            for (int i = 0; i < comboItem.getItemCount(); i++) {
-                Item item = comboItem.getItemAt(i);
-                if (item.getName().equals(itemName)) {
-                    item.addQuantity(quantity);
-                    // Force the ComboBox to refresh the display
-                    ((DefaultComboBoxModel<Item>) comboItem.getModel()).removeElementAt(i);
-                    ((DefaultComboBoxModel<Item>) comboItem.getModel()).insertElementAt(item, i);
-                    break;
-                }
+            // Save inventory changes immediately after restoring quantity
+            try {
+                InventoryItemRecord.saveInventory(inventoryMap);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error saving inventory after removing item: " + ex.getMessage());
             }
+
+            // Re-load items into combo box to reflect updated quantity or addition if quantity becomes > 0
+            loadItemsIntoComboBox();
 
             // Remove row from table model
             model.removeRow(selectedModelRow);
@@ -440,34 +469,33 @@ public class TransactionFrame extends JFrame implements ActionListener {
         } else if (e.getSource() == btnclear) {
             clearInputs();
         } else if (e.getSource() == btnsave) {
-            //Uses try-catch to save to file and shows error using IOException
+            // Transaction save only, inventory is saved incrementally
             try {
                 saveToFile();
                 saved = true;
-                JOptionPane.showMessageDialog(this, "File saved successfully!");
+                JOptionPane.showMessageDialog(this, "Transaction log saved successfully!");
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Error saving transaction log: " + ex.getMessage());
             }
         } else if (e.getSource() == btnClose) {
-            if (this.saved) { //If already saved it will automacticaly close and go back to menu
+            if (this.saved) {
                 new Menu();
                 dispose();
-            } else { //else it will show a prompt asking you to save changes
-                int choice = JOptionPane.showConfirmDialog(this, "Do you want to save changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
-                if (choice == JOptionPane.YES_OPTION) { //If yes it will save the file
+            } else {
+                int choice = JOptionPane.showConfirmDialog(this, "Do you want to save transaction changes?", "Save Changes", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (choice == JOptionPane.YES_OPTION) {
                     try {
                         saveToFile();
+                        // No need to save inventory here again as it's saved on add/remove
                         new Menu();
                         dispose();
                     } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
+                        JOptionPane.showMessageDialog(this, "Error saving transaction log on close: " + ex.getMessage());
                     }
-                } else if (choice == JOptionPane.NO_OPTION) { //If no it won't
+                } else if (choice == JOptionPane.NO_OPTION) {
                     new Menu();
                     dispose();
-                } else if (choice == JOptionPane.CANCEL_OPTION) {
-
-                }
+                } // If CANCEL_OPTION, do nothing and stay on the current frame
             }
         }
     }
@@ -480,37 +508,43 @@ public class TransactionFrame extends JFrame implements ActionListener {
         }
     }
 
-    //Methods that saves the file
+    //Methods that saves the transaction log file (not inventory)
     public void saveToFile() throws IOException {
         File dir = new File("logs"); //creates a file directory named logs
         if (!dir.exists()) dir.mkdir(); //if the directory does not exist it creates that directory
         String filename = "logs/" + TxtNameValue.getText() + ".csv"; //gets the name of the transaction as the name of the csv file
         File file = new File(filename); //creates the file under that filename
         TransactionFileManager.saveToFile(file, TxtNameValue.getText(), TxtDateValue.getText(),txtTransactionIDValue.getText(), model); //Saves file using
-        InventoryItemRecord.saveInventory(inventoryMap); //saves inventory based on the JCombobox
+        // Inventory is now saved incrementally on add/remove. No need to save it here.
     }
 
     //loads file
     public void loadFromFile(String filename) {
         try {
-            File file = new File(filename); //creates a file object based on the file you used
-            if (!file.exists()) { //if the file is not found it prompts this message
-                JOptionPane.showMessageDialog(this, "File not found: " + filename);
+            File file = new File(filename);
+            if (!file.exists()) {
+                JOptionPane.showMessageDialog(this, "Transaction log file not found: " + filename);
                 return;
-            } //Loads data from file
+            }
             TransactionData data = TransactionFileManager.loadFromFile(file);
-            setNameAndDate(data.name, data.date); //gets the name and date
-            transactionID = data.transactionID; //gets the transactionId from the file
-            txtTransactionIDValue.setText(transactionID); //settext to the textfield
+            setNameAndDate(data.name, data.date);
+            transactionID = data.transactionID;
+            txtTransactionIDValue.setText(transactionID);
             model.setRowCount(0); // Clear existing rows
-            for (String[] row : data.rows) { //loops through rows
-                if (row.length == model.getColumnCount()) { //if the row has the right amount of columns it adds the row to that table
+
+            // When loading a transaction, the inventoryMap is considered the live, current stock.
+            // This method simply populates the table with historical transaction data.
+            for (String[] row : data.rows) {
+                if (row.length == model.getColumnCount()) {
                     model.addRow(row);
                 }
             }
-            updateTotal(); //calls method to update the total
+            updateTotal();
+            // No need to loadItemsIntoComboBox here as the inventoryMap is the true source of truth
+            // and is loaded at application start, and updated on add/remove.
+            // The combo box will already reflect the current inventory.
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error loading file: " + e.getMessage()); //detects error
+            JOptionPane.showMessageDialog(this, "Error loading transaction log file: " + e.getMessage());
         }
     }
 
@@ -527,7 +561,9 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            TransactionFrame frame = new TransactionFrame("SampleLog", "2025-06-11", (args.length > 0 ? args[0] : null));
+            // Ensure inventory.csv exists or is created by your InventoryItemRecord.loadInventory()
+            // before running TransactionFrame to avoid NullPointerException on inventoryMap.
+            TransactionFrame frame = new TransactionFrame("SampleLog", "2025-07-04", (args.length > 0 ? args[0] : null));
             frame.setVisible(true);
         });
     }

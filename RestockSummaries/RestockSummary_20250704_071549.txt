@@ -1,0 +1,11 @@
+--- Restock Purchase Summary ---
+Supply ID: 3
+Supplier Name: sm
+Supplier Code: dawdwa
+Date Processed: 04/07/2025 07:15:47
+
+Items Restocked:
+ - Item: Beef loaf, Quantity: 12, Cost/Item: 12.00, Selling Price/Item: 13.00
+
+Total Purchase Cost: 144.00
+--------------------------------
