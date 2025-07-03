@@ -242,30 +242,30 @@ public class MainPanel extends JPanel implements ActionListener {
                 String dateLine = reader.readLine(); //Reads this line's date
                 String transLine = reader.readLine(); //Reads this line's transaction number/ID
 
-                if (dateLine != null && dateLine.contains(",")) {
-                    String[] parts = dateLine.split(",");
-                    if (parts.length > 1) creationDate = parts[1].trim();
+                if (dateLine != null && dateLine.contains(",")) { //if the dateline exists and it contains a comma
+                    String[] parts = dateLine.split(","); //it will be split into parts
+                    if (parts.length > 1) creationDate = parts[1].trim(); // If there are more than one part, the second part is the creation date
                 }
-                if (transLine != null && transLine.contains(",")) {
-                    String[] parts = transLine.split(",");
-                    if (parts.length > 1) transactionNo = parts[1].trim();
+                if (transLine != null && transLine.contains(",")) { //checks if the transaction line exists and contains a comma
+                    String[] parts = transLine.split(","); //it will be split into parts
+                    if (parts.length > 1) transactionNo = parts[1].trim(); // If there are more than one part, the second part is the transaction number
                 }
             } catch (IOException e) {
                 System.err.println("Error reading metadata from log file " + file.getName() + ": " + e.getMessage());
             }
 
             try {
-                Path path = file.toPath();
+                Path path = file.toPath(); // Converts the file to a Path object
                 BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
                 if (creationDate.isEmpty()) {
-                    creationDate = sdf.format(attr.creationTime().toMillis());
+                    creationDate = sdf.format(attr.creationTime().toMillis()); // If creation date is still empty, get the file creation time
                 }
             } catch (IOException e) {
                 System.err.println("Error reading file creation time for " + file.getName() + ": " + e.getMessage());
             }
 
-            String monthYear = monthYearFormat.format(new Date(file.lastModified()));
-            fileToMonthYear.put(filepath, monthYear);
+            String monthYear = monthYearFormat.format(new Date(file.lastModified())); // Formats the last modified date to "MMMMyyyy" format
+            fileToMonthYear.put(filepath, monthYear);// Maps the file path to its month-year format for filtering
             if (!comboBoxHasItem(monthYear)) monthComboBox.addItem(monthYear);
 
             tableModel.addRow(new Object[]{filename, transactionNo, creationDate, modified, filepath});
@@ -274,25 +274,27 @@ public class MainPanel extends JPanel implements ActionListener {
 
     private boolean comboBoxHasItem(String item) {
         for (int i = 0; i < monthComboBox.getItemCount(); i++) {
-            if (monthComboBox.getItemAt(i).equals(item)) return true;
+            if (monthComboBox.getItemAt(i).equals(item))  // Checks if the item already exists in the monthComboBox
+                return true; //returns true meaning the item already exists
         }
-        return false;
+        return false; //returns false meaning the item does not exist
     }
 
+    //Function to filter the table based on the search text field
     private void filterTable() {
-        String query = txtSearch.getText().trim().toLowerCase();
+        String query = txtSearch.getText().trim().toLowerCase(); //creates a query from the text field and converts it to lower case
 
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
-        logTable.setRowSorter(sorter);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel); //tablesorter refers to the table model
+        logTable.setRowSorter(sorter); // Sets the row sorter for the logTable
 
-        if (query.isEmpty() || query.equals("search")) {
+        if (query.isEmpty() || query.equals("search")) { //if query is empty or equals "search" then the sorter is null since it doesnt detect any search
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
-                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
-                    for (int i = 0; i <= 2; i++) {
-                        String value = entry.getStringValue(i).toLowerCase();
-                        if (value.contains(query)) return true;
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {//else it begins to filter the table
+                    for (int i = 0; i <= 2; i++) { // Checks the first three columns (Log Name, Transaction No., Date Created)
+                        String value = entry.getStringValue(i).toLowerCase(); // Converts the value to lower case
+                        if (value.contains(query)) return true; // If any of the values in the first three columns contain the query, include this row
                     }
                     return false;
                 }
@@ -301,52 +303,56 @@ public class MainPanel extends JPanel implements ActionListener {
         updateFilteredOverview((String) monthComboBox.getSelectedItem()); // Update overview after search filter
     }
 
+    //function that is used to filter using the jcombobox for month and year
     private void filterTableByMonthYear(String selected) {
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel); //Usses tablerowsorter to filter the table by month and year
         logTable.setRowSorter(sorter);
 
-        if ("Overall".equals(selected)) {
+        if ("Overall".equals(selected)) { //If overall is selected then it will sjhow all of the files
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
                 public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
-                    String filepath = (String) tableModel.getValueAt(entry.getIdentifier(), 4);
-                    return fileToMonthYear.containsKey(filepath) && selected.equals(fileToMonthYear.get(filepath));
+                    String filepath = (String) tableModel.getValueAt(entry.getIdentifier(), 4); // Gets the file path from the table model
+                    return fileToMonthYear.containsKey(filepath) && selected.equals(fileToMonthYear.get(filepath)); // Checks if the file path exists in the map and if the selected month-year matches
                 }
             });
         }
-        updateFilteredOverview(selected);
+        updateFilteredOverview(selected); // Update overview after month filter
     }
 
+    //Function to update the overview labels based on the filtered data
     private void updateFilteredOverview(String selectedMonthYear) {
-        double totalSales = 0;
-        int totalTransactions = 0;
-        HashMap<String, Integer> itemCount = new HashMap<>();
+        double totalSales = 0; //initial starts at 0
+        int totalTransactions = 0; //initial starts at 0
+        HashMap<String, Integer> itemCount = new HashMap<>(); // Keeps track of item quantities sold
 
-        int viewRowCount = logTable.getRowCount();
+
+        int viewRowCount = logTable.getRowCount(); // Gets the number of rows currently displayed in the logTable after filtering (Used for total transactions)
         Set<String> processedFiles = new HashSet<>(); // Prevent double-counting
 
-        for (int i = 0; i < viewRowCount; i++) {
-            int modelRow = logTable.convertRowIndexToModel(i);
-            String filepath = (String) tableModel.getValueAt(modelRow, 4);
+        for (int i = 0; i < viewRowCount; i++) { // for every row in the view
+            int modelRow = logTable.convertRowIndexToModel(i); // Converts the view row index to model row index (for sorting and filtering)
+            String filepath = (String) tableModel.getValueAt(modelRow, 4); // Gets the file path from the table model
 
             // Only process each file once
             if (!processedFiles.add(filepath)) continue;
 
-            File file = new File(filepath);
-            if (!file.exists() || !file.isFile()) {
-                fileToMonthYear.remove(filepath);
+            File file = new File(filepath);  // Creates a File object from the file path
+            if (!file.exists() || !file.isFile()) { //If the file does not exist or is not a file, skip it
+                fileToMonthYear.remove(filepath); // Remove from the map if the file is invalid
                 continue;
             }
 
+            // Check if the file's month-year matches the selected filter
             String monthYear = fileToMonthYear.get(filepath);
-            if (!selectedMonthYear.equals("Overall") && (monthYear == null || !monthYear.equals(selectedMonthYear))) {
+            if (!selectedMonthYear.equals("Overall") && (monthYear == null || !monthYear.equals(selectedMonthYear))) { // if the selected month-year is not "Overall" and the file's month-year does not match
                 continue;
             }
 
-            totalTransactions++;
+            totalTransactions++; //Our total transactions will increase by 1 for every file processed
 
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) { // Reads the log file
                 String line;
                 int lineCounter = 0;
                 while ((line = reader.readLine()) != null) {
@@ -355,7 +361,7 @@ public class MainPanel extends JPanel implements ActionListener {
                         continue; // skip header or empty lines
                     }
 
-                    String[] parts = line.split(",");
+                    String[] parts = line.split(","); //seperate each line by comma
                     // Skip non-item lines
                     if (parts.length == 0 || parts[0].trim().equalsIgnoreCase("Subtotal")
                             || parts[0].trim().equalsIgnoreCase("Total")
@@ -419,7 +425,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 int modelRow = logTable.convertRowIndexToModel(selected);
                 String logname = ((String) tableModel.getValueAt(modelRow, 0)).replace(".csv", "");
                 String filepath = (String) tableModel.getValueAt(modelRow, 4);
-                String date = extractDateFromCSV(filepath);
+                String date = extractDateFromCSV(filepath); // Creates an object that uses this method using filepath as its source
                 new TransactionFrame(logname, date, filepath).setVisible(true);
                 if (parentWindow != null) parentWindow.dispose();
             } else {
@@ -451,7 +457,7 @@ public class MainPanel extends JPanel implements ActionListener {
                             JOptionPane.QUESTION_MESSAGE
                     );
 
-                    boolean shouldRestock = (restock == JOptionPane.YES_OPTION);
+                    boolean shouldRestock = (restock == JOptionPane.YES_OPTION); //the stocks will go back if you click yes
 
                     if (fileToDelete.exists()) {
                         if (shouldRestock) {
@@ -481,13 +487,13 @@ public class MainPanel extends JPanel implements ActionListener {
         }
     }
 
-    private String extractDateFromCSV(String filepath) {
+    private String extractDateFromCSV(String filepath) { // method used to get the date from the file
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             reader.readLine();
             String dataLine = reader.readLine();
             if (dataLine != null) {
                 String[] values = dataLine.split(",");
-                if (values.length >= 2) return values[1].trim();
+                if (values.length >= 2) return values[1].trim(); // if the length fo the values inside the file is greater than oor equal to 2 return the value from index 1
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -496,9 +502,8 @@ public class MainPanel extends JPanel implements ActionListener {
         return "";
     }
 
-    private void restockFromDeletedLog(File file) {
+    private void restockFromDeletedLog(File file) { // Method to restock inventory based on the deleted log file
         try {
-            // Step 1: Read inventory into map
             Map<String, String[]> inventoryMap = new LinkedHashMap<>();
             File inventoryFile = new File("Inventory.txt");
             if (inventoryFile.exists()) {
@@ -558,7 +563,6 @@ public class MainPanel extends JPanel implements ActionListener {
                 }
             }
 
-            // Step 3: Write inventory map back to Inventory.txt
             try (PrintWriter writer = new PrintWriter(new FileWriter(inventoryFile))) {
                 for (String[] item : inventoryMap.values()) {
                     writer.println(String.join(",", item));
