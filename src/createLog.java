@@ -88,7 +88,7 @@
         public void actionPerformed(ActionEvent e) {
             try {
                 if (e.getSource() == btnBack) {
-                    new Menu(); // Replace with your actual menu class
+                    new Menu();
                     this.dispose();
                 } else if (e.getSource() == btnCreate) {
                     String name = txtName.getText().trim();
@@ -108,7 +108,7 @@
                     // Prepare unique file name
                     String fileName = name;
                     File file = new File(logDir, fileName + ".csv");
-                    int counter = 1;
+                    int counter = 1; // Counter for duplicate names
                     while (file.exists()) {
                         fileName = name + "(" + counter + ")";
                         file = new File(logDir, fileName + ".csv");

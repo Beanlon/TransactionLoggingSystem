@@ -167,7 +167,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         btnremove = new JButton("REMOVE");
         btnclear = new JButton("CLEAR");
         btnsave = new JButton("SAVE");
-        btnClose = new JButton("Close"); // Moved to panelBtn
+        btnClose = new JButton("CLOSE"); // Moved to panelBtn
 
         Dimension smallBtnSize = new Dimension(50, 25);
         btnadd.setPreferredSize(smallBtnSize);
@@ -330,7 +330,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
         for (int i = 0; i < model.getRowCount(); i++) {// For loop to check all of the rows
             Object value = model.getValueAt(i, 3);// Gets the value at column 4(Subtotal) which has an index of 3
             try { //uses try catch to get the total of all rows and uses NumberFormatException to detect the error
-                total += Double.parseDouble(value.toString());
+                total += Double.parseDouble(value.toString()); // Parses the value to a double and adds it to the total
             } catch (NumberFormatException ignored) {}
         }
         lblTotalValue.setText("\u20B1" + String.format("%.2f", total)); //Updates the Total value using string format with the total value with two decimals
@@ -338,7 +338,7 @@ public class TransactionFrame extends JFrame implements ActionListener {
 
     //Used to filter or search and uses query as the parameter
     private void searchTable(String query) {
-        if (query.trim().isEmpty() || query.trim().equals("Search")) { //If the string query is empty or just shows Search then it won't sort anything
+        if (query.trim().isEmpty() || query.trim().equals("Search")) {
             sorter.setRowFilter(null); // it will show all rows in the table
         } else { // else it will try to sort rows
             try {

@@ -1,1 +1,3 @@
-Tuna,10,13.00
+Beans,10,15.00
+Corned Beef,12,17.00
+Century Tuna,11,16.00

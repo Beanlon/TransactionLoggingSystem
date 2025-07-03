@@ -1,3 +1,5 @@
+// InventorySystem1.java
+// Inventory management panel for displaying, adding, removing, and restocking items.
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -9,21 +11,24 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class InventorySystem1 extends JPanel {
-
+    // Table and model for displaying inventory
     private JTable inventoryTable;
     private DefaultTableModel inventoryTableModel;
     private JPanel paneltable;
     private Menu menuRef;
     private InventoryManager inventoryManager;
+    // Stores the last restock date for each item
     private Map<String, String> lastRestockDates;
 
+    // Constructor: sets up UI and loads inventory data
     public InventorySystem1(Menu menuRef) {
-        this.menuRef = menuRef; //
+        this.menuRef = menuRef; // Reference to main menu
         this.inventoryManager = new InventoryManager("Inventory.txt");
         this.lastRestockDates = new HashMap<>();
         setLayout(null);
         setPreferredSize(new Dimension(900, 520));
 
+        // Panel for adding a new item
         RoundedPanel panel1 = new RoundedPanel(30);
         panel1.setBounds(40, 30, 340, 180);
         panel1.setBackground(new Color(255, 255, 255, 255));
@@ -43,9 +48,9 @@ public class InventorySystem1 extends JPanel {
         addItemLabel.setFont(new Font("Arial", Font.BOLD, 28));
         addItemLabel.setBounds(0, 60, 340, 40);
         panel1.add(addItemLabel);
-
         add(panel1);
 
+        // Panel for adding supply (restocking)
         RoundedPanel panel2 = new RoundedPanel(30);
         panel2.setBounds(415, 30, 340, 180);
         panel2.setBackground(new Color(255, 255, 255, 255));
@@ -60,17 +65,16 @@ public class InventorySystem1 extends JPanel {
                 }
             }
         });
-
         JLabel addSupplyLabel = new JLabel("ADD SUPPLY +", SwingConstants.CENTER);
         addSupplyLabel.setFont(new Font("Arial", Font.BOLD, 28));
         addSupplyLabel.setForeground(new Color (201, 42, 42));
         addSupplyLabel.setBounds(0, 60, 340, 40);
         panel2.add(addSupplyLabel);
-
         add(panel2);
 
+        // Panel for deleting items from inventory
         RoundedPanel paneldelete = new RoundedPanel(30);
-        paneldelete.setBounds(446, 535, 100, 47); // stack below panel1, adjust Y as needed
+        paneldelete.setBounds(446, 535, 100, 47);
         paneldelete.setBackground(new Color(201, 42, 42, 255));
         paneldelete.setLayout(null);
         paneldelete.addMouseListener(new MouseAdapter() {
@@ -82,11 +86,11 @@ public class InventorySystem1 extends JPanel {
                     String itemCategory = inventoryTableModel.getValueAt(row, 2).toString();
                     int stock = Integer.parseInt(inventoryTableModel.getValueAt(row, 4).toString());
 
+                    // Dialog for removing a certain quantity
                     JLabel lblInfo = new JLabel("Remove from: " + itemName + " (" + itemCategory + ")");
-                    JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 1, stock, 1)); // min 1, max stock
-
+                    JSpinner spinner = new JSpinner(new SpinnerNumberModel(1, 1, stock, 1));
                     JPanel panel = new JPanel();
-                    panel.setLayout(new GridLayout(2, 1));
+                    panel.setLayout(new GridLayout(1, 2));
                     panel.add(lblInfo);
                     panel.add(spinner);
 
@@ -103,7 +107,6 @@ public class InventorySystem1 extends JPanel {
                 }
             }
         });
-
         JLabel lbldelete = new JLabel("DELETE");
         lbldelete.setFont(new Font("Arial", Font.BOLD, 18));
         lbldelete.setForeground(new Color (255, 253, 253));
@@ -111,8 +114,9 @@ public class InventorySystem1 extends JPanel {
         paneldelete.add(lbldelete);
         add(paneldelete);
 
+        // Panel for viewing restock summary
         RoundedPanel panel3 = new RoundedPanel(30);
-        panel3.setBounds(555, 535, 200, 47); // stack below panel1, adjust Y as needed
+        panel3.setBounds(555, 535, 200, 47);
         panel3.setBackground(new Color(255, 255, 255, 255));
         panel3.setLayout(null);
         panel3.addMouseListener(new MouseAdapter() {
@@ -126,21 +130,21 @@ public class InventorySystem1 extends JPanel {
         lblRestock.setForeground(new Color (201, 42, 42));
         lblRestock.setBounds(5, 17, 300, 17);
         panel3.add(lblRestock);
-
         add(panel3);
 
+        // Header label for inventory table
         JLabel HeaderItem = new JLabel("INVENTORY ITEMS");
         HeaderItem.setBounds(43, 230, 300, 25);
         HeaderItem.setFont(new Font("Arial", Font.BOLD, 25));
         this.add(HeaderItem);
 
-        // --- Inventory Table Panel ---
+        // Inventory table panel setup
         paneltable = new JPanel();
         paneltable.setBounds(40, 275, 717, 250);
         paneltable.setBackground(Color.white);
         paneltable.setLayout(new BorderLayout());
 
-        // Define column names
+        // Define column names for inventory table
         String[] columnNames = {"ID", "Item Name", "Category", "Price", "Stock", "Last Restocked"};
         inventoryTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -160,31 +164,32 @@ public class InventorySystem1 extends JPanel {
         paneltable.add(scrollPane, BorderLayout.CENTER);
         add(paneltable);
 
-        loadInventoryData();
+        loadInventoryData(); // Load data into table
     }
 
+    // Loads inventory data from Items.txt and Inventory.txt, and updates table
     public void loadInventoryData() {
-        loadPurchaseRecords();
+        loadPurchaseRecords(); // Load last restock dates
         inventoryTableModel.setRowCount(0); // Clear table
         Map<String, Vector<Object>> itemsMap = new HashMap<>();
-        Set<String> itemsTxtKeys = new HashSet<>();
+        Set<String> itemsTxtKeys = new HashSet<>(); // Store keys from Items.txt
 
-        // 1. Load ALL items from Items.txt
+        // 1. Load all items from Items.txt
         try (BufferedReader br = new BufferedReader(new FileReader("Items.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
+            String line; // Read each line from Items.txt
+            while ((line = br.readLine()) != null) { // Split line by commas
                 String[] data = line.split(",");
-                if (data.length >= 3) {
+                if (data.length >= 3) { // Ensure there are at least 3 fields (ID, Name, Category)
                     Vector<Object> row = new Vector<>();
-                    row.add(data[0].trim());
-                    row.add(data[1].trim());
-                    row.add(data[2].trim());
-                    row.add("₱0.00");
-                    row.add(0);
-                    row.add("-");
-                    String itemKey = data[1].trim().toLowerCase();
-                    itemsMap.put(itemKey, row);
-                    itemsTxtKeys.add(itemKey);
+                    row.add(data[0].trim()); // ID
+                    row.add(data[1].trim()); // Name
+                    row.add(data[2].trim()); // Category
+                    row.add("₱0.00"); // Default price
+                    row.add(0); // Default stock
+                    row.add("-"); // Default last restocked
+                    String itemKey = data[1].trim().toLowerCase(); // Use item name as key (case-insensitive)
+                    itemsMap.put(itemKey, row); // Add to map with item name as key
+                    itemsTxtKeys.add(itemKey); // Store keys for later filtering
                 }
             }
         } catch (IOException e) {
@@ -194,7 +199,7 @@ public class InventorySystem1 extends JPanel {
                     "Data Error", JOptionPane.ERROR_MESSAGE);
         }
 
-        // 2. Update with inventory quantities and prices
+        // 2. Update with inventory quantities and prices from Inventory.txt
         try (BufferedReader br = new BufferedReader(new FileReader("Inventory.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -207,11 +212,10 @@ public class InventorySystem1 extends JPanel {
 
                     if (itemsMap.containsKey(itemKey)) {
                         Vector<Object> row = itemsMap.get(itemKey);
-                        row.set(3, "₱" + price);
-                        row.set(4, stock);
+                        row.set(3, "₱" + price); // Set price
+                        row.set(4, stock); // Set stock
                     } else {
-                        // This is an item not in Items.txt (i.e., deleted from ItemCreate)
-                        // Only show it if stock > 0
+                        // Item not in Items.txt (deleted from ItemCreate), show if stock > 0
                         if (stock > 0) {
                             Vector<Object> row = new Vector<>();
                             row.add("N/A");
@@ -229,19 +233,17 @@ public class InventorySystem1 extends JPanel {
             System.err.println("Error reading Inventory.txt: " + e.getMessage());
         }
 
-        // 3. Update with restock dates
-        for (Map.Entry<String, String> entry : lastRestockDates.entrySet()) {
-            String itemKey = entry.getKey().toLowerCase();
-            if (itemsMap.containsKey(itemKey)) {
-                itemsMap.get(itemKey).set(5, entry.getValue());
+// 3. Update last restock dates from purchase records
+        for (Map.Entry<String, String> entry : lastRestockDates.entrySet()) { // Iterate through last restock dates
+            String itemKey = entry.getKey().toLowerCase(); // Use item name as key (case-insensitive)
+            if (itemsMap.containsKey(itemKey)) { // Check if item exists in itemsMap
+                itemsMap.get(itemKey).set(5, entry.getValue()); // Set last restock date
             }
         }
 
-        // 4. Add items to the table:
-        // - If in Items.txt, always show (even stock 0)
-        // - If removed from Items.txt, only show if stock > 0
+        // Add rows to table (show all items in Items.txt, or items with stock > 0)
         for (Vector<Object> row : itemsMap.values()) {
-            String itemName = ((String) row.get(1)).toLowerCase();
+            String itemName = ((String) row.get(1)).toLowerCase(); // Get item name in lowercase for case-insensitive comparison
             int stock = (Integer) row.get(4);
             if (itemsTxtKeys.contains(itemName) || stock > 0) {
                 inventoryTableModel.addRow(row);
@@ -249,6 +251,7 @@ public class InventorySystem1 extends JPanel {
         }
     }
 
+    // Loads purchase records to determine last restock date for each item
     private void loadPurchaseRecords() {
         try (BufferedReader br = new BufferedReader(new FileReader("PurchaseRecords.txt"))) {
             String line;
@@ -276,12 +279,14 @@ public class InventorySystem1 extends JPanel {
         }
     }
 
+    // Refreshes the inventory table and restock dates
     public void refreshInventory() {
         lastRestockDates.clear();
         loadPurchaseRecords();
         loadInventoryData();
     }
 
+    // Returns the inventory manager instance
     public InventoryManager getInventoryManager() {
         return inventoryManager;
     }

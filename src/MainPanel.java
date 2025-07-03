@@ -11,7 +11,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
 
 public class MainPanel extends JPanel implements ActionListener {
-
+    // UI components
     private JTextField txtSearch;
     private InventorySystem1 inventorySystem;
     private JPanel pnlbtn;
@@ -20,6 +20,7 @@ public class MainPanel extends JPanel implements ActionListener {
     private DefaultTableModel tableModel;
     private JLabel lblTotalSales, lblTotalTransactions, lblMostBought;
     private JComboBox<String> monthComboBox;
+    // Helper data structures
     private final Map<String, String> fileToMonthYear = new HashMap<>();
     private final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMMyyyy");
 
@@ -27,6 +28,7 @@ public class MainPanel extends JPanel implements ActionListener {
         setLayout(null);
         setPreferredSize(new Dimension(785, 630));
 
+        // Panels for overview statistics
         RoundedPanel salesPanelContainer = new RoundedPanel(25);
         salesPanelContainer.setBounds(20, 20, 243, 125);
         salesPanelContainer.setBackground(Color.WHITE);
@@ -39,7 +41,7 @@ public class MainPanel extends JPanel implements ActionListener {
         mostBoughtPanelContainer.setBounds(540, 20, 243, 125);
         mostBoughtPanelContainer.setBackground(Color.WHITE);
 
-        // ---- Sales Panel content ----
+        // Sales Panel
         salesPanelContainer.setLayout(null);
         JPanel salesLine = new JPanel();
         salesLine.setBackground(new Color(201, 42, 42));
@@ -62,7 +64,7 @@ public class MainPanel extends JPanel implements ActionListener {
         lblTotalSales.setHorizontalAlignment(SwingConstants.CENTER);
         salesPanelContainer.add(lblTotalSales);
 
-        // ---- Transactions Panel content ----
+        // Transactions Panel
         transactionsPanelContainer.setLayout(null);
         JPanel transactionsLine = new JPanel();
         transactionsLine.setBackground(new Color(201, 42, 42));
@@ -83,7 +85,7 @@ public class MainPanel extends JPanel implements ActionListener {
         lblTotalTransactions.setHorizontalAlignment(SwingConstants.CENTER);
         transactionsPanelContainer.add(lblTotalTransactions);
 
-        // ---- Most Bought Panel content ----
+        // Most Bought Panel
         mostBoughtPanelContainer.setLayout(null);
         JPanel mostBoughtLine = new JPanel();
         mostBoughtLine.setBackground(new Color(201, 42, 42));
@@ -152,28 +154,19 @@ public class MainPanel extends JPanel implements ActionListener {
         txtSearch = new JTextField("Search");
         txtSearch.setForeground(Color.GRAY);
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) {
-                filterTable();
-            }
-
-            public void removeUpdate(DocumentEvent e) {
-                filterTable();
-            }
-
-            public void changedUpdate(DocumentEvent e) {
-                filterTable();
-            }
+            public void insertUpdate(DocumentEvent e) { filterTable(); }
+            public void removeUpdate(DocumentEvent e) { filterTable(); }
+            public void changedUpdate(DocumentEvent e) { filterTable(); }
         });
         txtSearch.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) { // When the text field gains focus
-                if (txtSearch.getText().equals("Search")) { // If the text is "Search", clear it
+            public void focusGained(FocusEvent e) {
+                if (txtSearch.getText().equals("Search")) {
                     txtSearch.setText("");
                     txtSearch.setForeground(Color.BLACK);
                 }
             }
-
-            public void focusLost(FocusEvent e) { // When the text field loses focus
-                if (txtSearch.getText().isEmpty()) { // If the text field is empty, set it back to "Search"
+            public void focusLost(FocusEvent e) {
+                if (txtSearch.getText().isEmpty()) {
                     txtSearch.setText("Search");
                     txtSearch.setForeground(Color.GRAY);
                 }
@@ -184,208 +177,192 @@ public class MainPanel extends JPanel implements ActionListener {
         add(filterPanel);
     }
 
-    private void setupTablePanel() { // Creates the table to display logs
-        String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified", "Full Filename" }; // Column names for the table
-        tableModel = new DefaultTableModel(columns, 0) { //Sets the the table moddel with the column names and the row begins at 0
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            } //tables are not editable
+    private void setupTablePanel() {
+        // Table columns
+        String[] columns = { "Log Name", "Transaction No.", "Date Created", "Last Modified", "Full Filename" };
+        tableModel = new DefaultTableModel(columns, 0) {
+            public boolean isCellEditable(int row, int column) { return false; }
         };
 
-        logTable = new JTable(tableModel); // Creates a new JTable with the table model
+        logTable = new JTable(tableModel);
         logTable.setRowHeight(25);
         logTable.setAutoCreateRowSorter(true);
 
+        // Hide file path column
         if (logTable.getColumnModel().getColumnCount() > 4) {
             logTable.removeColumn(logTable.getColumnModel().getColumn(4));
         }
 
-        DefaultTableCellRenderer center = new DefaultTableCellRenderer(); // Creates a cell renderer to center-align text in the table cells
-        center.setHorizontalAlignment(JLabel.CENTER); // Sets the horizontal alignment of the cell renderer to center
-        for (int i = 0; i < 4; i++) { //for every column in the table
-            if (logTable.getColumnModel().getColumnCount() > i) { // Checks if the column exists
-                logTable.getColumnModel().getColumn(i).setCellRenderer(center); // Sets the cell renderer for the column to center-align text
+        // Center-align columns
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+        center.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < 4; i++) {
+            if (logTable.getColumnModel().getColumnCount() > i) {
+                logTable.getColumnModel().getColumn(i).setCellRenderer(center);
             }
         }
 
-        JScrollPane scrollPane = new JScrollPane(logTable); //Creates a scroll pane to hold the table
-        JPanel panelTable = new JPanel(new BorderLayout()); //Creates a panel to hold the table thats inside a scroll pane
+        JScrollPane scrollPane = new JScrollPane(logTable);
+        JPanel panelTable = new JPanel(new BorderLayout());
         panelTable.setBounds(20, 205, 763, 375);
         panelTable.add(scrollPane, BorderLayout.CENTER);
         add(panelTable);
     }
 
-    // method for loading saved logs that are creates a new file under a directory
+    // Loads log files from the logs directory and populates the table and filter
     private void loadSavedLogs() {
-        File dir = new File("logs"); // Directory where logs are stored
-        if (!dir.exists()) dir.mkdirs(); // Create directory if it doesn't exist
+        File dir = new File("logs");
+        if (!dir.exists()) dir.mkdirs();
 
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv")); // Filter for CSV files
-        if (files == null) return; //It returns when no files are found
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".csv"));
+        if (files == null) return;
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //Creates a date format and last modified date
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        monthComboBox.removeAllItems(); //removes all item from the monthcombobox
-        monthComboBox.addItem("Overall"); //It always adds "Overall" as the first item
+        // IMPORTANT: Clear both table model and map before reloading
+        monthComboBox.removeAllItems();
+        monthComboBox.addItem("Overall");
+        tableModel.setRowCount(0);
+        fileToMonthYear.clear(); // Ensure the map is cleared before repopulating
 
-        tableModel.setRowCount(0); // Clear existing table data before repopulating
+        for (File file : files) {
+            String filename = file.getName();
+            String filepath = file.getPath();
+            String modified = sdf.format(file.lastModified());
+            String transactionId = "", creationDate = "";
 
-        for (File file : files) { // for every file in the files array
-            String filename = file.getName(); //get the file name
-            String filepath = file.getPath(); //get the file path
-            String modified = sdf.format(file.lastModified()); //get the last modified date and time of the file
-
-            String transactionId = "", creationDate = ""; //Leaves empty strings for transaction number and creation date since they are placed during log creation
-
+            // Read creation date and transaction number from file
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                reader.readLine(); // Skip header
-                String dateLine = reader.readLine(); //Reads this line's date
-                String transLine = reader.readLine(); //Reads this line's transaction number/ID
-
-                if (dateLine != null && dateLine.contains(",")) { //if the dateline exists and it contains a comma
-                    String[] parts = dateLine.split(","); //it will be split into parts
-                    if (parts.length > 1) creationDate = parts[1].trim(); // If there are more than one part, the second part is the creation date
+                reader.readLine();
+                String dateLine = reader.readLine();
+                String transLine = reader.readLine();
+                if (dateLine != null && dateLine.contains(",")) {
+                    String[] parts = dateLine.split(",");
+                    if (parts.length > 1) creationDate = parts[1].trim();
                 }
-                if (transLine != null && transLine.contains(",")) { //checks if the transaction line exists and contains a comma
-                    String[] parts = transLine.split(","); //it will be split into parts
-                    if (parts.length > 1) transactionId = parts[1].trim(); // If there are more than one part, the second part is the transaction number
+                if (transLine != null && transLine.contains(",")) {
+                    String[] parts = transLine.split(",");
+                    if (parts.length > 1) transactionId = parts[1].trim();
                 }
             } catch (IOException e) {
                 System.err.println("Error reading metadata from log file " + file.getName() + ": " + e.getMessage());
             }
 
+            // Fallback to file creation time if needed
             try {
-                Path path = file.toPath(); // Converts the file to a Path object
+                Path path = file.toPath();
                 BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
                 if (creationDate.isEmpty()) {
-                    creationDate = sdf.format(attr.creationTime().toMillis()); // If creation date is still empty, get the file creation time
+                    creationDate = sdf.format(attr.creationTime().toMillis());
                 }
             } catch (IOException e) {
                 System.err.println("Error reading file creation time for " + file.getName() + ": " + e.getMessage());
             }
 
-            String monthYear = monthYearFormat.format(new Date(file.lastModified())); // Formats the last modified date to "MMMMyyyy" format
-            fileToMonthYear.put(filepath, monthYear);// Maps the file path to its month-year format for filtering
+            String monthYear = monthYearFormat.format(new Date(file.lastModified())); // Format the last modified date to "MMMMyyyy"
+            fileToMonthYear.put(filepath, monthYear); // Store the mapping of file path to month/year
             if (!comboBoxHasItem(monthYear)) monthComboBox.addItem(monthYear);
 
             tableModel.addRow(new Object[]{filename, transactionId, creationDate, modified, filepath});
         }
     }
 
+    // Checks if the combo box already contains the item
     private boolean comboBoxHasItem(String item) {
         for (int i = 0; i < monthComboBox.getItemCount(); i++) {
-            if (monthComboBox.getItemAt(i).equals(item))  // Checks if the item already exists in the monthComboBox
-                return true; //returns true meaning the item already exists
+            if (monthComboBox.getItemAt(i).equals(item)) // Compare the item with existing items
+                return true; // Item found in the combo box
         }
-        return false; //returns false meaning the item does not exist
+        return false; // Item not found in the combo box
     }
 
-    //Function to filter the table based on the search text field
+    // Filters the table based on the search field
     private void filterTable() {
-        String query = txtSearch.getText().trim().toLowerCase(); //creates a query from the text field and converts it to lower case
-
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel); //tablesorter refers to the table model
-        logTable.setRowSorter(sorter); // Sets the row sorter for the logTable
-
-        if (query.isEmpty() || query.equals("search")) { //if query is empty or equals "search" then the sorter is null since it doesnt detect any search
+        String query = txtSearch.getText().trim().toLowerCase();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+        logTable.setRowSorter(sorter);
+        if (query.isEmpty() || query.equals("search")) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
-                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {//else it begins to filter the table
-                    for (int i = 0; i <= 2; i++) { // Checks the first three columns (Log Name, Transaction No., Date Created)
-                        String value = entry.getStringValue(i).toLowerCase(); // Converts the value to lower case
-                        if (value.contains(query)) return true; // If any of the values in the first three columns contain the query, include this row
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) { // Check if any of the first three columns contain the search query
+                    for (int i = 0; i <= 2; i++) {
+                        String value = entry.getStringValue(i).toLowerCase(); // Get the value of the column
+                        if (value.contains(query)) return true; // If it contains the search query, include this row
                     }
                     return false;
                 }
             });
         }
-        updateFilteredOverview((String) monthComboBox.getSelectedItem()); // Update overview after search filter
+        updateFilteredOverview((String) monthComboBox.getSelectedItem()); // Update overview based on filtered data
     }
 
-    //function that is used to filter using the jcombobox for month and year
+    // Filters the table by selected month/year
     private void filterTableByMonthYear(String selected) {
-        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel); //Usses tablerowsorter to filter the table by month and year
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         logTable.setRowSorter(sorter);
-
-        if ("Overall".equals(selected)) { //If overall is selected then it will sjhow all of the files
+        if ("Overall".equals(selected)) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
-                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
-                    String filepath = (String) tableModel.getValueAt(entry.getIdentifier(), 4); // Gets the file path from the table model
-                    return fileToMonthYear.containsKey(filepath) && selected.equals(fileToMonthYear.get(filepath)); // Checks if the file path exists in the map and if the selected month-year matches
+                public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) { // Check if the file's month/year matches the selected one
+                    String filepath = (String) tableModel.getValueAt(entry.getIdentifier(), 4); // Full Filename column
+                    return fileToMonthYear.containsKey(filepath) && selected.equals(fileToMonthYear.get(filepath)); // Check if the file's month/year matches the selected one
                 }
             });
         }
-        updateFilteredOverview(selected); // Update overview after month filter
+        updateFilteredOverview(selected);
     }
 
-    //Function to update the overview labels based on the filtered data
+    // Updates the overview labels (sales, transactions, most bought) based on filtered data
     private void updateFilteredOverview(String selectedMonthYear) {
-        double totalSales = 0; //initial starts at 0
-        int totalTransactions = 0; //initial starts at 0
-        HashMap<String, Integer> itemCount = new HashMap<>(); // Keeps track of item quantities sold
-
-
-        int viewRowCount = logTable.getRowCount(); // Gets the number of rows currently displayed in the logTable after filtering (Used for total transactions)
-        Set<String> processedFiles = new HashSet<>(); // Prevent double-counting
-
-        for (int i = 0; i < viewRowCount; i++) { // for every row in the view
-            int modelRow = logTable.convertRowIndexToModel(i); // Converts the view row index to model row index (for sorting and filtering)
-            String filepath = (String) tableModel.getValueAt(modelRow, 4); // Gets the file path from the table model
-
-            // Only process each file once
-            if (!processedFiles.add(filepath)) continue;
-
-            File file = new File(filepath);  // Creates a File object from the file path
-            if (!file.exists() || !file.isFile()) { //If the file does not exist or is not a file, skip it
-                fileToMonthYear.remove(filepath); // Remove from the map if the file is invalid
+        double totalSales = 0;
+        int totalTransactions = 0;
+        HashMap<String, Integer> itemCount = new HashMap<>(); // To count items sold
+        int viewRowCount = logTable.getRowCount(); // Number of rows in the view
+        Set<String> processedFiles = new HashSet<>(); // To avoid processing the same file multiple times
+        for (int i = 0; i < viewRowCount; i++) { // Iterate through the visible rows in the table
+            int modelRow = logTable.convertRowIndexToModel(i);
+            String filepath = (String) tableModel.getValueAt(modelRow, 4);
+            if (!processedFiles.add(filepath)) // Skip if this file has already been processed
+                continue;
+            File file = new File(filepath); // Get the file from the path
+            if (!file.exists() || !file.isFile()) { // Check if the file exists and is a valid file
+                fileToMonthYear.remove(filepath);
                 continue;
             }
-
-            // Check if the file's month-year matches the selected filter
-            String monthYear = fileToMonthYear.get(filepath);
-            if (!selectedMonthYear.equals("Overall") && (monthYear == null || !monthYear.equals(selectedMonthYear))) { // if the selected month-year is not "Overall" and the file's month-year does not match
+            String monthYear = fileToMonthYear.get(filepath); // Get the month/year for this file
+            if (!selectedMonthYear.equals("Overall") && (monthYear == null || !monthYear.equals(selectedMonthYear))) { // If not "Overall", check if the file's month/year matches the selected one
                 continue;
             }
-
-            totalTransactions++; //Our total transactions will increase by 1 for every file processed
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) { // Reads the log file
+            totalTransactions++;
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 int lineCounter = 0;
                 while ((line = reader.readLine()) != null) {
                     lineCounter++;
-                    if (lineCounter <= 3 || line.trim().isEmpty()) {
-                        continue; // skip header or empty lines
-                    }
-
-                    String[] parts = line.split(","); //seperate each line by comma
-                    // Skip non-item lines
+                    if (lineCounter <= 3 || line.trim().isEmpty()) continue;
+                    String[] parts = line.split(",");
                     if (parts.length == 0 || parts[0].trim().equalsIgnoreCase("Subtotal")
                             || parts[0].trim().equalsIgnoreCase("Total")
                             || parts[0].trim().equalsIgnoreCase("Discount")
                             || parts[0].trim().isEmpty()) {
                         continue;
                     }
-
-                    // Only sum the SUBTOTAL column (column 3)
                     if (parts.length >= 4) {
                         String item = parts[0].trim();
                         int qty = 0;
                         double subtotal = 0.0;
                         try {
                             qty = Integer.parseInt(parts[2].trim());
-                            // Subtotal is at index 3, parse directly
                             String subtotalStr = parts[3].trim().replaceAll("[^\\d.]", "");
                             if (!subtotalStr.isEmpty()) {
                                 subtotal = Double.parseDouble(subtotalStr);
                             }
                         } catch (NumberFormatException e) {
-                            continue; // skip malformed lines
+                            continue;
                         }
-                        totalSales += subtotal; // Use subtotal, not qty * price
+                        totalSales += subtotal;
                         itemCount.put(item, itemCount.getOrDefault(item, 0) + qty);
                     }
                 }
@@ -393,15 +370,13 @@ public class MainPanel extends JPanel implements ActionListener {
                 System.err.println("Error reading log file " + file.getName() + ": " + e.getMessage());
             }
         }
-
         lblTotalSales.setText("₱" + String.format("%,.2f", totalSales));
         lblTotalTransactions.setText(String.valueOf(totalTransactions));
-
         String mostBought = "-";
         int maxQty = 0;
-        if (!itemCount.isEmpty()) {
-            for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
-                if (entry.getValue() > maxQty) {
+        if (!itemCount.isEmpty()) { // Find the most bought item
+            for (Map.Entry<String, Integer> entry : itemCount.entrySet()) { // Iterate through the item counts
+                if (entry.getValue() > maxQty) { // If this item has a higher quantity than the current max
                     mostBought = entry.getKey();
                     maxQty = entry.getValue();
                 }
@@ -413,31 +388,26 @@ public class MainPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
-
         if (e.getSource() == createnew) {
-            JFrame createLogFrame = new createLog();
-            createLogFrame.setVisible(true);
-            if (parentWindow != null) parentWindow.dispose();
-
+            new createLog();
+            if (parentWindow != null) parentWindow.dispose(); // Close the parent window if it exists
         } else if (e.getSource() == load) {
             int selected = logTable.getSelectedRow();
             if (selected != -1) {
                 int modelRow = logTable.convertRowIndexToModel(selected);
                 String logname = ((String) tableModel.getValueAt(modelRow, 0)).replace(".csv", "");
                 String filepath = (String) tableModel.getValueAt(modelRow, 4);
-                String date = extractDateFromCSV(filepath); // Creates an object that uses this method using filepath as its source
+                String date = extractDateFromCSV(filepath); // Extract the date from the CSV file
                 new TransactionFrame(logname, date, filepath).setVisible(true);
                 if (parentWindow != null) parentWindow.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a log file to load.", "No Log Selected", JOptionPane.WARNING_MESSAGE);
             }
-
-        }else if (e.getSource() == delete) {
+        } else if (e.getSource() == delete) {
             int selectedRowView = logTable.getSelectedRow();
             if (selectedRowView >= 0) {
                 int selectedRowModel = logTable.convertRowIndexToModel(selectedRowView);
-                int filePathCol = tableModel.findColumn("Full Filename");
-                String filepath = (String) tableModel.getValueAt(selectedRowModel, filePathCol);
+                String filepath = (String) tableModel.getValueAt(selectedRowModel, 4);
                 File fileToDelete = new File(filepath);
 
                 int confirm = JOptionPane.showConfirmDialog(
@@ -456,8 +426,7 @@ public class MainPanel extends JPanel implements ActionListener {
                             JOptionPane.YES_NO_OPTION,
                             JOptionPane.QUESTION_MESSAGE
                     );
-
-                    boolean shouldRestock = (restock == JOptionPane.YES_OPTION); //the stocks will go back if you click yes
+                    boolean shouldRestock = (restock == JOptionPane.YES_OPTION);
 
                     if (fileToDelete.exists()) {
                         if (shouldRestock) {
@@ -467,17 +436,30 @@ public class MainPanel extends JPanel implements ActionListener {
                             }
                         }
                         if (fileToDelete.delete()) {
+                            // Directly remove from table model and map for immediate UI update
                             fileToMonthYear.remove(filepath);
-                            loadSavedLogs();
+                            tableModel.removeRow(selectedRowModel);
+
+                            // After deleting a row, you might need to adjust the selected row
+                            // to prevent issues if the next operation depends on a selected row
+                            if (logTable.getRowCount() > 0) {
+                                if (selectedRowView < logTable.getRowCount()) {
+                                    logTable.setRowSelectionInterval(selectedRowView, selectedRowView);
+                                } else {
+                                    logTable.setRowSelectionInterval(logTable.getRowCount() - 1, logTable.getRowCount() - 1);
+                                }
+                            }
+
                             updateFilteredOverview((String) monthComboBox.getSelectedItem());
                             JOptionPane.showMessageDialog(this, "Log deleted" + (shouldRestock ? " and inventory restocked." : "."), "Success", JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JOptionPane.showMessageDialog(this, "Failed to delete log. Please check file permissions.", "Deletion Error", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
+                        // If file not found, remove from internal data structures anyway
                         JOptionPane.showMessageDialog(this, "File not found. It might have been deleted already.", "File Not Found", JOptionPane.WARNING_MESSAGE);
                         fileToMonthYear.remove(filepath);
-                        loadSavedLogs();
+                        tableModel.removeRow(selectedRowModel); // Remove from table even if file was already gone
                         updateFilteredOverview((String) monthComboBox.getSelectedItem());
                     }
                 }
@@ -487,13 +469,14 @@ public class MainPanel extends JPanel implements ActionListener {
         }
     }
 
-    private String extractDateFromCSV(String filepath) { // method used to get the date from the file
+    // Reads the creation date from a CSV log file
+    private String extractDateFromCSV(String filepath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filepath))) {
             reader.readLine();
             String dataLine = reader.readLine();
             if (dataLine != null) {
                 String[] values = dataLine.split(",");
-                if (values.length >= 2) return values[1].trim(); // if the length fo the values inside the file is greater than oor equal to 2 return the value from index 1
+                if (values.length >= 2) return values[1].trim();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -502,7 +485,8 @@ public class MainPanel extends JPanel implements ActionListener {
         return "";
     }
 
-    private void restockFromDeletedLog(File file) { // Method to restock inventory based on the deleted log file
+    // Restocks inventory based on a deleted log file
+    private void restockFromDeletedLog(File file) {
         try {
             Map<String, String[]> inventoryMap = new LinkedHashMap<>();
             File inventoryFile = new File("Inventory.txt");
@@ -520,23 +504,19 @@ public class MainPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Inventory.txt not found. Cannot restock.", "Restock Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            // Step 2: Read log and update map
+            // Update inventory map from log
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 int lineNum = 0;
                 while ((line = reader.readLine()) != null) {
                     lineNum++;
-                    if (lineNum <= 3 || line.trim().isEmpty()) continue; // skip header
-
+                    if (lineNum <= 3 || line.trim().isEmpty()) continue;
                     String[] parts = line.split(",");
                     if (parts.length < 3) continue;
-
                     String itemName = parts[0].trim();
                     if (itemName.equalsIgnoreCase("Subtotal") || itemName.equalsIgnoreCase("Total") ||
                             itemName.equalsIgnoreCase("Discount") || itemName.isEmpty())
                         continue;
-
                     int quantitySold = 0;
                     try {
                         quantitySold = Integer.parseInt(parts[2].trim());
@@ -562,20 +542,19 @@ public class MainPanel extends JPanel implements ActionListener {
                     }
                 }
             }
-
             try (PrintWriter writer = new PrintWriter(new FileWriter(inventoryFile))) {
                 for (String[] item : inventoryMap.values()) {
                     writer.println(String.join(",", item));
                 }
             }
             System.out.println("Inventory.txt updated successfully.");
-
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error updating inventory: " + e.getMessage(), "Restock Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // Allows MainPanel to update inventory panel after restock
     public void setInventorySystem(InventorySystem1 inventoryPanel) {
         this.inventorySystem = inventoryPanel;
     }

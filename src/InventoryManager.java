@@ -83,15 +83,6 @@ public class InventoryManager {
         }
     }
 
-    public List<String> getItemNames() {
-        return new ArrayList<>(items.keySet());
-    }
-
-    public double getItemPrice(String itemName) {
-        InventoryItem item = items.get(itemName);
-        return item != null ? item.price : 0.0;
-    }
-
     private static class InventoryItem {
         String name;
         int quantity;
