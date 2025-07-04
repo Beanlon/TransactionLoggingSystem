@@ -236,7 +236,6 @@ public class ItemCreate extends JFrame implements ActionListener {
             supply.addRow(data);
             reset();
             db.overwriteRecords(supply);
-            db.overwriteRecords(supply);
             JOptionPane.showMessageDialog(this, "Item added successfully!");
             if (inventorySystem1Ref != null) {
                 inventorySystem1Ref.refreshInventory();
@@ -267,9 +266,13 @@ public class ItemCreate extends JFrame implements ActionListener {
             if (selectedRow >= 0) {
                 int confirm = JOptionPane.showConfirmDialog(this, "Delete this item?", "Confirm", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    supply.removeRow(selectedRow);
+                    int modelRow = tblSupply.convertRowIndexToModel(selectedRow);
+                    String itemName = supply.getValueAt(modelRow, 1).toString(); // Get item name
+                    supply.removeRow(modelRow); // Remove from model
                     reset();
-                    db.overwriteRecords(supply);
+                    db.overwriteRecords(supply); // Update Items.txt
+                    utils.InventoryItemRecord.deleteItem(itemName);
+
                     JOptionPane.showMessageDialog(this, "Item deleted successfully!");
                     if (inventorySystem1Ref != null) {
                         inventorySystem1Ref.refreshInventory();

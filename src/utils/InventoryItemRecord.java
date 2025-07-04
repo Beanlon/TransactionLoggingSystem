@@ -51,6 +51,15 @@ public class InventoryItemRecord {
         }
     }
 
+    public static void deleteItem(String itemName) {
+        Map<String, InventoryItemRecord> inventory = loadInventory();
+        if (inventory.containsKey(itemName)) {
+            inventory.remove(itemName);
+            saveInventory(inventory);
+            System.out.println("Item '" + itemName + "' deleted from inventory.");
+        }
+    }
+
     public static void restockItem(String itemName, int quantity) {
         Map<String, InventoryItemRecord> inventory = loadInventory();
 

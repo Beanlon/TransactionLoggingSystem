@@ -1,0 +1,12 @@
+--- Restock Purchase Summary ---
+Supply ID: 3
+Supplier Name: ASDAD
+Supplier Code: DWADA
+Date Processed: 04/07/2025 08:34:11
+
+Items Restocked:
+ - Item: Tuna, Quantity: 12, Cost/Item: 12.00, Selling Price/Item: 13.00
+ - Item: Beans, Quantity: 12, Cost/Item: 15.00, Selling Price/Item: 16.00
+
+Total Purchase Cost: 324.00
+--------------------------------
