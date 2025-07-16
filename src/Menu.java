@@ -25,10 +25,20 @@ public class Menu extends JFrame {
         JButton btnmain = new JButton("MAIN");
         btnmain.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnmain.setMaximumSize(new Dimension(105, 40));
+        btnmain.setForeground(new Color(255, 255, 255));
+        btnmain.setOpaque(false);
+        btnmain.setFocusPainted(false);
+        btnmain.setContentAreaFilled(false);
+        btnmain.setBorderPainted(false);
 
         JButton btnInventory = new JButton("INVENTORY");
         btnInventory.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnInventory.setMaximumSize(new Dimension(105, 40));
+        btnInventory.setForeground(new Color(255, 255, 255));
+        btnInventory.setContentAreaFilled(false);
+        btnInventory.setFocusPainted(false);
+        btnInventory.setOpaque(false);
+        btnInventory.setBorderPainted(false);
 
         dashboard.add(Box.createVerticalStrut(130));
         dashboard.add(btnmain);
