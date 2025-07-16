@@ -9,7 +9,7 @@ public class Menu extends JFrame {
 
     public Menu() {
         setTitle("Transaction Logging System");
-        setSize(1000, 630);
+        setSize(925, 640);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);

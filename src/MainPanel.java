@@ -71,7 +71,7 @@ public class MainPanel extends JPanel implements ActionListener {
 
     private void setupButtons() {
         pnlbtn = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        pnlbtn.setBounds(10, 140, 480, 26);
+        pnlbtn.setBounds(20, 165, 490, 26);
         pnlbtn.setOpaque(false);
 
         createnew = createButton("ADD", pnlbtn);
@@ -92,7 +92,7 @@ public class MainPanel extends JPanel implements ActionListener {
 
     private void setupFilterAndSearch() {
         JPanel filterPanel = new JPanel(new GridLayout(1, 2, 5, 0));
-        filterPanel.setBounds(495, 140, 280, 26);
+        filterPanel.setBounds(503, 165, 280, 26);
         filterPanel.setOpaque(false);
 
         monthComboBox = new JComboBox<>();
@@ -100,7 +100,7 @@ public class MainPanel extends JPanel implements ActionListener {
         monthComboBox.addActionListener(e -> filterTableByMonthYear((String) monthComboBox.getSelectedItem()));
         filterPanel.add(monthComboBox);
 
-        txtSearch = new JTextField("Search..");
+        txtSearch = new JTextField("Search");
         txtSearch.setForeground(Color.GRAY);
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) {
@@ -117,7 +117,7 @@ public class MainPanel extends JPanel implements ActionListener {
         });
         txtSearch.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (txtSearch.getText().equals("Search..")) {
+                if (txtSearch.getText().equals("Search")) {
                     txtSearch.setText("");
                     txtSearch.setForeground(Color.BLACK);
                 }
@@ -125,7 +125,7 @@ public class MainPanel extends JPanel implements ActionListener {
 
             public void focusLost(FocusEvent e) {
                 if (txtSearch.getText().isEmpty()) {
-                    txtSearch.setText("Search..");
+                    txtSearch.setText("Search");
                     txtSearch.setForeground(Color.GRAY);
                 }
             }
@@ -161,7 +161,7 @@ public class MainPanel extends JPanel implements ActionListener {
 
         JScrollPane scrollPane = new JScrollPane(logTable);
         JPanel panelTable = new JPanel(new BorderLayout());
-        panelTable.setBounds(10, 175, 765, 375);
+        panelTable.setBounds(20, 205, 763, 375);
         panelTable.add(scrollPane, BorderLayout.CENTER);
         add(panelTable);
     }
@@ -375,14 +375,13 @@ public class MainPanel extends JPanel implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
         Window parentWindow = SwingUtilities.getWindowAncestor(this);
 
-        if (src == createnew) {
+        if (e.getSource() == createnew) {
             new createLog();
             if (parentWindow != null) parentWindow.dispose();
 
-        } else if (src == load) {
+        } else if (e.getSource() == load) {
             int selected = logTable.getSelectedRow();
             if (selected != -1) {
                 int modelRow = logTable.convertRowIndexToModel(selected);
@@ -395,7 +394,7 @@ public class MainPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please select a log file to load.");
             }
 
-        } else if (src == delete) {
+        } else if (e.getSource() == delete) {
             int selectedRowView = logTable.getSelectedRow();
             if (selectedRowView >= 0) {
                 int selectedRowModel = logTable.convertRowIndexToModel(selectedRowView);
